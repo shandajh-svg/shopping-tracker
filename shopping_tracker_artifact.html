@@ -670,10 +670,52 @@ async function saveFinance() {
   } catch(e) {}
 }
 
-function setStatus(msg) {
-  const el = document.getElementById('save-status');
-  if (el) el.textContent = msg;
+function saveCode() {
+  const state = { order: items.map(it => it.item), data: {} };
+  items.forEach(it => {
+    state.data[it.item] = { n: it.need?1:0, d: it.due||'', i: it.daysInput||'' };
+  });
+  const code = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+  const box = document.getElementById('save-code-box');
+  box.value = code;
+  box.select();
+  try { document.execCommand('copy'); } catch(e) {}
+  showStatus('✓ CODE GENERATED & COPIED — PASTE INTO NOTES ON YOUR PHONE');
 }
+
+function loadCode() {
+  const code = document.getElementById('save-code-box').value.trim();
+  if (!code) { showStatus('PASTE YOUR SAVE CODE FIRST'); return; }
+  try {
+    const json = decodeURIComponent(escape(atob(code)));
+    const state = JSON.parse(json);
+    initFromRaw();
+    items.forEach(it => {
+      const s = state.data[it.item];
+      if (s) {
+        it.need = s.n === 1;
+        it.due = s.d || it.due;
+        it.daysInput = s.i || '';
+      }
+    });
+    if (state.order) {
+      items.sort((a,b) => {
+        const ai = state.order.indexOf(a.item), bi = state.order.indexOf(b.item);
+        if (ai===-1) return 1; if (bi===-1) return -1; return ai-bi;
+      });
+    }
+    saveState();
+    renderTable();
+    showStatus('✓ RESTORED!');
+  } catch(e) { showStatus('❌ INVALID CODE'); }
+}
+
+function showStatus(msg) {
+  const el = document.getElementById('status-msg');
+  if (el) { el.textContent = msg; setTimeout(()=>el.textContent='', 5000); }
+}
+
+
 
 function initFromRaw() {
   items = RAW_DATA.map((d,i) => ({
