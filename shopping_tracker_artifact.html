@@ -557,33 +557,47 @@ const RAW_DATA = [
   {item:"balsamic vinegar",store:"walmart online",num:"1",price:"",notes:"https://www.walmart.com/ip/seort/179935477"},
   {item:"evaporated milk; 365 by whole foods market organic",store:"whole foods tustin",num:"4",price:"3.19",notes:"12 oz cheaper out there but only one w/out carrageenan"},
   {item:"balsamic vinegar",store:"williams sonoma - scp",num:"1",price:"35.50",notes:"VSOP 25-Year Barrel-Aged Balsamic Vinegar, 459-ml ($44.14 if bought online)"},
-  {item:"ulta return wax",store:"",num:"1",price:"",notes:""}
+  {item:"ulta return wax",store:"",num:"1",price:"",notes:""},
+  {item:"creamer",store:"",num:"",price:"",notes:""},
 ];
 
 const PRESET_DATES = {
-  "tomato paste - 4 cans = 16 days":"2026-03-18","blueberries (16 oz) 3 bags":"2026-04-16",
-  "avocados; mini (6/bag)":"2026-03-25","mushrooms, enoki - three 200-gram pkgs = 16 days":"2026-03-31",
-  "mushrooms, king oyster - three 270-gram pkgs = 810g for 16 days - or - two 1 lb packages = 908g for 16 days":"2026-03-31",
-  "ginger root":"2026-03-31","milk; whole, organic - 292g/day average - 1,892g=1/2-gallon":"2026-03-30",
-  "cabbage, red":"2026-04-03","oatley original oatmilk":"2026-04-01","daikon radish root - get 1/3 lb":"2026-03-31",
-  "italian parsley":"2026-04-03","broccoli, 2 lb bag = 16 days":"2026-04-03","brussels sprouts ~ 2 lbs= 16 days":"2026-04-03",
-  "spinach - 2 lb box":"2026-04-03","cilantro - buy at vons if it's not 4 for $5 at sprouts - get 2 bunches":"2026-04-03",
-  "carrots":"2026-04-03","swiss chard":"2026-04-03","heavy cream, organic":"2026-04-06",
-  "celery - 20 oz - get 2":"2026-04-03","eggs; pasture-raised organic":"2026-04-09",
+  "tomato paste - 4 cans = 16 days":"2026-04-10",
+  "blueberries (16 oz) 3 bags":"2026-04-16",
+  "avocados; mini (6/bag)":"2026-04-06",
+  "mushrooms, enoki - three 200-gram pkgs = 16 days":"2026-04-06",
+  "mushrooms, king oyster - three 270-gram pkgs = 810g for 16 days - or - two 1 lb packages = 908g for 16 days":"2026-04-06",
+  "ginger root":"2026-04-06",
+  "milk; whole, organic - 292g/day average - 1,892g=1/2-gallon":"2026-04-02",
+  "cabbage, red":"2026-04-10",
+  "oatley original oatmilk":"2026-04-02",
+  "mandarin":"2026-04-03",
+  "daikon radish root - get 1/3 lb":"2026-04-10",
+  "italian parsley":"2026-04-10",
+  "broccoli, 2 lb bag = 16 days":"2026-04-10",
+  "brussels sprouts ~ 2 lbs= 16 days":"2026-04-10",
+  "spinach - 2 lb box":"2026-04-10",
+  "cilantro - buy at vons if it's not 4 for $5 at sprouts - get 2 bunches":"2026-04-10",
+  "carrots":"2026-04-10",
+  "swiss chard":"2026-04-10",
+  "celery - 20 oz - get 2":"2026-04-10",
+  "heavy cream, organic":"2026-04-06",
+  "eggs; pasture-raised organic":"2026-04-09",
   "good earth sweet spice - buy at sprouts if on sale at 2 for $5 ~ each box lasts 9 days":"2026-05-20",
-  "garlic cloves":"2026-10-30","flaxseed, whole":"2026-03-28"
+  "garlic cloves":"2026-10-30",
+  "flaxseed, whole":"2026-04-06"
 };
 
 const PRESET_NEED = new Set([
   "tomato paste - 4 cans = 16 days","blueberries (16 oz) 3 bags","avocados; mini (6/bag)",
   "mushrooms, enoki - three 200-gram pkgs = 16 days","mushrooms, king oyster - three 270-gram pkgs = 810g for 16 days - or - two 1 lb packages = 908g for 16 days",
   "ginger root","milk; whole, organic - 292g/day average - 1,892g=1/2-gallon","cabbage, red",
-  "oatley original oatmilk","daikon radish root - get 1/3 lb","italian parsley","broccoli, 2 lb bag = 16 days",
+  "oatley original oatmilk","mandarin","daikon radish root - get 1/3 lb","italian parsley","broccoli, 2 lb bag = 16 days",
   "brussels sprouts ~ 2 lbs= 16 days","spinach - 2 lb box","cilantro - buy at vons if it's not 4 for $5 at sprouts - get 2 bunches",
   "carrots","swiss chard","heavy cream, organic","celery - 20 oz - get 2","eggs; pasture-raised organic",
   "good earth sweet spice - buy at sprouts if on sale at 2 for $5 ~ each box lasts 9 days","flaxseed, whole",
   "tofu; nature's raw tofu","tofu; pulmuone organic soft for stews ($1.29)","ground beef, 93% grass fed, organic",
-  "italian panko breadcrumbs","whole chicken"
+  "italian panko breadcrumbs","whole chicken","artichokes on the go"
 ]);
 
 let items = [];
@@ -591,12 +605,11 @@ let currentFilter = 'all';
 let editingId = null;
 
 // ── STORAGE ──
-async function loadState() {
-  setStatus('loading…');
+function loadState() {
   try {
-    const result = await window.storage.get('shopping-items');
-    if (result && result.value) {
-      const savedMap = JSON.parse(result.value);
+    const saved = localStorage.getItem('shoppingItemState');
+    if (saved) {
+      const savedMap = JSON.parse(saved);
       initFromRaw();
       items.forEach(it => {
         const s = savedMap[it.item];
@@ -604,64 +617,47 @@ async function loadState() {
           if (s.need !== undefined) it.need = s.need;
           if (s.due !== undefined) it.due = s.due;
           if (s.daysInput !== undefined) it.daysInput = s.daysInput;
-          if (s.notes !== undefined) it.notes = s.notes;
-          if (s.store !== undefined) it.store = s.store;
-          if (s.num !== undefined) it.num = s.num;
-          if (s.price !== undefined) it.price = s.price;
-          if (s.calc !== undefined) it.calc = s.calc;
         }
       });
       if (savedMap.__order) {
         const order = savedMap.__order;
         items.sort((a,b) => {
-          const ai = order.indexOf(a.item), bi = order.indexOf(b.item);
-          if (ai===-1) return 1; if (bi===-1) return -1; return ai-bi;
+          const ai=order.indexOf(a.item), bi=order.indexOf(b.item);
+          if(ai===-1)return 1; if(bi===-1)return -1; return ai-bi;
         });
-      }
-      // restore any added items not in RAW_DATA
-      if (savedMap.__added) {
-        savedMap.__added.forEach(it => items.push(it));
       }
     } else {
       initFromRaw();
     }
   } catch(e) { initFromRaw(); }
-  setStatus('saved ✓');
 }
 
-async function saveState() {
-  setStatus('saving…');
+function saveState() {
   try {
-    const map = { __order: items.map(it => it.item), __added: [] };
-    const rawNames = new Set(RAW_DATA.map(d => d.item));
+    const map = { __order: items.map(it => it.item) };
     items.forEach(it => {
-      map[it.item] = { need: it.need, due: it.due, daysInput: it.daysInput, notes: it.notes, store: it.store, num: it.num, price: it.price, calc: it.calc };
-      if (!rawNames.has(it.item)) map.__added.push(it);
+      map[it.item] = { need: it.need, due: it.due, daysInput: it.daysInput };
     });
-    await window.storage.set('shopping-items', JSON.stringify(map));
-    setStatus('saved ✓');
-  } catch(e) { setStatus('save failed'); }
+    localStorage.setItem('shoppingItemState', JSON.stringify(map));
+  } catch(e) {}
 }
 
-async function loadFinance() {
+function loadFinance() {
   try {
-    const result = await window.storage.get('shopping-finance');
-    if (result && result.value) {
-      const f = JSON.parse(result.value);
-      if (f.available !== undefined) document.getElementById('fin-available').value = f.available;
-      if (f.amazon !== undefined) document.getElementById('fin-amazon').value = f.amazon;
-      if (f.atm !== undefined) document.getElementById('fin-atm').value = f.atm;
-      if (f.notes) f.notes.forEach(n => addFinNote(n));
-    }
+    const f = JSON.parse(localStorage.getItem('shoppingFinance') || '{}');
+    if (f.available !== undefined) document.getElementById('fin-available').value = f.available;
+    if (f.amazon !== undefined) document.getElementById('fin-amazon').value = f.amazon;
+    if (f.atm !== undefined) document.getElementById('fin-atm').value = f.atm;
+    if (f.notes) f.notes.forEach(n => addFinNote(n));
   } catch(e) {}
   updateFinance();
 }
 
-async function saveFinance() {
+function saveFinance() {
   try {
     const notes = [];
     document.querySelectorAll('.fin-note-input').forEach(el => notes.push(el.value));
-    await window.storage.set('shopping-finance', JSON.stringify({
+    localStorage.setItem('shoppingFinance', JSON.stringify({
       available: document.getElementById('fin-available').value,
       amazon: document.getElementById('fin-amazon').value,
       atm: document.getElementById('fin-atm').value,
@@ -945,9 +941,9 @@ function deleteItem(){if(!confirm('Delete this item?'))return;items=items.filter
 document.getElementById('edit-modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
 
 // ── INIT ──
-async function init(){
-  await loadState();
-  await loadFinance();
+function init() {
+  loadState();
+  loadFinance();
   renderTable();
 }
 init();
