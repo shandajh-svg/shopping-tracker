@@ -1176,20 +1176,36 @@ function buildMap() {
 }
 function applyMapData(savedMap) {
   initFromRaw();
-  items.forEach(it=>{
-    const s=savedMap[it.item];
-    if(s){
-      if(s.need!==undefined)it.need=s.need;
-      if(s.due!==undefined)it.due=s.due;
-      if(s.daysInput!==undefined)it.daysInput=s.daysInput;
-      if(s.notes!==undefined)it.notes=s.notes;
-      if(s.store!==undefined)it.store=s.store;
-      if(s.num!==undefined)it.num=s.num;
-      if(s.price!==undefined)it.price=s.price;
-      if(s.calc!==undefined)it.calc=s.calc;
-      if(s.veggie!==undefined)it.veggie=s.veggie;
-    }
-  });
+  // Apply diff format (__changes) or full format for backwards compatibility
+  if (savedMap.__changes) {
+    items.forEach(it=>{
+      const changes = savedMap.__changes[it.item];
+      if(changes){
+        if(changes.need!==undefined)it.need=changes.need;
+        if(changes.due!==undefined)it.due=changes.due;
+        if(changes.daysInput!==undefined)it.daysInput=changes.daysInput;
+        if(changes.notes!==undefined)it.notes=changes.notes;
+        if(changes.store!==undefined)it.store=changes.store;
+        if(changes.num!==undefined)it.num=changes.num;
+        if(changes.price!==undefined)it.price=changes.price;
+      }
+    });
+  } else {
+    items.forEach(it=>{
+      const s=savedMap[it.item];
+      if(s){
+        if(s.need!==undefined)it.need=s.need;
+        if(s.due!==undefined)it.due=s.due;
+        if(s.daysInput!==undefined)it.daysInput=s.daysInput;
+        if(s.notes!==undefined)it.notes=s.notes;
+        if(s.store!==undefined)it.store=s.store;
+        if(s.num!==undefined)it.num=s.num;
+        if(s.price!==undefined)it.price=s.price;
+        if(s.calc!==undefined)it.calc=s.calc;
+        if(s.veggie!==undefined)it.veggie=s.veggie;
+      }
+    });
+  }
   if(savedMap.__order){const order=savedMap.__order;items.sort((a,b)=>{const ai=order.indexOf(a.item),bi=order.indexOf(b.item);return ai===-1?1:bi===-1?-1:ai-bi;});}
   if(savedMap.__added)savedMap.__added.forEach(it=>items.push(it));
 }
@@ -1202,31 +1218,44 @@ function jsonpCall(baseUrl, cb) {
   s.onerror=function(){delete window[name];document.getElementById('jsonp-container').innerHTML='';cb(null);};
   document.getElementById('jsonp-container').appendChild(s);
 }
+function buildDiff() {
+  // Only save what differs from RAW_DATA defaults - much smaller payload
+  const rawMap = {};
+  RAW_DATA.forEach(d => rawMap[d.item] = d);
+  const diff = {__order: items.map(it=>it.item), __added: [], __changes: {}};
+  const rawNames = new Set(RAW_DATA.map(d=>d.item));
+  items.forEach(it => {
+    if (!rawNames.has(it.item)) {
+      diff.__added.push(it);
+    } else {
+      // Only save fields that differ from defaults
+      const changes = {};
+      const defaultNeed = PRESET_NEED.has(it.item);
+      const defaultDue = PRESET_DATES[it.item]||'';
+      const defaultDays = PRESET_DAYS_INPUT[it.item]||'';
+      if (it.need !== defaultNeed) changes.need = it.need;
+      if (it.due !== defaultDue) changes.due = it.due;
+      if (it.daysInput !== defaultDays) changes.daysInput = it.daysInput;
+      if (it.notes !== (rawMap[it.item]&&rawMap[it.item].notes||'')) changes.notes = it.notes;
+      if (it.store !== (rawMap[it.item]&&rawMap[it.item].store||'')) changes.store = it.store;
+      if (it.num !== (rawMap[it.item]&&rawMap[it.item].num||'')) changes.num = it.num;
+      if (it.price !== (rawMap[it.item]&&rawMap[it.item].price||'')) changes.price = it.price;
+      if (Object.keys(changes).length > 0) diff.__changes[it.item] = changes;
+    }
+  });
+  return diff;
+}
+
 function pushToGoogle(cb) {
   const url=getSyncUrl(); if(!url){if(cb)cb();return;}
-  const map=buildMap();
-  const json=JSON.stringify(map);
-  const CHUNK=500;
-  const chunks=[];
-  for(let i=0;i<json.length;i+=CHUNK) chunks.push(json.slice(i,i+CHUNK));
-  const total=chunks.length;
+  const diff = buildDiff();
+  const json = JSON.stringify(diff);
+  const encoded = encodeURIComponent(json);
   setSyncStatus('↑ Saving…','sync-pending');
-  // First clear the file, then send chunks
-  function sendChunk(i){
-    if(i>=total){
-      // All chunks sent, now tell server to reassemble
-      jsonpCall(url+'?finalize=1&total='+total, function(){
-        setSyncStatus('✓ Saved '+new Date().toLocaleTimeString(),'sync-ok');
-        if(cb)cb();
-      });
-      return;
-    }
-    const encoded=encodeURIComponent(chunks[i]);
-    jsonpCall(url+'?chunk='+encoded+'&index='+i+'&total='+total, function(){
-      sendChunk(i+1);
-    });
-  }
-  sendChunk(0);
+  jsonpCall(url+'?data='+encoded, function(r){
+    setSyncStatus('✓ Saved '+new Date().toLocaleTimeString(),'sync-ok');
+    if(cb)cb();
+  });
 }
 function pullFromGoogle(cb) {
   const url=getSyncUrl(); if(!url){cb(null);return;}
