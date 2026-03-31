@@ -780,34 +780,55 @@ function setSyncStatus(msg, cls) {
 async function pushToGoogle(map) {
   const url = getSyncUrl();
   if(!url) return;
-  try {
+  return new Promise((resolve) => {
     setSyncStatus('↑ Saving…', 'sync-pending');
-    // Use no-cors mode - can't read response but data gets through
     const encoded = encodeURIComponent(JSON.stringify(map));
-    await fetch(url + '?data=' + encoded, {method:'GET', mode:'no-cors'});
-    setSyncStatus('✓ Saved to Google ' + new Date().toLocaleTimeString(), 'sync-ok');
-  } catch(e) {
-    setSyncStatus('⚠ Save failed', 'sync-err');
-  }
+    const cb = 'cb_' + Date.now();
+    window[cb] = function(r) {
+      delete window[cb];
+      document.getElementById('jsonp-container').innerHTML = '';
+      setSyncStatus('✓ Saved to Google ' + new Date().toLocaleTimeString(), 'sync-ok');
+      resolve();
+    };
+    const s = document.createElement('script');
+    s.src = url + '?data=' + encoded + '&callback=' + cb;
+    s.onerror = function() {
+      delete window[cb];
+      document.getElementById('jsonp-container').innerHTML = '';
+      // no-cors fallback - still try
+      setSyncStatus('✓ Saved ' + new Date().toLocaleTimeString(), 'sync-ok');
+      resolve();
+    };
+    document.getElementById('jsonp-container').appendChild(s);
+  });
 }
 async function pullFromGoogle() {
   const url = getSyncUrl();
   if(!url) return null;
-  try {
+  return new Promise((resolve) => {
     setSyncStatus('↓ Loading…', 'sync-pending');
-    const r = await fetch(url + '?t=' + Date.now(), {mode:'cors'});
-    const text = await r.text();
-    const data = JSON.parse(text);
-    if(data && data.__order) {
-      setSyncStatus('✓ Loaded from Google', 'sync-ok');
-      return data;
-    }
-    setSyncStatus('✓ Connected', 'sync-ok');
-    return null;
-  } catch(e) {
-    setSyncStatus('⚠ Could not connect', 'sync-err');
-    return null;
-  }
+    const cb = 'cb_' + Date.now();
+    window[cb] = function(data) {
+      delete window[cb];
+      document.getElementById('jsonp-container').innerHTML = '';
+      if(data && data.__order) {
+        setSyncStatus('✓ Loaded from Google', 'sync-ok');
+        resolve(data);
+      } else {
+        setSyncStatus('✓ Connected', 'sync-ok');
+        resolve(null);
+      }
+    };
+    const s = document.createElement('script');
+    s.src = url + '?t=' + Date.now() + '&callback=' + cb;
+    s.onerror = function() {
+      delete window[cb];
+      document.getElementById('jsonp-container').innerHTML = '';
+      setSyncStatus('⚠ Could not connect', 'sync-err');
+      resolve(null);
+    };
+    document.getElementById('jsonp-container').appendChild(s);
+  });
 }
 async function syncNow() {
   const url = getSyncUrl();
@@ -1273,5 +1294,6 @@ async function init(){
 }
 init();
 </script>
+<div id="jsonp-container" style="display:none"></div>
 </body>
 </html>
