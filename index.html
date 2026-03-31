@@ -147,6 +147,14 @@
   .modal-field .checkbox-row input { width: auto; }
   .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
 
+
+  #sync-bar { background: #e8f0fe; border-bottom: 1px solid #aac4f5; padding: 6px 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 11px; }
+  #sync-status { font-size: 11px; font-weight: 600; font-family: 'DM Mono', monospace; }
+  .sync-ok { color: #2e7d32; }
+  .sync-err { color: #c04a2a; }
+  .sync-pending { color: #b07d20; }
+  #sync-url-input { flex: 1; min-width: 200px; padding: 4px 8px; border: 1px solid #aac4f5; border-radius: 4px; font-size: 11px; font-family: 'DM Mono', monospace; background: white; }
+
   .urgency-legend { display: flex; gap: 10px; align-items: center; font-size: 10px; color: rgba(255,255,255,0.6); }
   .legend-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 2px; }
 </style>
@@ -177,6 +185,14 @@
     <span id="status-msg"></span>
   </div>
   <textarea id="save-code-box" rows="2" placeholder="Code appears here after Save. Copy it → paste into Notes on your phone. To restore: paste code here → click Restore."></textarea>
+</div>
+
+
+<div id="sync-bar">
+  <span style="font-weight:700;color:#1a56c4;white-space:nowrap">☁️ GOOGLE SYNC</span>
+  <input id="sync-url-input" type="text" placeholder="Paste your Google Apps Script URL here to enable auto-sync…" oninput="saveSyncUrl()">
+  <button class="btn btn-sm" style="background:#1a56c4;color:white;border-color:#1a56c4;font-size:11px;" onclick="syncNow()">↑↓ Sync Now</button>
+  <span id="sync-status"></span>
 </div>
 
 <div id="finance-bar">
@@ -759,7 +775,106 @@ function getBackupSeed() {
 }
 
 // ── STORAGE ──
+// ── GOOGLE SYNC ──
+function getSyncUrl() { return localStorage.getItem('shopping-sync-url')||''; }
+function saveSyncUrl() {
+  const url = document.getElementById('sync-url-input').value.trim();
+  localStorage.setItem('shopping-sync-url', url);
+}
+function setSyncStatus(msg, cls) {
+  const el = document.getElementById('sync-status');
+  if(el) { el.textContent = msg; el.className = 'sync-status ' + (cls||''); }
+}
+async function pushToGoogle(map) {
+  const url = getSyncUrl();
+  if(!url) return;
+  try {
+    setSyncStatus('↑ Saving…', 'sync-pending');
+    await fetch(url, {method:'POST', body:JSON.stringify(map), headers:{'Content-Type':'application/json'}});
+    setSyncStatus('✓ Saved to Google ' + new Date().toLocaleTimeString(), 'sync-ok');
+  } catch(e) {
+    setSyncStatus('⚠ Save failed', 'sync-err');
+  }
+}
+async function pullFromGoogle() {
+  const url = getSyncUrl();
+  if(!url) return null;
+  try {
+    setSyncStatus('↓ Loading…', 'sync-pending');
+    const r = await fetch(url + '?t=' + Date.now());
+    const text = await r.text();
+    const data = JSON.parse(text);
+    if(data && data.__order) {
+      setSyncStatus('✓ Loaded from Google', 'sync-ok');
+      return data;
+    }
+    setSyncStatus('✓ Connected', 'sync-ok');
+    return null;
+  } catch(e) {
+    setSyncStatus('⚠ Could not connect', 'sync-err');
+    return null;
+  }
+}
+async function syncNow() {
+  const url = getSyncUrl();
+  if(!url) { alert('Paste your Google Apps Script URL in the sync bar first.'); return; }
+  const remote = await pullFromGoogle();
+  if(remote && remote.__order) {
+    applyMap(remote);
+    backfillDaysInput();
+    saveLocalState();
+    renderTable();
+    setSyncStatus('✓ Synced from Google ' + new Date().toLocaleTimeString(), 'sync-ok');
+  } else {
+    await saveState();
+    setSyncStatus('✓ Pushed to Google ' + new Date().toLocaleTimeString(), 'sync-ok');
+  }
+}
+function applyMap(savedMap) {
+  initFromRaw();
+  items.forEach(it => {
+    const s = savedMap[it.item];
+    if (s) {
+      if (s.need!==undefined) it.need=s.need;
+      if (s.due!==undefined) it.due=s.due;
+      if (s.daysInput!==undefined) it.daysInput=s.daysInput;
+      if (s.notes!==undefined) it.notes=s.notes;
+      if (s.store!==undefined) it.store=s.store;
+      if (s.num!==undefined) it.num=s.num;
+      if (s.price!==undefined) it.price=s.price;
+      if (s.calc!==undefined) it.calc=s.calc;
+      if (s.veggie!==undefined) it.veggie=s.veggie;
+    }
+  });
+  if (savedMap.__order) {
+    const order = savedMap.__order;
+    items.sort((a,b)=>{const ai=order.indexOf(a.item),bi=order.indexOf(b.item);if(ai===-1)return 1;if(bi===-1)return -1;return ai-bi;});
+  }
+  if (savedMap.__added) savedMap.__added.forEach(it=>items.push(it));
+}
+function saveLocalState() {
+  try {
+    const map = buildMap();
+    localStorage.setItem('shopping-items-v2', JSON.stringify(map));
+  } catch(e) {}
+}
+function buildMap() {
+  const map = { __order: items.map(it=>it.item), __added: [] };
+  const rawNames = new Set(RAW_DATA.map(d=>d.item));
+  items.forEach(it => {
+    map[it.item] = {need:it.need,due:it.due,daysInput:it.daysInput,notes:it.notes,store:it.store,num:it.num,price:it.price,calc:it.calc,veggie:it.veggie};
+    if (!rawNames.has(it.item)) map.__added.push(it);
+  });
+  return map;
+}
+
 function loadState() {
+  // Load sync URL into input
+  const syncUrl = getSyncUrl();
+  if(syncUrl) {
+    const inp = document.getElementById('sync-url-input');
+    if(inp) inp.value = syncUrl;
+  }
   try {
     const _raw = localStorage.getItem('shopping-items-v2'); const result = _raw ? {value: _raw} : null;
     if (result && result.value) {
@@ -793,13 +908,9 @@ function loadState() {
 
 async function saveState() {
   try {
-    const map = { __order: items.map(it=>it.item), __added: [] };
-    const rawNames = new Set(RAW_DATA.map(d=>d.item));
-    items.forEach(it => {
-      map[it.item] = {need:it.need,due:it.due,daysInput:it.daysInput,notes:it.notes,store:it.store,num:it.num,price:it.price,calc:it.calc,veggie:it.veggie};
-      if (!rawNames.has(it.item)) map.__added.push(it);
-    });
+    const map = buildMap();
     localStorage.setItem('shopping-items-v2', JSON.stringify(map));
+    pushToGoogle(map);
   } catch(e) {}
 }
 
@@ -1204,9 +1315,21 @@ document.getElementById('veggie-modal').addEventListener('click',function(e){if(
 
 // ── INIT ──
 async function init(){
-  await loadState();
-  await loadFinance();
+  loadState();
+  loadFinance();
   renderTable();
+  // After rendering from localStorage, try to pull fresher data from Google
+  const syncUrl = getSyncUrl();
+  if(syncUrl) {
+    const remote = await pullFromGoogle();
+    if(remote && remote.__order) {
+      applyMap(remote);
+      backfillDaysInput();
+      saveLocalState();
+      renderTable();
+      setSyncStatus('✓ Auto-synced from Google', 'sync-ok');
+    }
+  }
 }
 init();
 </script>
