@@ -23,11 +23,18 @@
   .btn-light:hover { background: rgba(255,255,255,0.22); }
   .btn-accent { background: var(--accent); border-color: var(--accent); color: white; }
   .btn-accent:hover { background: #4d6834; }
+  .btn-warn { background: var(--warn); border-color: var(--warn); color: white; }
+  .btn-warn:hover { background: #9a6d1a; }
   .btn-sm { padding: 3px 8px; font-size: 11px; }
   .btn-danger { background: var(--urgent); border-color: var(--urgent); color: white; }
   .btn-secondary { background: var(--surface); border-color: var(--border); color: var(--text); }
 
-  #save-status { font-size: 10px; color: rgba(255,255,255,0.5); font-family: 'DM Mono', monospace; }
+  #save-bar { background: #e8f0e0; border-bottom: 1px solid #c5d9b0; padding: 10px 16px; }
+  #save-bar-top { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 6px; }
+  #save-code-box { width: 100%; font-family: 'DM Mono', monospace; font-size: 10px; padding: 5px 8px; border: 1px solid #c5d9b0; border-radius: 4px; background: #fff; resize: none; display: block; }
+  #status-msg { font-size: 11px; color: var(--accent); font-weight: 600; }
+  .btn-copy { background: #1a73e8; border-color: #1a73e8; color: white; font-size: 12px; font-weight: 700; padding: 5px 14px; }
+  .btn-copy:hover { background: #1558b0; }
 
   #finance-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 8px 16px; display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
   .fin-group { display: flex; align-items: center; gap: 5px; }
@@ -48,13 +55,11 @@
   .filter-btn.active { background: var(--text); color: white; border-color: var(--text); }
   .filter-btn:hover:not(.active) { border-color: var(--text-muted); color: var(--text); }
   #item-count { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; margin-left: auto; }
-
-  /* ADD ITEM button — prominent at top */
   #add-row-btn { display: inline-block; margin: 0; padding: 5px 14px; border: none; border-radius: 4px; background: #1a73e8; color: white; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.04em; }
   #add-row-btn:hover { background: #1558b0; }
 
   #table-wrap { overflow-x: auto; padding: 0 16px 40px; }
-  table { width: 100%; border-collapse: collapse; min-width: 780px; }
+  table { width: 100%; border-collapse: collapse; min-width: 820px; }
   thead th { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; color: var(--text-muted); text-transform: uppercase; padding: 7px 5px; border-bottom: 2px solid var(--border); text-align: left; white-space: nowrap; background: var(--bg); }
   thead th.center { text-align: center; }
   tbody tr { border-bottom: 1px solid var(--border-light); transition: background 0.1s; }
@@ -67,9 +72,13 @@
 
   td.td-need { text-align: center; width: 28px; }
   .need-check { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
-  td.td-due { width: 72px; white-space: nowrap; }
-  .due-date { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 600; }
+  td.td-due { width: 80px; white-space: nowrap; }
+  .due-btn { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 600; background: none; border: none; cursor: pointer; padding: 2px 4px; border-radius: 3px; text-decoration: underline dotted; }
+  .due-btn:hover { background: rgba(0,0,0,0.06); }
   .due-past { color: var(--urgent); } .due-soon { color: var(--warn); } .due-ok { color: var(--accent); } .due-none { color: var(--text-muted); }
+  .due-clear { font-size: 9px; color: var(--text-muted); background: none; border: none; cursor: pointer; padding: 1px 2px; margin-left: 1px; }
+  .due-clear:hover { color: var(--urgent); }
+
   td.td-num { width: 26px; text-align: center; padding: 4px 2px; }
   .store-num { display: inline-block; width: 20px; height: 20px; border-radius: 50%; background: var(--border-light); font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; text-align: center; line-height: 20px; color: var(--text-muted); }
   .store-num.sn-1{background:#e8daf5;color:#6b3fa0}.store-num.sn-2{background:#fce4ec;color:#c2185b}.store-num.sn-3{background:#e3f2fd;color:#1565c0}.store-num.sn-4{background:#fff8e1;color:#f57f17}.store-num.sn-5{background:#fce8d5;color:#b84a00}.store-num.sn-6{background:#e8f5e9;color:#2e7d32}.store-num.sn-7{background:#e0f7fa;color:#006064}.store-num.sn-8{background:#fffde7;color:#827717}.store-num.sn-9{background:#f3e5f5;color:#6a1b9a}.store-num.sn-10{background:#e8eaf6;color:#283593}.store-num.sn-11{background:#fbe9e7;color:#bf360c}
@@ -77,35 +86,36 @@
   .item-name { font-weight: 700; font-size: 12px; line-height: 1.3; text-transform: uppercase; color: var(--text); }
   td.td-store { width: 85px; max-width: 85px; }
   .store-name { font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; }
-  td.td-days { width: 120px; }
+  td.td-days { width: 100px; }
   .days-wrap { display: flex; gap: 4px; align-items: center; }
-  /* Big spinner arrows via appearance override */
-  .days-input {
-    width: 64px; height: 34px;
-    padding: 2px 4px 2px 8px;
-    border: 1px solid var(--border); border-radius: 3px;
-    font-family: 'DM Mono', monospace; font-size: 14px;
-    text-align: left; background: var(--surface); color: var(--text);
-    -moz-appearance: textfield;
-  }
-  .days-input::-webkit-inner-spin-button {
-    -webkit-appearance: inner-spin-button;
-    width: 22px;
-    height: 34px;
-    cursor: pointer;
-    opacity: 1;
-  }
+  .days-input { width: 60px; height: 34px; padding: 2px 4px 2px 8px; border: 1px solid var(--border); border-radius: 3px; font-family: 'DM Mono', monospace; font-size: 14px; text-align: left; background: var(--surface); color: var(--text); -moz-appearance: textfield; }
+  .days-input::-webkit-inner-spin-button { -webkit-appearance: inner-spin-button; width: 22px; height: 34px; cursor: pointer; opacity: 1; }
   .days-input:focus { outline: none; border-color: var(--accent); }
   .days-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
   .egg-wrap { display: flex; flex-direction: column; gap: 2px; }
   .egg-row { display: flex; align-items: center; gap: 4px; }
   .egg-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; }
   .egg-result { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); }
-  td.td-price { width: 60px; min-width: 60px; text-align: right; font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; }
-  td.td-notes { max-width: 240px; }
+  td.td-price { width: 68px; min-width: 68px; text-align: right; font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; }
+  td.td-notes { max-width: 220px; }
   .notes-text { font-size: 12px; font-weight: 500; color: var(--text-muted); white-space: pre-line; max-height: 48px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; cursor: pointer; text-transform: uppercase; }
   .notes-text.expanded { max-height: none; -webkit-line-clamp: unset; }
   td.td-edit { width: 28px; padding: 4px 2px; text-align: center; }
+
+  /* DATE POPUP */
+  .date-popup { position: fixed; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; box-shadow: var(--shadow-md); z-index: 500; width: 240px; }
+  .date-popup h4 { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; font-weight: 600; }
+  .date-popup-field { margin-bottom: 8px; }
+  .date-popup-field label { display: block; font-size: 10px; color: var(--text-muted); margin-bottom: 3px; font-weight: 600; }
+  .date-popup-field input { width: 100%; padding: 5px 7px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; font-family: 'DM Mono', monospace; background: var(--bg); }
+  .date-popup-field input:focus { outline: none; border-color: var(--accent); }
+  .date-popup-actions { display: flex; gap: 6px; margin-top: 10px; justify-content: space-between; align-items: center; }
+  .date-popup-clear { font-size: 11px; color: var(--urgent); background: none; border: none; cursor: pointer; text-decoration: underline; text-transform: uppercase; }
+
+  /* VEGGIE SHIFT MODAL */
+  #veggie-modal { display: none; position: fixed; inset: 0; background: rgba(44,36,22,0.5); z-index: 200; align-items: center; justify-content: center; }
+  #veggie-modal.open { display: flex; }
+  #veggie-modal .modal-box { background: var(--surface); border-radius: 8px; padding: 20px; width: 360px; max-width: 95vw; box-shadow: var(--shadow-md); }
 
   /* SHOPPING MODE */
   #shopping-mode { display: none; position: fixed; inset: 0; background: white; z-index: 300; overflow-y: auto; }
@@ -123,7 +133,7 @@
   .shop-item.got-it { opacity: 0.4; }
   .shop-item.got-it .shop-item-name { text-decoration: line-through; }
 
-  /* MODAL */
+  /* EDIT MODAL */
   #edit-modal { display: none; position: fixed; inset: 0; background: rgba(44,36,22,0.5); z-index: 200; align-items: center; justify-content: center; }
   #edit-modal.open { display: flex; }
   .modal-box { background: var(--surface); border-radius: 8px; padding: 20px; width: 500px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-md); }
@@ -132,6 +142,8 @@
   .modal-field label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 3px; font-weight: 500; }
   .modal-field input, .modal-field textarea, .modal-field select { width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; font-family: 'DM Sans', sans-serif; font-size: 13px; background: var(--bg); }
   .modal-field textarea { height: 100px; resize: vertical; }
+  .modal-field .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .modal-field .checkbox-row input { width: auto; }
   .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
 
   .urgency-legend { display: flex; gap: 10px; align-items: center; font-size: 10px; color: rgba(255,255,255,0.6); }
@@ -148,20 +160,22 @@
       <span><span class="legend-dot" style="background:#b07d20"></span>3–7d</span>
       <span><span class="legend-dot" style="background:#5c7a3e"></span>dated</span>
     </div>
+    <button class="btn btn-warn" onclick="openVeggieShift()">🥦 Shift Veggies</button>
     <button class="btn btn-light" onclick="sortByDate()">⇅ Date</button>
     <button class="btn btn-light" onclick="sortByStore()">⇅ Store</button>
     <button class="btn btn-accent" onclick="openShoppingMode()">🛒 Shop Mode</button>
   </div>
 </div>
 
-<div id="save-bar" style="background:#e8f0e0;border-bottom:1px solid #c5d9b0;padding:10px 16px">
-  <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px">
-    <span style="font-size:11px;font-weight:700;color:var(--accent)">💾 SAVE / RESTORE YOUR DATA</span>
-    <button class="btn btn-accent btn-sm" onclick="saveCode()">1. SAVE → generates code</button>
-    <button class="btn btn-secondary btn-sm" onclick="loadCode()">3. RESTORE ← paste code first</button>
-    <span id="status-msg" style="font-size:11px;color:var(--accent);font-weight:600"></span>
+<div id="save-bar">
+  <div id="save-bar-top">
+    <span style="font-size:11px;font-weight:700;color:var(--accent)">💾 SAVE / RESTORE</span>
+    <button class="btn btn-accent btn-sm" onclick="saveCode()">1. SAVE → Code</button>
+    <button class="btn btn-copy btn-sm" onclick="copyCode()">2. COPY 📋</button>
+    <button class="btn btn-secondary btn-sm" onclick="loadCode()">4. RESTORE ← Paste first</button>
+    <span id="status-msg"></span>
   </div>
-  <textarea id="save-code-box" rows="2" style="width:100%;font-family:'DM Mono',monospace;font-size:10px;padding:5px 8px;border:1px solid #c5d9b0;border-radius:4px;background:#fff;resize:none;display:block" placeholder="2. Copy the code that appears here → save it in Notes on your phone. Next time: paste it back here → click Restore."></textarea>
+  <textarea id="save-code-box" rows="2" placeholder="Code appears here after Save. Copy it → paste into Notes on your phone. To restore: paste code here → click Restore."></textarea>
 </div>
 
 <div id="finance-bar">
@@ -215,9 +229,9 @@
         <th class="center th-num">#</th>
         <th class="th-item">Item</th>
         <th class="th-store">Store</th>
-        <th class="th-days">Days Left</th>
-        <th class="th-price" style="text-align:right">Price</th>
-        <th class="th-notes">Notes <span style="font-size:9px;font-weight:400;color:var(--text-muted)">(dbl-click to edit)</span></th>
+        <th class="th-days" style="width:100px">Days Left</th>
+        <th class="th-price" style="text-align:right;width:68px">Price</th>
+        <th class="th-notes">Notes <span style="font-size:9px;font-weight:400;color:var(--text-muted)">(click to expand)</span></th>
         <th class="th-edit"></th>
       </tr>
     </thead>
@@ -225,6 +239,47 @@
   </table>
 </div>
 
+<!-- DATE POPUP (shared, moved by JS) -->
+<div id="date-popup" class="date-popup" style="display:none">
+  <h4>📅 ADJUST DUE DATE</h4>
+  <div class="date-popup-field">
+    <label>Current Date</label>
+    <div id="popup-current" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted);padding:3px 0;"></div>
+  </div>
+  <div class="date-popup-field">
+    <label>Shift by Days (+/-)</label>
+    <input type="number" id="popup-offset" placeholder="e.g. 3 or -2" step="1">
+  </div>
+  <div class="date-popup-field">
+    <label>Or Set Specific Date</label>
+    <input type="date" id="popup-direct">
+  </div>
+  <div class="date-popup-actions">
+    <button class="date-popup-clear" onclick="clearPopupDate()">✕ Clear Date</button>
+    <div style="display:flex;gap:6px;">
+      <button class="btn btn-secondary btn-sm" onclick="closePopup()">Cancel</button>
+      <button class="btn btn-accent btn-sm" onclick="applyPopup()">Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- VEGGIE SHIFT MODAL -->
+<div id="veggie-modal">
+  <div class="modal-box" style="width:360px">
+    <div class="modal-title">🥦 Shift All Veggie Drink Items</div>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Pushes all veggie drink item due dates forward or back by the same number of days. Use when you skip or add days to your veggie drink routine.</p>
+    <div class="modal-field">
+      <label>Days to Shift (use negative to pull back)</label>
+      <input type="number" id="veggie-shift-days" placeholder="e.g. 3 to push forward, -2 to pull back" step="1">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-sm" onclick="closeVeggieModal()">Cancel</button>
+      <button class="btn btn-warn btn-sm" onclick="applyVeggieShift()">Shift All Veggie Items</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHOPPING MODE -->
 <div id="shopping-mode">
   <div id="shopping-mode-header">
     <h2>🛒 Shopping Mode</h2>
@@ -233,6 +288,7 @@
   <div id="shopping-mode-body"></div>
 </div>
 
+<!-- EDIT MODAL -->
 <div id="edit-modal">
   <div class="modal-box">
     <div class="modal-title" id="modal-title">Edit Item</div>
@@ -250,6 +306,11 @@
         <option value="bags">Blueberries bags (bags × 16oz × 28.35 ÷ 100g/day)</option>
       </select>
     </div>
+    <div class="modal-field">
+      <label class="checkbox-row">
+        <input type="checkbox" id="m-veggie"> Veggie Drink Item (included in Shift Veggies button)
+      </label>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-danger btn-sm" id="modal-delete-btn" onclick="deleteItem()">Delete</button>
       <button class="btn btn-secondary btn-sm" onclick="closeModal()">Cancel</button>
@@ -259,6 +320,35 @@
 </div>
 
 <script>
+// ── TODAY ──
+function today() { const d=new Date(); return new Date(d.getFullYear(),d.getMonth(),d.getDate()); }
+function addDays(n) { const d=today(); d.setDate(d.getDate()+Math.round(n)); return d.toISOString().slice(0,10); }
+function parseDue(str) { if(!str) return null; const d=new Date(str+'T00:00:00'); return isNaN(d)?null:d; }
+function formatDue(str) { const d=parseDue(str); if(!d) return ''; return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2); }
+function dueClass(str) { const d=parseDue(str); if(!d) return 'due-none'; const diff=Math.floor((d-today())/86400000); if(diff<=2) return 'due-past'; if(diff<=7) return 'due-soon'; return 'due-ok'; }
+function rowUrgency(it) { if(!it.due) return ''; const d=parseDue(it.due); if(!d) return ''; const diff=Math.floor((d-today())/86400000); if(diff<=2) return 'urgent-row'; if(diff<=7) return 'warn-row'; return ''; }
+function daysFromToday(n) { return addDays(n); }
+
+// ── VEGGIE DRINK ITEMS ──
+const VEGGIE_ITEMS = new Set([
+  "tomato paste - 4 cans = 16 days",
+  "mushrooms, enoki - three 200-gram pkgs = 16 days",
+  "mushrooms, king oyster - three 270-gram pkgs = 810g for 16 days - or - two 1 lb packages = 908g for 16 days",
+  "cabbage, red",
+  "daikon radish root - get 1/3 lb",
+  "italian parsley",
+  "broccoli, 2 lb bag = 16 days",
+  "brussels sprouts ~ 2 lbs= 16 days",
+  "spinach - 2 lb box",
+  "cilantro - buy at vons if it's not 4 for $5 at sprouts - get 2 bunches",
+  "carrots",
+  "swiss chard",
+  "celery - 20 oz - get 2",
+  "ginger root",
+  "garlic cloves"
+]);
+
+// ── RAW DATA ──
 const RAW_DATA = [
   {item:"tomato paste - 4 cans = 16 days",store:"vons",num:"11",price:"3.75",notes:"Trader Joe's: $0.99 (doesn't say BPA-Free)\nVons: $1.25 (BPA-Free)\nWalmart: $1.28 (doesn't say BPA-Free)\nSprouts (Can): $2.49\nSprouts (Glass): $3.49 (BPA-Free)",calc:"cans"},
   {item:"blueberries (16 oz) 3 bags",store:"trader joe's",num:"10",price:"7.47",notes:"3 bags = 13 days. Each bag 16oz × 28.35g = 453.6g ÷ 100g/day = 4.54 days/bag",calc:"bags"},
@@ -557,198 +647,256 @@ const RAW_DATA = [
   {item:"balsamic vinegar",store:"walmart online",num:"1",price:"",notes:"https://www.walmart.com/ip/seort/179935477"},
   {item:"evaporated milk; 365 by whole foods market organic",store:"whole foods tustin",num:"4",price:"3.19",notes:"12 oz cheaper out there but only one w/out carrageenan"},
   {item:"balsamic vinegar",store:"williams sonoma - scp",num:"1",price:"35.50",notes:"VSOP 25-Year Barrel-Aged Balsamic Vinegar, 459-ml ($44.14 if bought online)"},
-  {item:"ulta return wax",store:"",num:"1",price:"",notes:""},
-  {item:"creamer",store:"",num:"",price:"",notes:""},
+  {item:"ulta return wax",store:"",num:"1",price:"",notes:""}
 ];
 
+// ── PRESET STATE (baked-in quantities and dates as of 3/30/2026) ──
 const PRESET_DATES = {
-  "tomato paste - 4 cans = 16 days":"2026-04-10",
-  "blueberries (16 oz) 3 bags":"2026-04-16",
-  "avocados; mini (6/bag)":"2026-04-06",
-  "mushrooms, enoki - three 200-gram pkgs = 16 days":"2026-04-06",
-  "mushrooms, king oyster - three 270-gram pkgs = 810g for 16 days - or - two 1 lb packages = 908g for 16 days":"2026-04-06",
-  "ginger root":"2026-04-06",
-  "milk; whole, organic - 292g/day average - 1,892g=1/2-gallon":"2026-04-02",
-  "cabbage, red":"2026-04-10",
-  "oatley original oatmilk":"2026-04-02",
-  "mandarin":"2026-04-03",
-  "daikon radish root - get 1/3 lb":"2026-04-10",
-  "italian parsley":"2026-04-10",
-  "broccoli, 2 lb bag = 16 days":"2026-04-10",
-  "brussels sprouts ~ 2 lbs= 16 days":"2026-04-10",
-  "spinach - 2 lb box":"2026-04-10",
-  "cilantro - buy at vons if it's not 4 for $5 at sprouts - get 2 bunches":"2026-04-10",
-  "carrots":"2026-04-10",
-  "swiss chard":"2026-04-10",
-  "celery - 20 oz - get 2":"2026-04-10",
-  "heavy cream, organic":"2026-04-06",
-  "eggs; pasture-raised organic":"2026-04-09",
-  "good earth sweet spice - buy at sprouts if on sale at 2 for $5 ~ each box lasts 9 days":"2026-05-20",
-  "garlic cloves":"2026-10-30",
-  "flaxseed, whole":"2026-04-06"
+  "tomato paste - 4 cans = 16 days": addDays(11),
+  "blueberries (16 oz) 3 bags": addDays(18),
+  "mushrooms, enoki - three 200-gram pkgs = 16 days": addDays(12),
+  "mushrooms, king oyster - three 270-gram pkgs = 810g for 16 days - or - two 1 lb packages = 908g for 16 days": addDays(12),
+  "ginger root": addDays(8),
+  "cabbage, red": addDays(11),
+  "daikon radish root - get 1/3 lb": addDays(8),
+  "italian parsley": addDays(11),
+  "broccoli, 2 lb bag = 16 days": addDays(11),
+  "brussels sprouts ~ 2 lbs= 16 days": addDays(11),
+  "spinach - 2 lb box": addDays(11),
+  "cilantro - buy at vons if it's not 4 for $5 at sprouts - get 2 bunches": addDays(11),
+  "carrots": addDays(11),
+  "swiss chard": addDays(11),
+  "celery - 20 oz - get 2": addDays(11),
+  "heavy cream, organic": addDays(7),
+  "eggs; pasture-raised organic": addDays(17),
+  "good earth sweet spice - buy at sprouts if on sale at 2 for $5 ~ each box lasts 9 days": "2026-05-20",
+  "garlic cloves": "2026-10-30",
+  "flaxseed, whole": addDays(8),
+};
+
+const PRESET_DAYS_INPUT = {
+  "tomato paste - 4 cans = 16 days": "3",
+  "blueberries (16 oz) 3 bags": "3.96",
+  "mushrooms, enoki - three 200-gram pkgs = 16 days": "12",
+  "mushrooms, king oyster - three 270-gram pkgs = 810g for 16 days - or - two 1 lb packages = 908g for 16 days": "12",
+  "ginger root": "8",
+  "cabbage, red": "11",
+  "daikon radish root - get 1/3 lb": "8",
+  "italian parsley": "11",
+  "broccoli, 2 lb bag = 16 days": "11",
+  "brussels sprouts ~ 2 lbs= 16 days": "11",
+  "spinach - 2 lb box": "11",
+  "cilantro - buy at vons if it's not 4 for $5 at sprouts - get 2 bunches": "11",
+  "carrots": "11",
+  "swiss chard": "11",
+  "celery - 20 oz - get 2": "11",
+  "heavy cream, organic": "7",
+  "eggs; pasture-raised organic": "25",
+  "good earth sweet spice - buy at sprouts if on sale at 2 for $5 ~ each box lasts 9 days": "51",
+  "garlic cloves": "214",
+  "flaxseed, whole": "8",
 };
 
 const PRESET_NEED = new Set([
   "tomato paste - 4 cans = 16 days","blueberries (16 oz) 3 bags","avocados; mini (6/bag)",
   "mushrooms, enoki - three 200-gram pkgs = 16 days","mushrooms, king oyster - three 270-gram pkgs = 810g for 16 days - or - two 1 lb packages = 908g for 16 days",
   "ginger root","milk; whole, organic - 292g/day average - 1,892g=1/2-gallon","cabbage, red",
-  "oatley original oatmilk","mandarin","daikon radish root - get 1/3 lb","italian parsley","broccoli, 2 lb bag = 16 days",
+  "oatley original oatmilk","daikon radish root - get 1/3 lb","italian parsley","broccoli, 2 lb bag = 16 days",
   "brussels sprouts ~ 2 lbs= 16 days","spinach - 2 lb box","cilantro - buy at vons if it's not 4 for $5 at sprouts - get 2 bunches",
   "carrots","swiss chard","heavy cream, organic","celery - 20 oz - get 2","eggs; pasture-raised organic",
   "good earth sweet spice - buy at sprouts if on sale at 2 for $5 ~ each box lasts 9 days","flaxseed, whole",
   "tofu; nature's raw tofu","tofu; pulmuone organic soft for stews ($1.29)","ground beef, 93% grass fed, organic",
-  "italian panko breadcrumbs","whole chicken","artichokes on the go"
+  "italian panko breadcrumbs","whole chicken",
+  "barbacoa; del real","black beans (from freezer)","black olives; large lindsay","bread: Oroweat / Arnold Organic 22 Grains & Seed Bread","carnitas"
 ]);
 
 let items = [];
 let currentFilter = 'all';
 let editingId = null;
+let popupItemId = null;
+
+// ── INIT FROM RAW ──
+function initFromRaw() {
+  items = RAW_DATA.map((d,i) => ({
+    id: i,
+    item: d.item,
+    store: d.store,
+    num: d.num,
+    price: d.price,
+    notes: d.notes,
+    calc: d.calc||'days',
+    need: PRESET_NEED.has(d.item),
+    due: PRESET_DATES[d.item]||'',
+    daysInput: PRESET_DAYS_INPUT[d.item]||'',
+    veggie: VEGGIE_ITEMS.has(d.item)
+  }));
+}
+
+// ── BACKFILL: if due set but daysInput blank, calculate from due date ──
+function backfillDaysInput() {
+  const todayMs = today().getTime();
+  items.forEach(it => {
+    if (it.due && (it.daysInput===''||it.daysInput===null||it.daysInput===undefined)) {
+      const d = parseDue(it.due);
+      if (!d) return;
+      const daysRemaining = Math.ceil((d.getTime()-todayMs)/86400000);
+      let val;
+      if (it.calc==='eggs') val = Math.round(daysRemaining*1.5*10)/10;
+      else if (it.calc==='cans') val = Math.round(daysRemaining/4*10)/10;
+      else if (it.calc==='bags') val = Math.round(daysRemaining*100/(16*28.35)*100)/100;
+      else val = daysRemaining;
+      if (val>0) it.daysInput = String(val);
+    }
+  });
+}
 
 // ── STORAGE ──
-function loadState() {
+async function loadState() {
   try {
-    const saved = localStorage.getItem('shoppingItemState');
-    if (saved) {
-      const savedMap = JSON.parse(saved);
+    const result = await window.storage.get('shopping-items-v2');
+    if (result && result.value) {
+      const savedMap = JSON.parse(result.value);
       initFromRaw();
       items.forEach(it => {
         const s = savedMap[it.item];
         if (s) {
-          if (s.need !== undefined) it.need = s.need;
-          if (s.due !== undefined) it.due = s.due;
-          if (s.daysInput !== undefined) it.daysInput = s.daysInput;
+          if (s.need!==undefined) it.need=s.need;
+          if (s.due!==undefined) it.due=s.due;
+          if (s.daysInput!==undefined) it.daysInput=s.daysInput;
+          if (s.notes!==undefined) it.notes=s.notes;
+          if (s.store!==undefined) it.store=s.store;
+          if (s.num!==undefined) it.num=s.num;
+          if (s.price!==undefined) it.price=s.price;
+          if (s.calc!==undefined) it.calc=s.calc;
+          if (s.veggie!==undefined) it.veggie=s.veggie;
         }
       });
       if (savedMap.__order) {
         const order = savedMap.__order;
-        items.sort((a,b) => {
-          const ai=order.indexOf(a.item), bi=order.indexOf(b.item);
-          if(ai===-1)return 1; if(bi===-1)return -1; return ai-bi;
-        });
+        items.sort((a,b)=>{const ai=order.indexOf(a.item),bi=order.indexOf(b.item);if(ai===-1)return 1;if(bi===-1)return -1;return ai-bi;});
       }
+      if (savedMap.__added) savedMap.__added.forEach(it=>items.push(it));
     } else {
       initFromRaw();
     }
   } catch(e) { initFromRaw(); }
+  backfillDaysInput();
 }
 
-function saveState() {
+async function saveState() {
   try {
-    const map = { __order: items.map(it => it.item) };
+    const map = { __order: items.map(it=>it.item), __added: [] };
+    const rawNames = new Set(RAW_DATA.map(d=>d.item));
     items.forEach(it => {
-      map[it.item] = { need: it.need, due: it.due, daysInput: it.daysInput };
+      map[it.item] = {need:it.need,due:it.due,daysInput:it.daysInput,notes:it.notes,store:it.store,num:it.num,price:it.price,calc:it.calc,veggie:it.veggie};
+      if (!rawNames.has(it.item)) map.__added.push(it);
     });
-    localStorage.setItem('shoppingItemState', JSON.stringify(map));
+    await window.storage.set('shopping-items-v2', JSON.stringify(map));
   } catch(e) {}
 }
 
-function loadFinance() {
+async function loadFinance() {
   try {
-    const f = JSON.parse(localStorage.getItem('shoppingFinance') || '{}');
-    if (f.available !== undefined) document.getElementById('fin-available').value = f.available;
-    if (f.amazon !== undefined) document.getElementById('fin-amazon').value = f.amazon;
-    if (f.atm !== undefined) document.getElementById('fin-atm').value = f.atm;
-    if (f.notes) f.notes.forEach(n => addFinNote(n));
+    const result = await window.storage.get('shopping-finance');
+    if (result && result.value) {
+      const f = JSON.parse(result.value);
+      if (f.available!==undefined) document.getElementById('fin-available').value=f.available;
+      if (f.amazon!==undefined) document.getElementById('fin-amazon').value=f.amazon;
+      if (f.atm!==undefined) document.getElementById('fin-atm').value=f.atm;
+      if (f.notes) f.notes.forEach(n=>addFinNote(n));
+    }
   } catch(e) {}
   updateFinance();
 }
 
-function saveFinance() {
+async function saveFinance() {
   try {
-    const notes = [];
-    document.querySelectorAll('.fin-note-input').forEach(el => notes.push(el.value));
-    localStorage.setItem('shoppingFinance', JSON.stringify({
-      available: document.getElementById('fin-available').value,
-      amazon: document.getElementById('fin-amazon').value,
-      atm: document.getElementById('fin-atm').value,
+    const notes=[];
+    document.querySelectorAll('.fin-note-input').forEach(el=>notes.push(el.value));
+    await window.storage.set('shopping-finance',JSON.stringify({
+      available:document.getElementById('fin-available').value,
+      amazon:document.getElementById('fin-amazon').value,
+      atm:document.getElementById('fin-atm').value,
       notes
     }));
   } catch(e) {}
 }
 
+// ── SAVE/RESTORE CODE ──
 function saveCode() {
-  const state = { order: items.map(it => it.item), data: {} };
-  items.forEach(it => {
-    state.data[it.item] = { n: it.need?1:0, d: it.due||'', i: it.daysInput||'' };
+  try {
+    const map={__order:items.map(it=>it.item),__added:[]};
+    const rawNames=new Set(RAW_DATA.map(d=>d.item));
+    items.forEach(it=>{
+      map[it.item]={need:it.need,due:it.due,daysInput:it.daysInput,notes:it.notes,store:it.store,num:it.num,price:it.price,calc:it.calc,veggie:it.veggie};
+      if(!rawNames.has(it.item)) map.__added.push(it);
+    });
+    const code=btoa(unescape(encodeURIComponent(JSON.stringify(map))));
+    document.getElementById('save-code-box').value=code;
+    document.getElementById('status-msg').textContent='✓ Code ready — click COPY';
+  } catch(e){document.getElementById('status-msg').textContent='Save failed';}
+}
+
+function copyCode() {
+  const box=document.getElementById('save-code-box');
+  if(!box.value){document.getElementById('status-msg').textContent='Click SAVE first!';return;}
+  navigator.clipboard.writeText(box.value).then(()=>{
+    document.getElementById('status-msg').textContent='✓ Copied to clipboard!';
+  }).catch(()=>{
+    box.select();document.execCommand('copy');
+    document.getElementById('status-msg').textContent='✓ Copied!';
   });
-  const code = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
-  const box = document.getElementById('save-code-box');
-  box.value = code;
-  box.select();
-  try { document.execCommand('copy'); } catch(e) {}
-  showStatus('✓ CODE GENERATED & COPIED — PASTE INTO NOTES ON YOUR PHONE');
 }
 
 function loadCode() {
-  const code = document.getElementById('save-code-box').value.trim();
-  if (!code) { showStatus('PASTE YOUR SAVE CODE FIRST'); return; }
   try {
-    const json = decodeURIComponent(escape(atob(code)));
-    const state = JSON.parse(json);
+    const code=document.getElementById('save-code-box').value.trim();
+    if(!code){document.getElementById('status-msg').textContent='Paste code first!';return;}
+    const savedMap=JSON.parse(decodeURIComponent(escape(atob(code))));
     initFromRaw();
-    items.forEach(it => {
-      const s = state.data[it.item];
-      if (s) {
-        it.need = s.n === 1;
-        it.due = s.d || it.due;
-        it.daysInput = s.i || '';
+    items.forEach(it=>{
+      const s=savedMap[it.item];
+      if(s){
+        if(s.need!==undefined) it.need=s.need;
+        if(s.due!==undefined) it.due=s.due;
+        if(s.daysInput!==undefined) it.daysInput=s.daysInput;
+        if(s.notes!==undefined) it.notes=s.notes;
+        if(s.store!==undefined) it.store=s.store;
+        if(s.num!==undefined) it.num=s.num;
+        if(s.price!==undefined) it.price=s.price;
+        if(s.calc!==undefined) it.calc=s.calc;
+        if(s.veggie!==undefined) it.veggie=s.veggie;
       }
     });
-    if (state.order) {
-      items.sort((a,b) => {
-        const ai = state.order.indexOf(a.item), bi = state.order.indexOf(b.item);
-        if (ai===-1) return 1; if (bi===-1) return -1; return ai-bi;
-      });
-    }
-    saveState();
-    renderTable();
-    showStatus('✓ RESTORED!');
-  } catch(e) { showStatus('❌ INVALID CODE'); }
-}
-
-function showStatus(msg) {
-  const el = document.getElementById('status-msg');
-  if (el) { el.textContent = msg; setTimeout(()=>el.textContent='', 5000); }
-}
-
-
-
-function initFromRaw() {
-  items = RAW_DATA.map((d,i) => ({
-    id: i, item: d.item, store: d.store, num: d.num, price: d.price,
-    notes: d.notes, calc: d.calc||'days', need: PRESET_NEED.has(d.item),
-    due: PRESET_DATES[d.item]||'', daysInput: ''
-  }));
+    if(savedMap.__order){const order=savedMap.__order;items.sort((a,b)=>{const ai=order.indexOf(a.item),bi=order.indexOf(b.item);if(ai===-1)return 1;if(bi===-1)return -1;return ai-bi;});}
+    if(savedMap.__added) savedMap.__added.forEach(it=>items.push(it));
+    backfillDaysInput();
+    saveState();renderTable();
+    document.getElementById('status-msg').textContent='✓ Restored!';
+  } catch(e){document.getElementById('status-msg').textContent='Restore failed — bad code?';}
 }
 
 // ── FINANCE ──
 function updateFinance() {
-  let total = 0;
-  items.forEach(it => { if (it.need) { const p = parseFloat(it.price); if (!isNaN(p)) total += p; } });
-  document.getElementById('fin-total-needed').textContent = '$' + total.toFixed(2);
-  const available = parseFloat(document.getElementById('fin-available').value)||0;
-  const left = available - total;
-  const el = document.getElementById('fin-leftover');
-  el.textContent = (left>=0?'+$':'-$') + Math.abs(left).toFixed(2);
-  el.className = 'fin-value ' + (left>=0?'fin-positive':'fin-negative');
+  let total=0;
+  items.forEach(it=>{if(it.need){const p=parseFloat(it.price);if(!isNaN(p))total+=p;}});
+  document.getElementById('fin-total-needed').textContent='$'+total.toFixed(2);
+  const available=parseFloat(document.getElementById('fin-available').value)||0;
+  const left=available-total;
+  const el=document.getElementById('fin-leftover');
+  el.textContent=(left>=0?'+$':'-$')+Math.abs(left).toFixed(2);
+  el.className='fin-value '+(left>=0?'fin-positive':'fin-negative');
 }
 
 function addFinNote(val) {
-  const area = document.getElementById('fin-notes-area');
-  const wrap = document.createElement('div'); wrap.className = 'fin-note-wrap';
-  const inp = document.createElement('input'); inp.className = 'fin-input fin-note-input'; inp.style.width='150px'; inp.placeholder='note…'; inp.value=val||''; inp.oninput=()=>saveFinance();
-  const del = document.createElement('button'); del.textContent='✕'; del.className='btn btn-secondary btn-sm'; del.style.cssText='padding:2px 5px;font-size:10px;'; del.onclick=()=>{wrap.remove();saveFinance();};
-  wrap.append(inp,del); area.appendChild(wrap);
+  const area=document.getElementById('fin-notes-area');
+  const wrap=document.createElement('div');wrap.className='fin-note-wrap';
+  const inp=document.createElement('input');inp.className='fin-input fin-note-input';inp.style.width='150px';inp.placeholder='note…';inp.value=val||'';inp.oninput=()=>saveFinance();
+  const del=document.createElement('button');del.textContent='✕';del.className='btn btn-secondary btn-sm';del.style.cssText='padding:2px 5px;font-size:10px;';del.onclick=()=>{wrap.remove();saveFinance();};
+  wrap.append(inp,del);area.appendChild(wrap);
 }
 
-// ── DATES ──
-function today() { const d=new Date(); return new Date(d.getFullYear(),d.getMonth(),d.getDate()); }
-function addDays(n) { const d=today(); d.setDate(d.getDate()+Math.round(n)); return d.toISOString().slice(0,10); }
-function parseDue(str) { if(!str) return null; const d=new Date(str+'T00:00:00'); return isNaN(d)?null:d; }
-function formatDue(str) { const d=parseDue(str); if(!d) return ''; return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2); }
-function dueClass(str) { const d=parseDue(str); if(!d) return 'due-none'; const diff=Math.floor((d-today())/86400000); if(diff<=2) return 'due-past'; if(diff<=7) return 'due-soon'; return 'due-ok'; }
-function rowUrgency(it) { if(!it.due) return ''; const d=parseDue(it.due); if(!d) return ''; const diff=Math.floor((d-today())/86400000); if(diff<=2) return 'urgent-row'; if(diff<=7) return 'warn-row'; return ''; }
-
+// ── COMPUTE DUE ──
 function computeDue(item,val) {
   if(!val&&val!==0) return item.due;
   const v=parseFloat(val); if(isNaN(v)) return item.due;
@@ -760,7 +908,7 @@ function computeDue(item,val) {
   return addDays(days);
 }
 
-// ── RENDER ──
+// ── FILTER & RENDER ──
 function setFilter(f) {
   currentFilter=f;
   ['all','need','dated','urgent'].forEach(x=>document.getElementById('filter-'+x).classList.toggle('active',x===f));
@@ -771,7 +919,7 @@ function getFilteredItems() {
   const q=document.getElementById('search-input').value.toLowerCase().trim();
   const dueByVal=document.getElementById('filter-due-by').value;
   const dueByDate=dueByVal?new Date(dueByVal+'T00:00:00'):null;
-  return items.filter(it => {
+  return items.filter(it=>{
     if(q){const h=(it.item+' '+it.store+' '+it.notes).toLowerCase();if(!h.includes(q))return false;}
     if(dueByDate&&it.due){const d=parseDue(it.due);if(d&&d>dueByDate)return false;}
     else if(dueByDate&&!it.due)return false;
@@ -798,25 +946,35 @@ function renderTable() {
     tr.className=[it.need?'need-row':'',urgency].filter(Boolean).join(' ');
     tr.dataset.id=it.id;
 
-    const tdNeed=document.createElement('td'); tdNeed.className='td-need';
+    // NEED
+    const tdNeed=document.createElement('td');tdNeed.className='td-need';
     tdNeed.innerHTML=`<input type="checkbox" class="need-check" ${it.need?'checked':''} onchange="toggleNeed(${it.id},this.checked)">`;
 
-    const tdDue=document.createElement('td'); tdDue.className='td-due';
+    // DUE DATE — clickable button
+    const tdDue=document.createElement('td');tdDue.className='td-due';
     const dc=dueClass(it.due);
-    tdDue.innerHTML=it.due?`<span class="due-date ${dc}">${formatDue(it.due)}</span>`:`<span class="due-date due-none">—</span>`;
+    if(it.due){
+      tdDue.innerHTML=`<button class="due-btn ${dc}" onclick="openPopup(${it.id},this)">${formatDue(it.due)}</button><button class="due-clear" onclick="clearDue(${it.id})" title="Clear date">✕</button>`;
+    } else {
+      tdDue.innerHTML=`<button class="due-btn due-none" onclick="openPopup(${it.id},this)">+ date</button>`;
+    }
 
-    const tdNum=document.createElement('td'); tdNum.className='td-num'; tdNum.dataset.num=it.num||'';
+    // NUM
+    const tdNum=document.createElement('td');tdNum.className='td-num';tdNum.dataset.num=it.num||'';
     tdNum.innerHTML=it.num?`<span class="store-num ${numClass(it.num)}">${it.num}</span>`:'';
 
-    const tdItem=document.createElement('td'); tdItem.className='td-item';
+    // ITEM
+    const tdItem=document.createElement('td');tdItem.className='td-item';
     tdItem.innerHTML=`<div class="item-name">${escHtml(it.item)}</div>`;
-    tdItem.style.cursor='pointer'; tdItem.ondblclick=()=>openEditModal(it.id);
+    tdItem.style.cursor='pointer';tdItem.ondblclick=()=>openEditModal(it.id);
 
-    const tdStore=document.createElement('td'); tdStore.className='td-store';
+    // STORE
+    const tdStore=document.createElement('td');tdStore.className='td-store';
     tdStore.innerHTML=`<span class="store-name">${escHtml(it.store)}</span>`;
-    tdStore.style.cursor='pointer'; tdStore.ondblclick=()=>openEditModal(it.id);
+    tdStore.style.cursor='pointer';tdStore.ondblclick=()=>openEditModal(it.id);
 
-    const tdDays=document.createElement('td'); tdDays.className='td-days';
+    // DAYS
+    const tdDays=document.createElement('td');tdDays.className='td-days';
     if(it.calc==='eggs'){
       const r=it.daysInput?(parseFloat(it.daysInput)/1.5).toFixed(1):'';
       tdDays.innerHTML=`<div class="egg-wrap"><div class="egg-row"><span class="egg-label">eggs:</span><input class="days-input" type="number" min="0" value="${escHtml(it.daysInput)}" placeholder="qty" onchange="updateDays(${it.id},this.value)" oninput="updateDays(${it.id},this.value)"></div><div class="egg-row"><span class="egg-label">= days:</span><span class="egg-result">${r}</span></div></div>`;
@@ -829,10 +987,15 @@ function renderTable() {
       tdDays.innerHTML=`<div class="days-wrap"><input class="days-input" type="number" min="0" value="${escHtml(it.daysInput)}" placeholder="days" onchange="updateDays(${it.id},this.value)" oninput="updateDays(${it.id},this.value)"><span class="days-label">d</span></div>`;
     }
 
-    const tdPrice=document.createElement('td'); tdPrice.className='td-price'; tdPrice.textContent=fmtPrice(it.price);
-    const tdNotes=document.createElement('td'); tdNotes.className='td-notes';
+    // PRICE
+    const tdPrice=document.createElement('td');tdPrice.className='td-price';tdPrice.textContent=fmtPrice(it.price);
+
+    // NOTES
+    const tdNotes=document.createElement('td');tdNotes.className='td-notes';
     if(it.notes) tdNotes.innerHTML=`<div class="notes-text" onclick="this.classList.toggle('expanded')">${escHtml(it.notes)}</div>`;
-    const tdEdit=document.createElement('td'); tdEdit.className='td-edit';
+
+    // EDIT
+    const tdEdit=document.createElement('td');tdEdit.className='td-edit';
     tdEdit.innerHTML=`<button class="btn btn-light btn-sm" style="font-size:10px;padding:2px 5px;" onclick="openEditModal(${it.id})">✎</button>`;
 
     tr.append(tdNeed,tdDue,tdNum,tdItem,tdStore,tdDays,tdPrice,tdNotes,tdEdit);
@@ -842,38 +1005,132 @@ function renderTable() {
 
 // ── ACTIONS ──
 function toggleNeed(id,val){
-  const it=items.find(x=>x.id===id); if(!it)return;
-  it.need=val; saveState(); updateFinance();
+  const it=items.find(x=>x.id===id);if(!it)return;
+  it.need=val;saveState();updateFinance();
   const tr=document.querySelector(`tr[data-id="${id}"]`);
   if(tr){tr.classList.toggle('need-row',val);const u=rowUrgency(it);tr.classList.toggle('urgent-row',u==='urgent-row');tr.classList.toggle('warn-row',u==='warn-row');}
 }
 
 function updateDays(id,val){
-  const it=items.find(x=>x.id===id); if(!it)return;
-  it.daysInput=val; it.due=computeDue(it,val); saveState();
+  const it=items.find(x=>x.id===id);if(!it)return;
+  it.daysInput=val;it.due=computeDue(it,val);saveState();
   const tr=document.querySelector(`tr[data-id="${id}"]`);
   if(tr){
-    const tdDue=tr.querySelector('.td-due'); const dc=dueClass(it.due);
-    tdDue.innerHTML=it.due?`<span class="due-date ${dc}">${formatDue(it.due)}</span>`:`<span class="due-date due-none">—</span>`;
+    const tdDue=tr.querySelector('.td-due');const dc=dueClass(it.due);
+    if(it.due){
+      tdDue.innerHTML=`<button class="due-btn ${dc}" onclick="openPopup(${it.id},this)">${formatDue(it.due)}</button><button class="due-clear" onclick="clearDue(${it.id})" title="Clear date">✕</button>`;
+    } else {
+      tdDue.innerHTML=`<button class="due-btn due-none" onclick="openPopup(${it.id},this)">+ date</button>`;
+    }
     const u=rowUrgency(it);tr.classList.toggle('urgent-row',u==='urgent-row');tr.classList.toggle('warn-row',u==='warn-row');
     if(it.calc==='eggs'){const r=tr.querySelector('.egg-result');if(r)r.textContent=val?(parseFloat(val)/1.5).toFixed(1):'';}
     else if(it.calc==='bags'){const r=tr.querySelector('.egg-result');if(r)r.textContent=val?(parseFloat(val)*16*28.35/100).toFixed(1):'';}
   }
 }
 
-function sortByDate(){
-  items.sort((a,b)=>{const da=a.due?parseDue(a.due):null,db=b.due?parseDue(b.due):null;if(da&&db){if(da<db)return -1;if(da>db)return 1;return 0;}if(da)return -1;if(db)return 1;return 0;});
-  saveState(); renderTable();
+function clearDue(id){
+  const it=items.find(x=>x.id===id);if(!it)return;
+  it.due='';it.daysInput='';saveState();
+  const tr=document.querySelector(`tr[data-id="${id}"]`);
+  if(tr){
+    tr.querySelector('.td-due').innerHTML=`<button class="due-btn due-none" onclick="openPopup(${it.id},this)">+ date</button>`;
+    tr.classList.remove('urgent-row','warn-row');
+    const inp=tr.querySelector('.days-input');if(inp) inp.value='';
+  }
 }
 
+// ── DATE POPUP ──
+function openPopup(id, triggerEl) {
+  popupItemId=id;
+  const it=items.find(x=>x.id===id);if(!it)return;
+  const popup=document.getElementById('date-popup');
+  document.getElementById('popup-current').textContent=it.due?formatDue(it.due):'No date set';
+  document.getElementById('popup-offset').value='';
+  document.getElementById('popup-direct').value=it.due||'';
+  popup.style.display='block';
+  // Position near trigger
+  const rect=triggerEl.getBoundingClientRect();
+  const ph=popup.offsetHeight||180;
+  let top=rect.bottom+window.scrollY+4;
+  let left=rect.left+window.scrollX;
+  if(left+240>window.innerWidth) left=window.innerWidth-248;
+  if(top+ph>window.scrollY+window.innerHeight) top=rect.top+window.scrollY-ph-4;
+  popup.style.top=top+'px';popup.style.left=left+'px';
+  // Close on outside click
+  setTimeout(()=>document.addEventListener('click',outsidePopupClose,{once:true}),10);
+}
+
+function outsidePopupClose(e){
+  if(!document.getElementById('date-popup').contains(e.target)) closePopup();
+}
+
+function closePopup(){
+  document.getElementById('date-popup').style.display='none';
+  popupItemId=null;
+}
+
+function applyPopup(){
+  if(popupItemId===null)return;
+  const it=items.find(x=>x.id===popupItemId);if(!it)return;
+  const offset=document.getElementById('popup-offset').value.trim();
+  const direct=document.getElementById('popup-direct').value;
+  if(offset!==''){
+    const n=parseInt(offset);
+    if(!isNaN(n)){
+      const base=it.due?parseDue(it.due):today();
+      const newDate=new Date(base.getTime()+n*86400000);
+      it.due=newDate.toISOString().slice(0,10);
+    }
+  } else if(direct){
+    it.due=direct;
+  }
+  it.daysInput='';
+  backfillDaysInput();
+  saveState();renderTable();
+  closePopup();
+}
+
+function clearPopupDate(){
+  if(popupItemId===null)return;
+  clearDue(popupItemId);
+  closePopup();
+}
+
+// ── VEGGIE SHIFT ──
+function openVeggieShift(){
+  document.getElementById('veggie-shift-days').value='';
+  document.getElementById('veggie-modal').classList.add('open');
+}
+function closeVeggieModal(){document.getElementById('veggie-modal').classList.remove('open');}
+function applyVeggieShift(){
+  const n=parseInt(document.getElementById('veggie-shift-days').value);
+  if(isNaN(n)||n===0){alert('Enter a number of days (positive to push forward, negative to pull back).');return;}
+  items.forEach(it=>{
+    if(it.veggie&&it.due){
+      const d=parseDue(it.due);if(!d)return;
+      const newDate=new Date(d.getTime()+n*86400000);
+      it.due=newDate.toISOString().slice(0,10);
+      it.daysInput='';
+    }
+  });
+  backfillDaysInput();
+  saveState();renderTable();
+  closeVeggieModal();
+}
+
+// ── SORT ──
+function sortByDate(){
+  items.sort((a,b)=>{const da=a.due?parseDue(a.due):null,db=b.due?parseDue(b.due):null;if(da&&db){if(da<db)return -1;if(da>db)return 1;return 0;}if(da)return -1;if(db)return 1;return 0;});
+  saveState();renderTable();
+}
 function sortByStore(){
   items.sort((a,b)=>{
-    const nd=(b.need?1:0)-(a.need?1:0); if(nd!==0)return nd;
+    const nd=(b.need?1:0)-(a.need?1:0);if(nd!==0)return nd;
     if(a.need&&b.need){const na=String(a.num||''),nb=String(b.num||''),numA=parseInt(na),numB=parseInt(nb);
       if(!isNaN(numA)&&!isNaN(numB))return numA-numB;if(!isNaN(numA))return -1;if(!isNaN(numB))return 1;return na.localeCompare(nb);}
     return 0;
   });
-  saveState(); renderTable();
+  saveState();renderTable();
 }
 
 // ── SHOPPING MODE ──
@@ -882,13 +1139,13 @@ function openShoppingMode(){
   const groups={};
   needed.forEach(it=>{const key=(it.num||'zzz')+'|'+(it.store||'No Store');if(!groups[key])groups[key]={num:it.num,store:it.store,items:[]};groups[key].items.push(it);});
   const sorted=Object.values(groups).sort((a,b)=>{const na=parseInt(a.num),nb=parseInt(b.num);if(!isNaN(na)&&!isNaN(nb))return na-nb;if(!isNaN(na))return -1;if(!isNaN(nb))return 1;return(a.store||'').localeCompare(b.store||'');});
-  const body=document.getElementById('shopping-mode-body'); body.innerHTML='';
+  const body=document.getElementById('shopping-mode-body');body.innerHTML='';
   sorted.forEach(group=>{
-    const h=document.createElement('div'); h.className='shop-store-header';
-    h.textContent=(group.num?'#'+group.num+' — ':'')+(group.store||'No Store').toUpperCase(); body.appendChild(h);
+    const h=document.createElement('div');h.className='shop-store-header';
+    h.textContent=(group.num?'#'+group.num+' — ':'')+(group.store||'No Store').toUpperCase();body.appendChild(h);
     group.items.forEach(it=>{
-      const div=document.createElement('div'); div.className='shop-item'; div.dataset.id=it.id;
-      const price=fmtPrice(it.price); const due=it.due?'📅 Due: '+formatDue(it.due):'';
+      const div=document.createElement('div');div.className='shop-item';div.dataset.id=it.id;
+      const price=fmtPrice(it.price);const due=it.due?'📅 Due: '+formatDue(it.due):'';
       div.innerHTML=`<div class="shop-item-name">${escHtml(it.item)}</div><div class="shop-item-price">${escHtml(price)}</div>${due?`<div class="shop-item-due">${due}</div>`:''}${it.notes?`<div class="shop-item-notes">${escHtml(it.notes)}</div>`:''}<div class="shop-item-got"><label class="shop-got-check"><input type="checkbox" onchange="toggleGotIt(this.closest('.shop-item'),this.checked)"> Got it ✓</label></div>`;
       body.appendChild(div);
     });
@@ -896,13 +1153,12 @@ function openShoppingMode(){
   document.getElementById('shopping-mode').classList.add('open');
   document.body.style.overflow='hidden';
 }
-
 function closeShoppingMode(){document.getElementById('shopping-mode').classList.remove('open');document.body.style.overflow='';}
 function toggleGotIt(el,checked){el.classList.toggle('got-it',checked);}
 
-// ── MODAL ──
+// ── EDIT MODAL ──
 function openEditModal(id){
-  editingId=id; const it=items.find(x=>x.id===id); if(!it)return;
+  editingId=id;const it=items.find(x=>x.id===id);if(!it)return;
   document.getElementById('modal-title').textContent='Edit Item';
   document.getElementById('m-item').value=it.item;
   document.getElementById('m-store').value=it.store;
@@ -910,40 +1166,38 @@ function openEditModal(id){
   document.getElementById('m-price').value=it.price;
   document.getElementById('m-notes').value=it.notes;
   document.getElementById('m-calc').value=it.calc||'days';
+  document.getElementById('m-veggie').checked=!!it.veggie;
   document.getElementById('modal-delete-btn').style.display='';
   document.getElementById('edit-modal').classList.add('open');
 }
-
 function openAddModal(){
   editingId=null;
   document.getElementById('modal-title').textContent='Add Item';
   ['m-item','m-store','m-num','m-price','m-notes'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('m-calc').value='days';
+  document.getElementById('m-veggie').checked=false;
   document.getElementById('modal-delete-btn').style.display='none';
   document.getElementById('edit-modal').classList.add('open');
 }
-
 function closeModal(){document.getElementById('edit-modal').classList.remove('open');}
-
 function saveModal(){
-  const itemVal=document.getElementById('m-item').value.trim(); if(!itemVal){alert('Item name required');return;}
+  const itemVal=document.getElementById('m-item').value.trim();if(!itemVal){alert('Item name required');return;}
   if(editingId!==null){
     const it=items.find(x=>x.id===editingId);
-    if(it){it.item=itemVal;it.store=document.getElementById('m-store').value;it.num=document.getElementById('m-num').value;it.price=document.getElementById('m-price').value;it.notes=document.getElementById('m-notes').value;it.calc=document.getElementById('m-calc').value;}
+    if(it){it.item=itemVal;it.store=document.getElementById('m-store').value;it.num=document.getElementById('m-num').value;it.price=document.getElementById('m-price').value;it.notes=document.getElementById('m-notes').value;it.calc=document.getElementById('m-calc').value;it.veggie=document.getElementById('m-veggie').checked;}
   } else {
-    items.push({id:Date.now(),item:itemVal,store:document.getElementById('m-store').value,num:document.getElementById('m-num').value,price:document.getElementById('m-price').value,notes:document.getElementById('m-notes').value,calc:document.getElementById('m-calc').value,need:false,due:'',daysInput:''});
+    items.push({id:Date.now(),item:itemVal,store:document.getElementById('m-store').value,num:document.getElementById('m-num').value,price:document.getElementById('m-price').value,notes:document.getElementById('m-notes').value,calc:document.getElementById('m-calc').value,veggie:document.getElementById('m-veggie').checked,need:false,due:'',daysInput:''});
   }
-  saveState(); closeModal(); renderTable();
+  saveState();closeModal();renderTable();
 }
-
 function deleteItem(){if(!confirm('Delete this item?'))return;items=items.filter(x=>x.id!==editingId);saveState();closeModal();renderTable();}
-
 document.getElementById('edit-modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.getElementById('veggie-modal').addEventListener('click',function(e){if(e.target===this)closeVeggieModal();});
 
 // ── INIT ──
-function init() {
-  loadState();
-  loadFinance();
+async function init(){
+  await loadState();
+  await loadFinance();
   renderTable();
 }
 init();
