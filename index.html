@@ -34,11 +34,8 @@
   .btn-danger { background: var(--urgent); border-color: var(--urgent); color: white; }
   .btn-secondary { background: var(--surface); border-color: var(--border); color: var(--text); }
 
-  #save-bar { background: #e8f0e0; border-bottom: 1px solid #c5d9b0; padding: 10px 16px; }
-  #save-bar-top { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 6px; }
-  #save-code-box { width: 100%; font-family: 'DM Mono', monospace; font-size: 10px; padding: 5px 8px; border: 1px solid #c5d9b0; border-radius: 4px; background: #fff; resize: none; display: block; }
-  #status-msg { font-size: 11px; color: var(--accent); font-weight: 600; }
-  .btn-copy { background: #1a73e8; border-color: #1a73e8; color: white; font-size: 12px; font-weight: 700; padding: 5px 14px; }
+
+
   .btn-copy:hover { background: #1558b0; }
 
   #finance-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 8px 16px; display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
@@ -180,16 +177,7 @@
   </div>
 </div>
 
-<div id="save-bar">
-  <div id="save-bar-top">
-    <span style="font-size:11px;font-weight:700;color:var(--accent)">💾 SAVE / RESTORE</span>
-    <button class="btn btn-accent btn-sm" onclick="saveCode()">1. SAVE → Code</button>
-    <button class="btn btn-copy btn-sm" onclick="copyCode()">2. COPY 📋</button>
-    <button class="btn btn-secondary btn-sm" onclick="loadCode()">4. RESTORE ← Paste first</button>
-    <span id="status-msg"></span>
-  </div>
-  <textarea id="save-code-box" rows="2" placeholder="Code appears here after Save. Copy it → paste into Notes on your phone. To restore: paste code here → click Restore."></textarea>
-</div>
+
 
 
 <div id="sync-bar">
@@ -945,60 +933,6 @@ function saveFinance() {
       notes
     }));
   } catch(e) {}
-}
-
-// ── SAVE/RESTORE CODE ──
-function saveCode() {
-  try {
-    const map={__order:items.map(it=>it.item),__added:[]};
-    const rawNames=new Set(RAW_DATA.map(d=>d.item));
-    items.forEach(it=>{
-      map[it.item]={need:it.need,due:it.due,daysInput:it.daysInput,notes:it.notes,store:it.store,num:it.num,price:it.price,calc:it.calc,veggie:it.veggie};
-      if(!rawNames.has(it.item)) map.__added.push(it);
-    });
-    const code=btoa(unescape(encodeURIComponent(JSON.stringify(map))));
-    document.getElementById('save-code-box').value=code;
-    document.getElementById('status-msg').textContent='✓ Code ready — click COPY';
-  } catch(e){document.getElementById('status-msg').textContent='Save failed';}
-}
-
-function copyCode() {
-  const box=document.getElementById('save-code-box');
-  if(!box.value){document.getElementById('status-msg').textContent='Click SAVE first!';return;}
-  navigator.clipboard.writeText(box.value).then(()=>{
-    document.getElementById('status-msg').textContent='✓ Copied to clipboard!';
-  }).catch(()=>{
-    box.select();document.execCommand('copy');
-    document.getElementById('status-msg').textContent='✓ Copied!';
-  });
-}
-
-function loadCode() {
-  try {
-    const code=document.getElementById('save-code-box').value.trim();
-    if(!code){document.getElementById('status-msg').textContent='Paste code first!';return;}
-    const savedMap=JSON.parse(decodeURIComponent(escape(atob(code))));
-    initFromRaw();
-    items.forEach(it=>{
-      const s=savedMap[it.item];
-      if(s){
-        if(s.need!==undefined) it.need=s.need;
-        if(s.due!==undefined) it.due=s.due;
-        if(s.daysInput!==undefined) it.daysInput=s.daysInput;
-        if(s.notes!==undefined) it.notes=s.notes;
-        if(s.store!==undefined) it.store=s.store;
-        if(s.num!==undefined) it.num=s.num;
-        if(s.price!==undefined) it.price=s.price;
-        if(s.calc!==undefined) it.calc=s.calc;
-        if(s.veggie!==undefined) it.veggie=s.veggie;
-      }
-    });
-    if(savedMap.__order){const order=savedMap.__order;items.sort((a,b)=>{const ai=order.indexOf(a.item),bi=order.indexOf(b.item);if(ai===-1)return 1;if(bi===-1)return -1;return ai-bi;});}
-    if(savedMap.__added) savedMap.__added.forEach(it=>items.push(it));
-    backfillDaysInput();
-    saveState();renderTable();
-    document.getElementById('status-msg').textContent='✓ Restored!';
-  } catch(e){document.getElementById('status-msg').textContent='Restore failed — bad code?';}
 }
 
 // ── FINANCE ──
