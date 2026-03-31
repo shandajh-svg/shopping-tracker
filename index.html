@@ -794,7 +794,9 @@ async function pushToGoogle(map) {
   if(!url) return;
   try {
     setSyncStatus('↑ Saving…', 'sync-pending');
-    await fetch(url, {method:'POST', body:JSON.stringify(map), headers:{'Content-Type':'application/json'}});
+    // Use no-cors mode - can't read response but data gets through
+    const encoded = encodeURIComponent(JSON.stringify(map));
+    await fetch(url + '?data=' + encoded, {method:'GET', mode:'no-cors'});
     setSyncStatus('✓ Saved to Google ' + new Date().toLocaleTimeString(), 'sync-ok');
   } catch(e) {
     setSyncStatus('⚠ Save failed', 'sync-err');
@@ -805,7 +807,7 @@ async function pullFromGoogle() {
   if(!url) return null;
   try {
     setSyncStatus('↓ Loading…', 'sync-pending');
-    const r = await fetch(url + '?t=' + Date.now());
+    const r = await fetch(url + '?t=' + Date.now(), {mode:'cors'});
     const text = await r.text();
     const data = JSON.parse(text);
     if(data && data.__order) {
