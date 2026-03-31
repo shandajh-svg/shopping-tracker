@@ -1205,12 +1205,28 @@ function jsonpCall(baseUrl, cb) {
 function pushToGoogle(cb) {
   const url=getSyncUrl(); if(!url){if(cb)cb();return;}
   const map=buildMap();
-  const encoded=encodeURIComponent(JSON.stringify(map));
+  const json=JSON.stringify(map);
+  const CHUNK=500;
+  const chunks=[];
+  for(let i=0;i<json.length;i+=CHUNK) chunks.push(json.slice(i,i+CHUNK));
+  const total=chunks.length;
   setSyncStatus('↑ Saving…','sync-pending');
-  jsonpCall(url+'?data='+encoded, function(){
-    setSyncStatus('✓ Saved '+new Date().toLocaleTimeString(),'sync-ok');
-    if(cb)cb();
-  });
+  // First clear the file, then send chunks
+  function sendChunk(i){
+    if(i>=total){
+      // All chunks sent, now tell server to reassemble
+      jsonpCall(url+'?finalize=1&total='+total, function(){
+        setSyncStatus('✓ Saved '+new Date().toLocaleTimeString(),'sync-ok');
+        if(cb)cb();
+      });
+      return;
+    }
+    const encoded=encodeURIComponent(chunks[i]);
+    jsonpCall(url+'?chunk='+encoded+'&index='+i+'&total='+total, function(){
+      sendChunk(i+1);
+    });
+  }
+  sendChunk(0);
 }
 function pullFromGoogle(cb) {
   const url=getSyncUrl(); if(!url){cb(null);return;}
