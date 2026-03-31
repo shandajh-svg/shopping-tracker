@@ -1193,11 +1193,12 @@ function applyMapData(savedMap) {
   if(savedMap.__order){const order=savedMap.__order;items.sort((a,b)=>{const ai=order.indexOf(a.item),bi=order.indexOf(b.item);return ai===-1?1:bi===-1?-1:ai-bi;});}
   if(savedMap.__added)savedMap.__added.forEach(it=>items.push(it));
 }
-function jsonpCall(url, cb) {
+function jsonpCall(baseUrl, cb) {
   const name='cb_'+Date.now();
   window[name]=function(data){delete window[name];document.getElementById('jsonp-container').innerHTML='';cb(data);};
   const s=document.createElement('script');
-  s.src=url;
+  const sep=baseUrl.indexOf('?')>=0?'&':'?';
+  s.src=baseUrl+sep+'callback='+name;
   s.onerror=function(){delete window[name];document.getElementById('jsonp-container').innerHTML='';cb(null);};
   document.getElementById('jsonp-container').appendChild(s);
 }
@@ -1206,7 +1207,7 @@ function pushToGoogle(cb) {
   const map=buildMap();
   const encoded=encodeURIComponent(JSON.stringify(map));
   setSyncStatus('↑ Saving…','sync-pending');
-  jsonpCall(url+'?data='+encoded+'&callback=cb_'+Date.now(), function(){
+  jsonpCall(url+'?data='+encoded, function(){
     setSyncStatus('✓ Saved '+new Date().toLocaleTimeString(),'sync-ok');
     if(cb)cb();
   });
@@ -1214,7 +1215,7 @@ function pushToGoogle(cb) {
 function pullFromGoogle(cb) {
   const url=getSyncUrl(); if(!url){cb(null);return;}
   setSyncStatus('↓ Loading…','sync-pending');
-  jsonpCall(url+'?t='+Date.now()+'&callback=cb_'+Date.now(), function(data){
+  jsonpCall(url+'?t='+Date.now(), function(data){
     if(data&&data.__order){setSyncStatus('✓ Loaded '+new Date().toLocaleTimeString(),'sync-ok');cb(data);}
     else{setSyncStatus('⚠ Nothing found','sync-err');cb(null);}
   });
