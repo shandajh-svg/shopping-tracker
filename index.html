@@ -1203,43 +1203,32 @@ function pushToGoogle() {
   var url=getSyncUrl(); if(!url) return;
   var diff=buildDiff();
   var json=JSON.stringify(diff);
-  var encoded=encodeURIComponent(json);
   setSyncStatus('Saving...','sync-pending');
-  // Use Image trick - works cross-domain on all browsers including iOS
-  var img=new Image();
-  img.onload=img.onerror=function(){
+  var iframe=document.getElementById('push-iframe');
+  if(!iframe){
+    iframe=document.createElement('iframe');
+    iframe.id='push-iframe';
+    iframe.name='push-iframe';
+    iframe.style.display='none';
+    document.body.appendChild(iframe);
+  }
+  var form=document.createElement('form');
+  form.method='POST';
+  form.action=url;
+  form.target='push-iframe';
+  var input=document.createElement('input');
+  input.type='hidden';
+  input.name='data';
+  input.value=json;
+  form.appendChild(input);
+  document.body.appendChild(form);
+  form.submit();
+  document.body.removeChild(form);
+  setTimeout(function(){
     setSyncStatus('Saved '+new Date().toLocaleTimeString(),'sync-ok');
-  };
-  img.src=url+'?data='+encoded+'&t='+Date.now();
+  },2000);
 }
-function pullFromGoogle() {
-  var url=getSyncUrl(); if(!url){setSyncStatus('Paste URL first','sync-err');return;}
-  setSyncStatus('Loading...','sync-pending');
-  fetch(url+'?t='+Date.now(),{method:'GET',mode:'cors',cache:'no-store'})
-    .then(function(r){ return r.text(); })
-    .then(function(text){
-      try {
-        // Strip any wrapping callback like jsonp format just in case
-        var clean = text.trim();
-        if(clean.charAt(0) !== '{' && clean.charAt(0) !== '[') {
-          var start = clean.indexOf('{');
-          var end = clean.lastIndexOf('}');
-          if(start >= 0 && end >= 0) clean = clean.slice(start, end+1);
-        }
-        var data=JSON.parse(clean);
-        if(data&&(data.__changes||data.__added)){
-          applyDiff(data);
-          backfillDaysInput();
-          saveState();
-          renderTable();
-          setSyncStatus('Loaded '+new Date().toLocaleTimeString(),'sync-ok');
-        } else {
-          setSyncStatus('Nothing saved yet','sync-err');
-        }
-      } catch(e){ setSyncStatus('Could not read data: '+e.message,'sync-err'); }
-    })
-    .catch(function(e){ setSyncStatus('Could not connect: '+e,'sync-err'); });
-}
+
 function syncNow() {
   var url=getSyncUrl();
   if(!url){alert('Paste your Google Apps Script URL first.');return;}
