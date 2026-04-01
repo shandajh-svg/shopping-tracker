@@ -1211,12 +1211,22 @@ function applyMapData(savedMap) {
 }
 function jsonpCall(baseUrl, cb) {
   const name='cb_'+Date.now();
-  window[name]=function(data){delete window[name];document.getElementById('jsonp-container').innerHTML='';cb(data);};
+  let done=false;
+  const cleanup=function(){
+    done=true;
+    delete window[name];
+    document.getElementById('jsonp-container').innerHTML='';
+  };
+  window[name]=function(data){if(done)return;cleanup();cb(data);};
   const s=document.createElement('script');
   const sep=baseUrl.indexOf('?')>=0?'&':'?';
   s.src=baseUrl+sep+'callback='+name;
-  s.onerror=function(){delete window[name];document.getElementById('jsonp-container').innerHTML='';cb(null);};
+  s.onerror=function(){if(done)return;cleanup();cb(null);};
   document.getElementById('jsonp-container').appendChild(s);
+  // 15 second timeout
+  setTimeout(function(){
+    if(!done){cleanup();cb(null);setSyncStatus('⚠ Timed out - try again','sync-err');}
+  },15000);
 }
 function buildDiff() {
   // Only save items that have need=true or a due date set
