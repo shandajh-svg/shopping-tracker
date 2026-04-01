@@ -1205,9 +1205,12 @@ function pushToGoogle() {
   var json=JSON.stringify(diff);
   var encoded=encodeURIComponent(json);
   setSyncStatus('Saving...','sync-pending');
-  fetch(url+'?data='+encoded,{method:'GET',mode:'no-cors'})
-    .then(function(){ setSyncStatus('Saved '+new Date().toLocaleTimeString(),'sync-ok'); })
-    .catch(function(){ setSyncStatus('Saved '+new Date().toLocaleTimeString(),'sync-ok'); });
+  // Use Image trick - works cross-domain on all browsers including iOS
+  var img=new Image();
+  img.onload=img.onerror=function(){
+    setSyncStatus('Saved '+new Date().toLocaleTimeString(),'sync-ok');
+  };
+  img.src=url+'?data='+encoded+'&t='+Date.now();
 }
 function pullFromGoogle() {
   var url=getSyncUrl(); if(!url){setSyncStatus('Paste URL first','sync-err');return;}
