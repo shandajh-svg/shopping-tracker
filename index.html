@@ -177,9 +177,12 @@
 
 
 <div id="sync-bar" style="background:#e8f0fe;border-bottom:1px solid #aac4f5;padding:6px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:11px;">
-  <span style="font-weight:700;color:#1a56c4;white-space:nowrap">☁️ GOOGLE SYNC</span>
-  <input id="sync-url-input" type="text" placeholder="Paste your Google Apps Script URL here…" style="flex:1;min-width:200px;padding:4px 8px;border:1px solid #aac4f5;border-radius:4px;font-size:11px;font-family:monospace;background:white;" oninput="saveSyncUrl()">
-  <button onclick="syncNow()" style="background:#1a56c4;color:white;border:none;border-radius:4px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;" id="sync-btn">↑↓ Sync Now</button>
+  <span style="font-weight:700;color:#1a56c4;white-space:nowrap">GOOGLE SYNC</span>
+  <div id="sync-url-wrap" style="display:flex;gap:6px;flex:1;align-items:center;">
+    <input id="sync-url-input" type="text" placeholder="Paste your Google Apps Script URL here once to enable sync..." style="flex:1;min-width:200px;padding:4px 8px;border:1px solid #aac4f5;border-radius:4px;font-size:11px;font-family:monospace;background:white;" oninput="saveSyncUrl()">
+  </div>
+  <button onclick="syncNow()" style="background:#1a56c4;color:white;border:none;border-radius:4px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">Sync Now</button>
+  <button onclick="toggleUrlBox()" style="background:transparent;color:#1a56c4;border:1px solid #aac4f5;border-radius:4px;padding:5px 8px;font-size:11px;cursor:pointer;">Settings</button>
   <span id="sync-status" style="font-size:11px;font-weight:600;font-family:monospace;"></span>
 </div>
 
@@ -1146,192 +1149,102 @@ document.getElementById('edit-modal').addEventListener('click',function(e){if(e.
 document.getElementById('veggie-modal').addEventListener('click',function(e){if(e.target===this)closeVeggieModal();});
 
 // ── INIT ──
-async function init(){
-  await loadState();
-  await loadFinance();
+function init(){
+  loadState();
+  loadFinance();
   renderTable();
+  var syncUrl=getSyncUrl();
+  if(syncUrl){
+    var inp=document.getElementById('sync-url-input');
+    if(inp) inp.value=syncUrl;
+    var w=document.getElementById('sync-url-wrap');
+    if(w) w.style.display='none';
+    // Auto pull on startup
+    pullFromGoogle();
+  }
 }
 init();
-
-// ── GOOGLE SYNC ──
+// GOOGLE SYNC
 function getSyncUrl() { return localStorage.getItem('shopping-sync-url')||''; }
 function saveSyncUrl() {
-  localStorage.setItem('shopping-sync-url', document.getElementById('sync-url-input').value.trim());
+  var url = document.getElementById('sync-url-input').value.trim();
+  localStorage.setItem('shopping-sync-url', url);
+  if(url) { var w=document.getElementById('sync-url-wrap'); if(w) w.style.display='none'; }
+}
+function toggleUrlBox() {
+  var w=document.getElementById('sync-url-wrap');
+  if(w) w.style.display=(w.style.display==='none'?'flex':'none');
 }
 function setSyncStatus(msg, cls) {
-  const el = document.getElementById('sync-status');
-  if(el) { el.textContent=msg; el.style.color = cls==='sync-ok'?'#2e7d32':cls==='sync-err'?'#c04a2a':'#b07d20'; }
-}
-function isMobile() {
-  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
-}
-function buildMap() {
-  const map={__order:items.map(it=>it.item),__added:[]};
-  const rawNames=new Set(RAW_DATA.map(d=>d.item));
-  items.forEach(it=>{
-    map[it.item]={need:it.need,due:it.due,daysInput:it.daysInput,notes:it.notes,store:it.store,num:it.num,price:it.price,calc:it.calc,veggie:it.veggie};
-    if(!rawNames.has(it.item)) map.__added.push(it);
-  });
-  return map;
-}
-function applyMapData(savedMap) {
-  initFromRaw();
-  // Apply diff format (__changes) or full format for backwards compatibility
-  if (savedMap.__changes) {
-    items.forEach(it=>{
-      const changes = savedMap.__changes[it.item];
-      if(changes){
-        if(changes.need!==undefined)it.need=changes.need;
-        if(changes.due!==undefined)it.due=changes.due;
-        if(changes.daysInput!==undefined)it.daysInput=changes.daysInput;
-        if(changes.notes!==undefined)it.notes=changes.notes;
-        if(changes.store!==undefined)it.store=changes.store;
-        if(changes.num!==undefined)it.num=changes.num;
-        if(changes.price!==undefined)it.price=changes.price;
-      }
-    });
-  } else {
-    items.forEach(it=>{
-      const s=savedMap[it.item];
-      if(s){
-        if(s.need!==undefined)it.need=s.need;
-        if(s.due!==undefined)it.due=s.due;
-        if(s.daysInput!==undefined)it.daysInput=s.daysInput;
-        if(s.notes!==undefined)it.notes=s.notes;
-        if(s.store!==undefined)it.store=s.store;
-        if(s.num!==undefined)it.num=s.num;
-        if(s.price!==undefined)it.price=s.price;
-        if(s.calc!==undefined)it.calc=s.calc;
-        if(s.veggie!==undefined)it.veggie=s.veggie;
-      }
-    });
-  }
-  if(savedMap.__order){const order=savedMap.__order;items.sort((a,b)=>{const ai=order.indexOf(a.item),bi=order.indexOf(b.item);return ai===-1?1:bi===-1?-1:ai-bi;});}
-  if(savedMap.__added)savedMap.__added.forEach(it=>items.push(it));
-}
-;
-  window[name]=function(data){if(done)return;cleanup();cb(data);};
-  const s=document.createElement('script');
-  const sep=baseUrl.indexOf('?')>=0?'&':'?';
-  s.src=baseUrl+sep+'callback='+name;
-  s.onerror=function(){if(done)return;cleanup();cb(null);};
-  document.getElementById('jsonp-container').appendChild(s);
-  // 15 second timeout
-  setTimeout(function(){
-    if(!done){cleanup();cb(null);setSyncStatus('⚠ Timed out - try again','sync-err');}
-  },15000);
+  var el=document.getElementById('sync-status');
+  if(el){ el.textContent=msg; el.style.color=(cls==='sync-ok'?'#2e7d32':cls==='sync-err'?'#c04a2a':'#b07d20'); }
 }
 function buildDiff() {
-  // Only save items that have need=true or a due date set
-  const diff = {__added: [], __changes: {}};
-  const rawNames = new Set(RAW_DATA.map(d=>d.item));
-  items.forEach(it => {
-    if (!rawNames.has(it.item)) {
+  var diff={__added:[],__changes:{}};
+  var rawNames=new Set(RAW_DATA.map(function(d){return d.item;}));
+  items.forEach(function(it){
+    if(!rawNames.has(it.item)){
       diff.__added.push({item:it.item,store:it.store,num:it.num,price:it.price,notes:it.notes,calc:it.calc,need:it.need,due:it.due,daysInput:it.daysInput,veggie:it.veggie});
-    } else if (it.need || it.due) {
-      diff.__changes[it.item] = {need:it.need,due:it.due||'',daysInput:it.daysInput||''};
+    } else if(it.need||it.due){
+      diff.__changes[it.item]={need:it.need,due:it.due||'',daysInput:it.daysInput||''};
     }
   });
   return diff;
 }
-
-function pushToGoogle(cb) {
-  const url=getSyncUrl(); if(!url){if(cb)cb();return;}
-  const diff = buildDiff();
-  const json = JSON.stringify(diff);
-  const encoded = encodeURIComponent(json);
-  setSyncStatus('Saving...','sync-pending');
-  fetch(url+'?data='+encoded, {method:'GET', mode:'no-cors'})
-    .then(function(){setSyncStatus('Saved '+new Date().toLocaleTimeString(),'sync-ok');if(cb)cb();})
-    .catch(function(){setSyncStatus('Saved '+new Date().toLocaleTimeString(),'sync-ok');if(cb)cb();});
-}
-  const diff = buildDiff();
-  const json = JSON.stringify(diff);
-  const encoded = encodeURIComponent(json);
-  setSyncStatus('↑ Saving… ('+json.length+' chars)','sync-pending');
-  console.log('PUSH URL length:', (url+'?data='+encoded).length);
-  console.log('Data sample:', json.slice(0,100));
-  jsonpCall(url+'?data='+encoded, function(r){
-    setSyncStatus('✓ Saved '+new Date().toLocaleTimeString()+' ('+json.length+' chars)','sync-ok');
-    if(cb)cb();
-  });
-}
-function pullFromGoogle(cb) {
-  const url=getSyncUrl(); if(!url){cb(null);return;}
-  setSyncStatus('Loading...','sync-pending');
-  fetch(url+'?t='+Date.now(), {method:'GET', mode:'cors', cache:'no-store'})
-    .then(function(r){return r.text();})
-    .then(function(text){
-      try {
-        const data=JSON.parse(text);
-        if(data&&(data.__changes||data.__order||data.__added)){
-          setSyncStatus('Loaded '+new Date().toLocaleTimeString(),'sync-ok');
-          cb(data);
-        } else {
-          setSyncStatus('Nothing saved yet','sync-err');cb(null);
-        }
-      } catch(e){setSyncStatus('Could not read data','sync-err');cb(null);}
-    })
-    .catch(function(){setSyncStatus('Could not connect','sync-err');cb(null);});
-}
-  setSyncStatus('↓ Loading…','sync-pending');
-  jsonpCall(url+'?t='+Date.now(), function(data){
-    if(data&&(data.__changes||data.__order||data.__added)){
-      setSyncStatus('✓ Loaded '+new Date().toLocaleTimeString(),'sync-ok');
-      cb(data);
-    } else {
-      setSyncStatus('⚠ Nothing found','sync-err');
-      cb(null);
-    }
-  });
-}
-function syncNow() {
-  const url=getSyncUrl();
-  if(!url){alert('Paste your Google Apps Script URL in the sync bar first.');return;}
-  if(isMobile()) {
-    // Phone always pulls from Google
-    pullFromGoogle(function(data){
-      if(data&&data.__order){
-        applyMapData(data);
-        backfillDaysInput();
-        localStorage.setItem('shopping-items-v2', JSON.stringify(buildMap()));
-        renderTable();
-        setSyncStatus('✓ Loaded from Google '+new Date().toLocaleTimeString(),'sync-ok');
+function applyDiff(data) {
+  initFromRaw();
+  if(data.__changes){
+    items.forEach(function(it){
+      var c=data.__changes[it.item];
+      if(c){
+        if(c.need!==undefined) it.need=c.need;
+        if(c.due!==undefined) it.due=c.due;
+        if(c.daysInput!==undefined) it.daysInput=c.daysInput;
       }
     });
-  } else {
-    // Desktop always pushes to Google
-    pushToGoogle();
+  }
+  if(data.__added){
+    data.__added.forEach(function(it){ items.push(it); });
   }
 }
-// Update button label based on device
-document.addEventListener('DOMContentLoaded', function(){
-  const btn = document.getElementById('sync-btn');
-  const inp = document.getElementById('sync-url-input');
-  const url = getSyncUrl();
-  if(url && inp) inp.value = url;
-  if(btn) btn.textContent = isMobile() ? '↓ Pull from Google' : '↑ Push to Google';
-});
-// On mobile startup, auto-pull from Google after page loads
-if(isMobile()) {
-  window.addEventListener('load', function(){
-    const url = getSyncUrl();
-    if(url) {
-      setTimeout(function(){
-        pullFromGoogle(function(data){
-          if(data&&data.__order){
-            applyMapData(data);
-            backfillDaysInput();
-            localStorage.setItem('shopping-items-v2', JSON.stringify(buildMap()));
-            renderTable();
-          }
-        });
-      }, 500);
-    }
-  });
+function pushToGoogle() {
+  var url=getSyncUrl(); if(!url) return;
+  var diff=buildDiff();
+  var json=JSON.stringify(diff);
+  var encoded=encodeURIComponent(json);
+  setSyncStatus('Saving...','sync-pending');
+  fetch(url+'?data='+encoded,{method:'GET',mode:'no-cors'})
+    .then(function(){ setSyncStatus('Saved '+new Date().toLocaleTimeString(),'sync-ok'); })
+    .catch(function(){ setSyncStatus('Saved '+new Date().toLocaleTimeString(),'sync-ok'); });
+}
+function pullFromGoogle() {
+  var url=getSyncUrl(); if(!url){setSyncStatus('Paste URL first','sync-err');return;}
+  setSyncStatus('Loading...','sync-pending');
+  fetch(url+'?t='+Date.now(),{method:'GET',mode:'cors',cache:'no-store'})
+    .then(function(r){ return r.text(); })
+    .then(function(text){
+      try {
+        var data=JSON.parse(text);
+        if(data&&(data.__changes||data.__added)){
+          applyDiff(data);
+          backfillDaysInput();
+          saveState();
+          renderTable();
+          setSyncStatus('Loaded '+new Date().toLocaleTimeString(),'sync-ok');
+        } else {
+          setSyncStatus('Nothing saved yet','sync-err');
+        }
+      } catch(e){ setSyncStatus('Could not read data','sync-err'); }
+    })
+    .catch(function(){ setSyncStatus('Could not connect','sync-err'); });
+}
+function syncNow() {
+  var url=getSyncUrl();
+  if(!url){alert('Paste your Google Apps Script URL first.');return;}
+  var isMobile=(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||window.innerWidth<768);
+  if(isMobile){ pullFromGoogle(); } else { pushToGoogle(); }
 }
 
 </script>
-
 </body>
 </html>
