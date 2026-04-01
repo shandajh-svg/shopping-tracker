@@ -1249,8 +1249,13 @@ function pullFromGoogle(cb) {
   const url=getSyncUrl(); if(!url){cb(null);return;}
   setSyncStatus('↓ Loading…','sync-pending');
   jsonpCall(url+'?t='+Date.now(), function(data){
-    if(data&&data.__order){setSyncStatus('✓ Loaded '+new Date().toLocaleTimeString(),'sync-ok');cb(data);}
-    else{setSyncStatus('⚠ Nothing found','sync-err');cb(null);}
+    if(data&&(data.__changes||data.__order||data.__added)){
+      setSyncStatus('✓ Loaded '+new Date().toLocaleTimeString(),'sync-ok');
+      cb(data);
+    } else {
+      setSyncStatus('⚠ Nothing found','sync-err');
+      cb(null);
+    }
   });
 }
 function syncNow() {
