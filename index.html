@@ -1188,30 +1188,15 @@ function pushToGoogle() {
   var url=getSyncUrl(); if(!url) return;
   var diff=buildDiff();
   var json=JSON.stringify(diff);
+  var encoded=encodeURIComponent(json);
   setSyncStatus('Saving...','sync-pending');
-  var iframe=document.getElementById('push-iframe');
-  if(!iframe){
-    iframe=document.createElement('iframe');
-    iframe.id='push-iframe';
-    iframe.name='push-iframe';
-    iframe.style.display='none';
-    document.body.appendChild(iframe);
-  }
-  var form=document.createElement('form');
-  form.method='POST';
-  form.action=url;
-  form.target='push-iframe';
-  var input=document.createElement('input');
-  input.type='hidden';
-  input.name='data';
-  input.value=json;
-  form.appendChild(input);
-  document.body.appendChild(form);
-  form.submit();
-  document.body.removeChild(form);
+  // Open in new tab - bypasses all CSP/CORS restrictions
+  var saveUrl = url+'?data='+encoded;
+  var win = window.open(saveUrl, '_blank');
   setTimeout(function(){
+    if(win) win.close();
     setSyncStatus('Saved '+new Date().toLocaleTimeString(),'sync-ok');
-  },2000);
+  }, 3000);
 }
 
 function pullFromGoogle() {
