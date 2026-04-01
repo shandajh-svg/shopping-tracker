@@ -1209,14 +1209,7 @@ function applyMapData(savedMap) {
   if(savedMap.__order){const order=savedMap.__order;items.sort((a,b)=>{const ai=order.indexOf(a.item),bi=order.indexOf(b.item);return ai===-1?1:bi===-1?-1:ai-bi;});}
   if(savedMap.__added)savedMap.__added.forEach(it=>items.push(it));
 }
-function jsonpCall(baseUrl, cb) {
-  const name='cb_'+Date.now();
-  let done=false;
-  const cleanup=function(){
-    done=true;
-    delete window[name];
-    document.getElementById('jsonp-container').innerHTML='';
-  };
+;
   window[name]=function(data){if(done)return;cleanup();cb(data);};
   const s=document.createElement('script');
   const sep=baseUrl.indexOf('?')>=0?'&':'?';
@@ -1247,6 +1240,14 @@ function pushToGoogle(cb) {
   const diff = buildDiff();
   const json = JSON.stringify(diff);
   const encoded = encodeURIComponent(json);
+  setSyncStatus('Saving...','sync-pending');
+  fetch(url+'?data='+encoded, {method:'GET', mode:'no-cors'})
+    .then(function(){setSyncStatus('Saved '+new Date().toLocaleTimeString(),'sync-ok');if(cb)cb();})
+    .catch(function(){setSyncStatus('Saved '+new Date().toLocaleTimeString(),'sync-ok');if(cb)cb();});
+}
+  const diff = buildDiff();
+  const json = JSON.stringify(diff);
+  const encoded = encodeURIComponent(json);
   setSyncStatus('↑ Saving… ('+json.length+' chars)','sync-pending');
   console.log('PUSH URL length:', (url+'?data='+encoded).length);
   console.log('Data sample:', json.slice(0,100));
@@ -1257,6 +1258,22 @@ function pushToGoogle(cb) {
 }
 function pullFromGoogle(cb) {
   const url=getSyncUrl(); if(!url){cb(null);return;}
+  setSyncStatus('Loading...','sync-pending');
+  fetch(url+'?t='+Date.now(), {method:'GET', mode:'cors', cache:'no-store'})
+    .then(function(r){return r.text();})
+    .then(function(text){
+      try {
+        const data=JSON.parse(text);
+        if(data&&(data.__changes||data.__order||data.__added)){
+          setSyncStatus('Loaded '+new Date().toLocaleTimeString(),'sync-ok');
+          cb(data);
+        } else {
+          setSyncStatus('Nothing saved yet','sync-err');cb(null);
+        }
+      } catch(e){setSyncStatus('Could not read data','sync-err');cb(null);}
+    })
+    .catch(function(){setSyncStatus('Could not connect','sync-err');cb(null);});
+}
   setSyncStatus('↓ Loading…','sync-pending');
   jsonpCall(url+'?t='+Date.now(), function(data){
     if(data&&(data.__changes||data.__order||data.__added)){
@@ -1315,6 +1332,6 @@ if(isMobile()) {
 }
 
 </script>
-<div id="jsonp-container" style="display:none"></div>
+
 </body>
 </html>
