@@ -1141,21 +1141,6 @@ document.getElementById('edit-modal').addEventListener('click',function(e){if(e.
 document.getElementById('veggie-modal').addEventListener('click',function(e){if(e.target===this)closeVeggieModal();});
 
 // ── INIT ──
-function init(){
-  loadState();
-  loadFinance();
-  renderTable();
-  var syncUrl=getSyncUrl();
-  if(syncUrl){
-    var inp=document.getElementById('sync-url-input');
-    if(inp) inp.value=syncUrl;
-    var w=document.getElementById('sync-url-wrap');
-    if(w) w.style.display='none';
-    // Auto pull on startup
-    pullFromGoogle();
-  }
-}
-init();
 // GOOGLE SYNC
 function getSyncUrl() { return localStorage.getItem('shopping-sync-url')||''; }
 function saveSyncUrl() {
@@ -1240,6 +1225,21 @@ function syncPull() {
   pullFromGoogle();
 }
 
+function init(){
+  loadState();
+  loadFinance();
+  renderTable();
+  var syncUrl=getSyncUrl();
+  if(syncUrl){
+    var inp=document.getElementById('sync-url-input');
+    if(inp) inp.value=syncUrl;
+    var w=document.getElementById('sync-url-wrap');
+    if(w) w.style.display='none';
+    // Auto pull on startup
+    pullFromGoogle();
+  }
+}
+init();
 </script>
 <div id="jsonp-container" style="display:none"></div>
 </body>
