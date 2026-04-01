@@ -173,7 +173,7 @@
   <div id="sync-url-wrap" style="display:flex;gap:6px;flex:1;align-items:center;">
     <input id="sync-url-input" type="text" placeholder="Paste your Google Apps Script URL here once to enable sync..." style="flex:1;min-width:200px;padding:4px 8px;border:1px solid #aac4f5;border-radius:4px;font-size:11px;font-family:monospace;background:white;" oninput="saveSyncUrl()">
   </div>
-  <button onclick="syncNow()" style="background:#1a56c4;color:white;border:none;border-radius:4px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">Sync Now</button>
+  <button onclick="syncNow()" style="background:#1a56c4;color:white;border:none;border-radius:4px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">Push to Google</button><button onclick="syncPull()" style="background:#2e7d32;color:white;border:none;border-radius:4px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">Pull from Google</button>
   <button onclick="toggleUrlBox()" style="background:transparent;color:#1a56c4;border:1px solid #aac4f5;border-radius:4px;padding:5px 8px;font-size:11px;cursor:pointer;">Settings</button>
   <span id="sync-status" style="font-size:11px;font-weight:600;font-family:monospace;"></span>
 </div>
@@ -1243,8 +1243,12 @@ function pullFromGoogle() {
 function syncNow() {
   var url=getSyncUrl();
   if(!url){alert('Paste your Google Apps Script URL first.');return;}
-  var isMobile=(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||window.innerWidth<768);
-  if(isMobile){ pullFromGoogle(); } else { pushToGoogle(); }
+  pushToGoogle();
+}
+function syncPull() {
+  var url=getSyncUrl();
+  if(!url){alert('Paste your Google Apps Script URL first.');return;}
+  pullFromGoogle();
 }
 
 </script>
