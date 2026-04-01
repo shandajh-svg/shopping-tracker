@@ -1214,6 +1214,30 @@ function pushToGoogle() {
   },2000);
 }
 
+function pullFromGoogle() {
+  var url=getSyncUrl(); if(!url){setSyncStatus('Paste URL first','sync-err');return;}
+  setSyncStatus('Loading...','sync-pending');
+  fetch(url+'?t='+Date.now(),{method:'GET',mode:'cors',cache:'no-store'})
+    .then(function(r){ return r.text(); })
+    .then(function(text){
+      try {
+        var clean=text.trim();
+        if(clean.charAt(0)!=='{'){var s=clean.indexOf('{');var e=clean.lastIndexOf('}');if(s>=0&&e>=0)clean=clean.slice(s,e+1);}
+        var data=JSON.parse(clean);
+        if(data&&(data.__changes||data.__added)){
+          applyDiff(data);
+          backfillDaysInput();
+          saveState();
+          renderTable();
+          setSyncStatus('Loaded '+new Date().toLocaleTimeString(),'sync-ok');
+        } else {
+          setSyncStatus('Nothing saved yet','sync-err');
+        }
+      } catch(e){ setSyncStatus('Could not read: '+e.message,'sync-err'); }
+    })
+    .catch(function(e){ setSyncStatus('Could not connect','sync-err'); });
+}
+
 function syncNow() {
   var url=getSyncUrl();
   if(!url){alert('Paste your Google Apps Script URL first.');return;}
