@@ -1219,24 +1219,14 @@ function jsonpCall(baseUrl, cb) {
   document.getElementById('jsonp-container').appendChild(s);
 }
 function buildDiff() {
-  // Only save changes from defaults - no __order to keep payload small
-  const rawMap = {};
-  RAW_DATA.forEach(d => rawMap[d.item] = d);
+  // Only save items that have need=true or a due date set
   const diff = {__added: [], __changes: {}};
   const rawNames = new Set(RAW_DATA.map(d=>d.item));
   items.forEach(it => {
     if (!rawNames.has(it.item)) {
       diff.__added.push({item:it.item,store:it.store,num:it.num,price:it.price,notes:it.notes,calc:it.calc,need:it.need,due:it.due,daysInput:it.daysInput,veggie:it.veggie});
-    } else {
-      const changes = {};
-      if (it.need !== PRESET_NEED.has(it.item)) changes.need = it.need;
-      if (it.due !== (PRESET_DATES[it.item]||'')) changes.due = it.due;
-      if (it.daysInput !== (PRESET_DAYS_INPUT[it.item]||'')) changes.daysInput = it.daysInput;
-      if (it.notes !== (rawMap[it.item].notes||'')) changes.notes = it.notes;
-      if (it.store !== (rawMap[it.item].store||'')) changes.store = it.store;
-      if (it.num !== (rawMap[it.item].num||'')) changes.num = it.num;
-      if (it.price !== (rawMap[it.item].price||'')) changes.price = it.price;
-      if (Object.keys(changes).length > 0) diff.__changes[it.item] = changes;
+    } else if (it.need || it.due) {
+      diff.__changes[it.item] = {need:it.need,due:it.due||'',daysInput:it.daysInput||''};
     }
   });
   return diff;
