@@ -177,6 +177,12 @@
   <button onclick="toggleUrlBox()" style="background:transparent;color:#1a56c4;border:1px solid #aac4f5;border-radius:4px;padding:5px 8px;font-size:11px;cursor:pointer;">Settings</button>
   <span id="sync-status" style="font-size:11px;font-weight:600;font-family:monospace;"></span>
 </div>
+<div id="push-url-wrap" style="display:none;background:#fff8e1;border-bottom:1px solid #fcd34d;padding:8px 16px;gap:8px;align-items:center;flex-wrap:wrap;">
+  <span style="font-size:11px;font-weight:700;color:#78350f;white-space:nowrap">STEP: Copy this URL → paste in address bar → press Enter → come back</span>
+  <input id="push-url-box" type="text" readonly style="flex:1;min-width:200px;padding:4px 8px;border:1px solid #fcd34d;border-radius:4px;font-size:11px;font-family:monospace;background:white;" onclick="this.select()">
+  <button onclick="this.select();document.execCommand('copy')" style="background:#f59e0b;color:white;border:none;border-radius:4px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;" onclick="document.getElementById('push-url-box').select();document.execCommand('copy')">Copy</button>
+  <button onclick="dismissPushBox()" style="background:#6b7280;color:white;border:none;border-radius:4px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">Done</button>
+</div>
 
 <div id="finance-bar">
   <div class="fin-group">
@@ -1185,18 +1191,26 @@ function applyDiff(data) {
   }
 }
 function pushToGoogle() {
-  var url=getSyncUrl(); if(!url) return;
+  var url=getSyncUrl(); if(!url){alert('Paste your Google Apps Script URL first.');return;}
   var diff=buildDiff();
   var json=JSON.stringify(diff);
   var encoded=encodeURIComponent(json);
-  setSyncStatus('Saving...','sync-pending');
-  // Open in new tab - bypasses all CSP/CORS restrictions
-  var saveUrl = url+'?data='+encoded;
-  var win = window.open(saveUrl, '_blank');
-  setTimeout(function(){
-    if(win) win.close();
-    setSyncStatus('Saved '+new Date().toLocaleTimeString(),'sync-ok');
-  }, 3000);
+  var saveUrl=url+'?data='+encoded;
+  // Show URL for user to paste in address bar
+  var box=document.getElementById('push-url-box');
+  var wrap=document.getElementById('push-url-wrap');
+  if(box&&wrap){
+    box.value=saveUrl;
+    wrap.style.display='flex';
+    box.select();
+    try{document.execCommand('copy');}catch(e){}
+    setSyncStatus('Copy the URL below and paste it in your address bar','sync-pending');
+  }
+}
+function dismissPushBox() {
+  var wrap=document.getElementById('push-url-wrap');
+  if(wrap) wrap.style.display='none';
+  setSyncStatus('Saved - tap Pull on your phone to sync','sync-ok');
 }
 
 function pullFromGoogle() {
