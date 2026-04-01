@@ -1216,7 +1216,14 @@ function pullFromGoogle() {
     .then(function(r){ return r.text(); })
     .then(function(text){
       try {
-        var data=JSON.parse(text);
+        // Strip any wrapping callback like jsonp format just in case
+        var clean = text.trim();
+        if(clean.charAt(0) !== '{' && clean.charAt(0) !== '[') {
+          var start = clean.indexOf('{');
+          var end = clean.lastIndexOf('}');
+          if(start >= 0 && end >= 0) clean = clean.slice(start, end+1);
+        }
+        var data=JSON.parse(clean);
         if(data&&(data.__changes||data.__added)){
           applyDiff(data);
           backfillDaysInput();
@@ -1226,9 +1233,9 @@ function pullFromGoogle() {
         } else {
           setSyncStatus('Nothing saved yet','sync-err');
         }
-      } catch(e){ setSyncStatus('Could not read data','sync-err'); }
+      } catch(e){ setSyncStatus('Could not read data: '+e.message,'sync-err'); }
     })
-    .catch(function(){ setSyncStatus('Could not connect','sync-err'); });
+    .catch(function(e){ setSyncStatus('Could not connect: '+e,'sync-err'); });
 }
 function syncNow() {
   var url=getSyncUrl();
