@@ -1160,8 +1160,12 @@ function buildDiff() {
   items.forEach(function(it) {
     if(!rawNames.has(it.item)) {
       diff.__added.push({item:it.item,store:it.store,num:it.num,price:it.price,notes:it.notes,calc:it.calc,need:it.need,due:it.due,daysInput:it.daysInput,veggie:it.veggie});
-    } else if(it.need || it.due) {
-      diff.__changes[it.item] = {need:it.need, due:it.due||'', daysInput:it.daysInput||''};
+    } else {
+      var defaultNeed = PRESET_NEED.has(it.item);
+      // Save if need differs from default, OR if item has a due date
+      if(it.need !== defaultNeed || it.due) {
+        diff.__changes[it.item] = {need:it.need, due:it.due||'', daysInput:it.daysInput||''};
+      }
     }
   });
   return diff;
