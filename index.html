@@ -1247,9 +1247,11 @@ function pushToGoogle(cb) {
   const diff = buildDiff();
   const json = JSON.stringify(diff);
   const encoded = encodeURIComponent(json);
-  setSyncStatus('↑ Saving…','sync-pending');
+  setSyncStatus('↑ Saving… ('+json.length+' chars)','sync-pending');
+  console.log('PUSH URL length:', (url+'?data='+encoded).length);
+  console.log('Data sample:', json.slice(0,100));
   jsonpCall(url+'?data='+encoded, function(r){
-    setSyncStatus('✓ Saved '+new Date().toLocaleTimeString(),'sync-ok');
+    setSyncStatus('✓ Saved '+new Date().toLocaleTimeString()+' ('+json.length+' chars)','sync-ok');
     if(cb)cb();
   });
 }
