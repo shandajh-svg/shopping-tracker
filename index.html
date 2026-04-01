@@ -33,6 +33,12 @@
   .btn-sm { padding: 3px 8px; font-size: 11px; }
   .btn-danger { background: var(--urgent); border-color: var(--urgent); color: white; }
   .btn-secondary { background: var(--surface); border-color: var(--border); color: var(--text); }
+
+  #save-bar { background: #e8f0e0; border-bottom: 1px solid #c5d9b0; padding: 10px 16px; }
+  #save-bar-top { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 6px; }
+  #save-code-box { width: 100%; font-family: 'DM Mono', monospace; font-size: 10px; padding: 5px 8px; border: 1px solid #c5d9b0; border-radius: 4px; background: #fff; resize: none; display: block; }
+  #status-msg { font-size: 11px; color: var(--accent); font-weight: 600; }
+  .btn-copy { background: #1a73e8; border-color: #1a73e8; color: white; font-size: 12px; font-weight: 700; padding: 5px 14px; }
   .btn-copy:hover { background: #1558b0; }
 
   #finance-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 8px 16px; display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
@@ -165,23 +171,16 @@
     <button class="btn btn-accent" onclick="openShoppingMode()">🛒 Shop Mode</button>
   </div>
 </div>
+
+  <textarea id="save-code-box" rows="2" placeholder="Code appears here after Save. Copy it → paste into Notes on your phone. To restore: paste code here → click Restore."></textarea>
 </div>
 
 
 <div id="sync-bar" style="background:#e8f0fe;border-bottom:1px solid #aac4f5;padding:6px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:11px;">
   <span style="font-weight:700;color:#1a56c4;white-space:nowrap">GOOGLE SYNC</span>
-  <div id="sync-url-wrap" style="display:flex;gap:6px;flex:1;align-items:center;">
-    <input id="sync-url-input" type="text" placeholder="Paste your Google Apps Script URL here once to enable sync..." style="flex:1;min-width:200px;padding:4px 8px;border:1px solid #aac4f5;border-radius:4px;font-size:11px;font-family:monospace;background:white;" oninput="saveSyncUrl()">
-  </div>
-  <button onclick="syncNow()" style="background:#1a56c4;color:white;border:none;border-radius:4px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">Push to Google</button><button onclick="syncPull()" style="background:#2e7d32;color:white;border:none;border-radius:4px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">Pull from Google</button>
-  <button onclick="toggleUrlBox()" style="background:transparent;color:#1a56c4;border:1px solid #aac4f5;border-radius:4px;padding:5px 8px;font-size:11px;cursor:pointer;">Settings</button>
+  <button onclick="pushToGoogle()" style="background:#1a56c4;color:white;border:none;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">Push to Google</button>
+  <button onclick="pullFromGoogle()" style="background:#2e7d32;color:white;border:none;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">Pull from Google</button>
   <span id="sync-status" style="font-size:11px;font-weight:600;font-family:monospace;"></span>
-</div>
-<div id="push-url-wrap" style="display:none;background:#fff8e1;border-bottom:1px solid #fcd34d;padding:8px 16px;gap:8px;align-items:center;flex-wrap:wrap;">
-  <span style="font-size:11px;font-weight:700;color:#78350f;white-space:nowrap">STEP: Copy this URL → paste in address bar → press Enter → come back</span>
-  <input id="push-url-box" type="text" readonly style="flex:1;min-width:200px;padding:4px 8px;border:1px solid #fcd34d;border-radius:4px;font-size:11px;font-family:monospace;background:white;" onclick="this.select()">
-  <button onclick="this.select();document.execCommand('copy')" style="background:#f59e0b;color:white;border:none;border-radius:4px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;" onclick="document.getElementById('push-url-box').select();document.execCommand('copy')">Copy</button>
-  <button onclick="dismissPushBox()" style="background:#6b7280;color:white;border:none;border-radius:4px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">Done</button>
 </div>
 
 <div id="finance-bar">
@@ -1147,123 +1146,102 @@ document.getElementById('edit-modal').addEventListener('click',function(e){if(e.
 document.getElementById('veggie-modal').addEventListener('click',function(e){if(e.target===this)closeVeggieModal();});
 
 // ── INIT ──
-// GOOGLE SYNC
-function getSyncUrl() { return localStorage.getItem('shopping-sync-url')||''; }
-function saveSyncUrl() {
-  var url = document.getElementById('sync-url-input').value.trim();
-  localStorage.setItem('shopping-sync-url', url);
-  if(url) { var w=document.getElementById('sync-url-wrap'); if(w) w.style.display='none'; }
-}
-function toggleUrlBox() {
-  var w=document.getElementById('sync-url-wrap');
-  if(w) w.style.display=(w.style.display==='none'?'flex':'none');
-}
-function setSyncStatus(msg, cls) {
-  var el=document.getElementById('sync-status');
-  if(el){ el.textContent=msg; el.style.color=(cls==='sync-ok'?'#2e7d32':cls==='sync-err'?'#c04a2a':'#b07d20'); }
-}
-function buildDiff() {
-  var diff={__added:[],__changes:{}};
-  var rawNames=new Set(RAW_DATA.map(function(d){return d.item;}));
-  items.forEach(function(it){
-    if(!rawNames.has(it.item)){
-      diff.__added.push({item:it.item,store:it.store,num:it.num,price:it.price,notes:it.notes,calc:it.calc,need:it.need,due:it.due,daysInput:it.daysInput,veggie:it.veggie});
-    } else if(it.need||it.due){
-      diff.__changes[it.item]={need:it.need,due:it.due||'',daysInput:it.daysInput||''};
-    }
-  });
-  return diff;
-}
-function applyDiff(data) {
-  initFromRaw();
-  if(data.__changes){
-    items.forEach(function(it){
-      var c=data.__changes[it.item];
-      if(c){
-        if(c.need!==undefined) it.need=c.need;
-        if(c.due!==undefined) it.due=c.due;
-        if(c.daysInput!==undefined) it.daysInput=c.daysInput;
-      }
-    });
-  }
-  if(data.__added){
-    data.__added.forEach(function(it){ items.push(it); });
-  }
-}
-function pushToGoogle() {
-  var url=getSyncUrl(); if(!url){alert('Paste your Google Apps Script URL first.');return;}
-  var diff=buildDiff();
-  var json=JSON.stringify(diff);
-  var encoded=encodeURIComponent(json);
-  var saveUrl=url+'?data='+encoded;
-  // Show URL for user to paste in address bar
-  var box=document.getElementById('push-url-box');
-  var wrap=document.getElementById('push-url-wrap');
-  if(box&&wrap){
-    box.value=saveUrl;
-    wrap.style.display='flex';
-    box.select();
-    try{document.execCommand('copy');}catch(e){}
-    setSyncStatus('Copy the URL below and paste it in your address bar','sync-pending');
-  }
-}
-function dismissPushBox() {
-  var wrap=document.getElementById('push-url-wrap');
-  if(wrap) wrap.style.display='none';
-  setSyncStatus('Saved - tap Pull on your phone to sync','sync-ok');
-}
-
-function pullFromGoogle() {
-  var url=getSyncUrl(); if(!url){setSyncStatus('Paste URL first','sync-err');return;}
-  setSyncStatus('Loading...','sync-pending');
-  fetch(url+'?t='+Date.now(),{method:'GET',mode:'cors',cache:'no-store'})
-    .then(function(r){ return r.text(); })
-    .then(function(text){
-      try {
-        var clean=text.trim();
-        if(clean.charAt(0)!=='{'){var s=clean.indexOf('{');var e=clean.lastIndexOf('}');if(s>=0&&e>=0)clean=clean.slice(s,e+1);}
-        var data=JSON.parse(clean);
-        if(data&&(data.__changes||data.__added)){
-          applyDiff(data);
-          backfillDaysInput();
-          saveState();
-          renderTable();
-          setSyncStatus('Loaded '+new Date().toLocaleTimeString(),'sync-ok');
-        } else {
-          setSyncStatus('Nothing saved yet','sync-err');
-        }
-      } catch(e){ setSyncStatus('Could not read: '+e.message,'sync-err'); }
-    })
-    .catch(function(e){ setSyncStatus('Could not connect','sync-err'); });
-}
-
-function syncNow() {
-  var url=getSyncUrl();
-  if(!url){alert('Paste your Google Apps Script URL first.');return;}
-  pushToGoogle();
-}
-function syncPull() {
-  var url=getSyncUrl();
-  if(!url){alert('Paste your Google Apps Script URL first.');return;}
-  pullFromGoogle();
-}
-
 function init(){
   loadState();
   loadFinance();
   renderTable();
-  var syncUrl=getSyncUrl();
-  if(syncUrl){
-    var inp=document.getElementById('sync-url-input');
-    if(inp) inp.value=syncUrl;
-    var w=document.getElementById('sync-url-wrap');
-    if(w) w.style.display='none';
-    // Auto pull on startup
-    pullFromGoogle();
+  // Auto pull on startup
+  pullFromGoogle();
+}
+
+// JSONBIN SYNC
+var JBIN_ID = '69cc8912856a682189ea4991';
+var JBIN_KEY = '$2a$10$tpjsSaIqmjzoWXjpvpu7n.AdJJdQf8JUbDhBDfNoCC5rzN0vxDh/m';
+var JBIN_URL = 'https://api.jsonbin.io/v3/b/' + JBIN_ID;
+
+function setSyncStatus(msg, cls) {
+  var el = document.getElementById('sync-status');
+  if(el) { el.textContent = msg; el.style.color = cls==='sync-ok'?'#2e7d32':cls==='sync-err'?'#c04a2a':'#b07d20'; }
+}
+
+function buildDiff() {
+  var diff = {__added:[], __changes:{}};
+  var rawNames = new Set(RAW_DATA.map(function(d){return d.item;}));
+  items.forEach(function(it) {
+    if(!rawNames.has(it.item)) {
+      diff.__added.push({item:it.item,store:it.store,num:it.num,price:it.price,notes:it.notes,calc:it.calc,need:it.need,due:it.due,daysInput:it.daysInput,veggie:it.veggie});
+    } else if(it.need || it.due) {
+      diff.__changes[it.item] = {need:it.need, due:it.due||'', daysInput:it.daysInput||''};
+    }
+  });
+  return diff;
+}
+
+function applyDiff(data) {
+  initFromRaw();
+  if(data.__changes) {
+    items.forEach(function(it) {
+      var c = data.__changes[it.item];
+      if(c) {
+        if(c.need !== undefined) it.need = c.need;
+        if(c.due !== undefined) it.due = c.due;
+        if(c.daysInput !== undefined) it.daysInput = c.daysInput;
+      }
+    });
+  }
+  if(data.__added) {
+    data.__added.forEach(function(it) { items.push(it); });
   }
 }
+
+function pushToGoogle() {
+  var diff = buildDiff();
+  setSyncStatus('Saving...', 'sync-pending');
+  fetch(JBIN_URL, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Master-Key': JBIN_KEY,
+      'X-Bin-Versioning': 'false'
+    },
+    body: JSON.stringify(diff)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    setSyncStatus('Saved ' + new Date().toLocaleTimeString(), 'sync-ok');
+  })
+  .catch(function(e) {
+    setSyncStatus('Save failed: ' + e, 'sync-err');
+  });
+}
+
+function pullFromGoogle() {
+  setSyncStatus('Loading...', 'sync-pending');
+  fetch(JBIN_URL + '/latest', {
+    method: 'GET',
+    headers: {
+      'X-Master-Key': JBIN_KEY
+    }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(resp) {
+    var data = resp.record;
+    if(data && (data.__changes || data.__added)) {
+      applyDiff(data);
+      backfillDaysInput();
+      saveState();
+      renderTable();
+      setSyncStatus('Loaded ' + new Date().toLocaleTimeString(), 'sync-ok');
+    } else {
+      setSyncStatus('Nothing saved yet', 'sync-err');
+    }
+  })
+  .catch(function(e) {
+    setSyncStatus('Could not connect: ' + e, 'sync-err');
+  });
+}
+
 init();
 </script>
-<div id="jsonp-container" style="display:none"></div>
 </body>
 </html>
