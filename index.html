@@ -33,12 +33,6 @@
   .btn-sm { padding: 3px 8px; font-size: 11px; }
   .btn-danger { background: var(--urgent); border-color: var(--urgent); color: white; }
   .btn-secondary { background: var(--surface); border-color: var(--border); color: var(--text); }
-
-  #save-bar { background: #e8f0e0; border-bottom: 1px solid #c5d9b0; padding: 10px 16px; }
-  #save-bar-top { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 6px; }
-  #save-code-box { width: 100%; font-family: 'DM Mono', monospace; font-size: 10px; padding: 5px 8px; border: 1px solid #c5d9b0; border-radius: 4px; background: #fff; resize: none; display: block; }
-  #status-msg { font-size: 11px; color: var(--accent); font-weight: 600; }
-  .btn-copy { background: #1a73e8; border-color: #1a73e8; color: white; font-size: 12px; font-weight: 700; padding: 5px 14px; }
   .btn-copy:hover { background: #1558b0; }
 
   #finance-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 8px 16px; display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
@@ -171,8 +165,6 @@
     <button class="btn btn-accent" onclick="openShoppingMode()">🛒 Shop Mode</button>
   </div>
 </div>
-
-  <textarea id="save-code-box" rows="2" placeholder="Code appears here after Save. Copy it → paste into Notes on your phone. To restore: paste code here → click Restore."></textarea>
 </div>
 
 
@@ -1150,8 +1142,6 @@ function init(){
   loadState();
   loadFinance();
   renderTable();
-  // Auto pull on startup
-  pullFromGoogle();
 }
 
 // JSONBIN SYNC
