@@ -991,9 +991,6 @@ function openPopup(id, triggerEl) {
   document.getElementById('popup-offset').value='';
   document.getElementById('popup-direct').value=it.due||'';
   popup.style.display='block';
-  // Position near trigger
-  const rect=triggerEl.getBoundingClientRect();
-  const ph=popup.offsetHeight||180;
   let top=rect.bottom+window.scrollY+4;
   let left=rect.left+window.scrollX;
   if(left+240>window.innerWidth) left=window.innerWidth-248;
