@@ -348,7 +348,7 @@ function openPopup(id,triggerEl){
 }
 
 function outsidePopupClose(e){if(!document.getElementById('date-popup').contains(e.target))closePopup();}
-function closePopup(){document.getElementById('date-popup').style.display='none';popupItemId=null;}
+function closePopup(){document.getElementById('date-popup').style.display='none';popupItemId=null;document.removeEventListener('click',outsidePopupClose);}
 
 function applyPopup(){if(popupItemId===null)return;const it=items.find(x=>x.id===popupItemId);if(!it)return;const offset=document.getElementById('popup-offset').value.trim();const direct=document.getElementById('popup-direct').value;if(offset!==''){const n=parseInt(offset);if(!isNaN(n)){const base=it.due?parseDue(it.due):today();const newDate=new Date(base.getTime()+n*86400000);it.due=newDate.toISOString().slice(0,10);}}else if(direct){it.due=direct;}it.daysInput='';backfillDaysInput();saveState();renderTable();closePopup();}
 
