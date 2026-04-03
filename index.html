@@ -323,7 +323,9 @@ function updateDays(id,val){const it=items.find(x=>x.id===id);if(!it)return;it.d
 function clearDue(id){const it=items.find(x=>x.id===id);if(!it)return;it.due='';it.daysInput='';saveState();const tr=document.querySelector(`tr[data-id="${id}"]`);if(tr){tr.querySelector('.td-due').innerHTML=`<button class="due-btn due-none" onclick="openPopup(${it.id},this)">+ date</button>`;tr.classList.remove('urgent-row','warn-row');const inp=tr.querySelector('.days-input');if(inp)inp.value='';}}
 
 // ── DATE POPUP ──
+var _popupOpen=false;
 function openPopup(id,triggerEl){
+  event.stopPropagation();
   popupItemId=id;
   const it=items.find(x=>x.id===id);if(!it)return;
   const popup=document.getElementById('date-popup');
@@ -331,6 +333,7 @@ function openPopup(id,triggerEl){
   document.getElementById('popup-offset').value='';
   document.getElementById('popup-direct').value=it.due||'';
   popup.style.display='block';
+  _popupOpen=true;
   const row=triggerEl.closest('tr');
   const rowRect=row?row.getBoundingClientRect():triggerEl.getBoundingClientRect();
   const daysCell=row?row.querySelector('.td-days'):null;
@@ -344,11 +347,15 @@ function openPopup(id,triggerEl){
   if(top+popupH>window.innerHeight-8)top=window.innerHeight-popupH-8;
   popup.style.top=top+'px';
   popup.style.left=left+'px';
-  setTimeout(()=>document.addEventListener('click',outsidePopupClose,{once:true}),300);
 }
 
-function outsidePopupClose(e){if(!document.getElementById('date-popup').contains(e.target))closePopup();}
-function closePopup(){document.getElementById('date-popup').style.display='none';popupItemId=null;document.removeEventListener('click',outsidePopupClose);}
+document.addEventListener('click',function(e){
+  if(!_popupOpen)return;
+  const popup=document.getElementById('date-popup');
+  if(!popup.contains(e.target))closePopup();
+});
+
+function closePopup(){document.getElementById('date-popup').style.display='none';popupItemId=null;_popupOpen=false;}
 
 function applyPopup(){if(popupItemId===null)return;const it=items.find(x=>x.id===popupItemId);if(!it)return;const offset=document.getElementById('popup-offset').value.trim();const direct=document.getElementById('popup-direct').value;if(offset!==''){const n=parseInt(offset);if(!isNaN(n)){const base=it.due?parseDue(it.due):today();const newDate=new Date(base.getTime()+n*86400000);it.due=newDate.toISOString().slice(0,10);}}else if(direct){it.due=direct;}it.daysInput='';backfillDaysInput();saveState();renderTable();closePopup();}
 
