@@ -326,6 +326,8 @@ function clearDue(id){const it=items.find(x=>x.id===id);if(!it)return;it.due='';
 var _popupOpen=false;
 function openPopup(id,triggerEl){
   event.stopPropagation();
+  _popupOpen=false;
+  document.getElementById('date-popup').style.display='none';
   popupItemId=id;
   const it=items.find(x=>x.id===id);if(!it)return;
   const popup=document.getElementById('date-popup');
