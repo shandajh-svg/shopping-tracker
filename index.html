@@ -991,11 +991,19 @@ function openPopup(id, triggerEl) {
   document.getElementById('popup-offset').value='';
   document.getElementById('popup-direct').value=it.due||'';
   popup.style.display='block';
-  let top=rect.bottom+window.scrollY+4;
-  let left=rect.left+window.scrollX;
-  if(left+240>window.innerWidth) left=window.innerWidth-248;
-  if(top+ph>window.scrollY+window.innerHeight) top=rect.top+window.scrollY-ph-4;
-  popup.style.top=top+'px';popup.style.left=left+'px';
+ const row=triggerEl.closest('tr');
+  const rowRect=row?row.getBoundingClientRect():triggerEl.getBoundingClientRect();
+  const daysCell=row?row.querySelector('.td-days'):null;
+  const daysCellRect=daysCell?daysCell.getBoundingClientRect():rowRect;
+  const popupW=240;
+  const popupH=popup.offsetHeight||190;
+  let left=daysCellRect.right+6;
+  let top=rowRect.top+(rowRect.height/2)-(popupH/2);
+  if(left+popupW>window.innerWidth-8) left=daysCellRect.left-popupW-6;
+  if(top<52) top=52;
+  if(top+popupH>window.innerHeight-8) top=window.innerHeight-popupH-8;
+  popup.style.top=top+'px';
+  popup.style.left=left+'px';
   // Close on outside click
   setTimeout(()=>document.addEventListener('click',outsidePopupClose,{once:true}),10);
 }
