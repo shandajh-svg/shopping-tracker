@@ -1,16 +1,14 @@
-https://raw.githubusercontent.com/shandajh-svg/shopping-tracker/main/index.html
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shopping Tracker</title>
-<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAv0lEQVR4nO1UQQ6AIAwbxrsP8w2+zjf4Ht/g0XjQgyEhZpMyWSCGnghpRteyufXYTyqIruTjTUATQETU+8M8DixhWjZTAcUdcG97wLti6UIfp8jxpEBqou4IiO7utREgEUIO5IjgkwBL1C/A55caAzrC0Bg+i+aEaQTI9EQdsN6GcARa+2PCi09BdBN6hA5IXSGcJ1SbkIsD4agESIXCe4SjFmCN+gVInym8RzhqAVwhrjDC4QCPoRXq/wO/F3ABY1RQXffnoLAAAAAASUVORK5CYII=">
-<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAv0lEQVR4nO1UQQ6AIAwbxrsP8w2+zjf4Ht/g0XjQgyEhZpMyWSCGnghpRteyufXYTyqIruTjTUATQETU+8M8DixhWjZTAcUdcG97wLti6UIfp8jxpEBqou4IiO7utREgEUIO5IjgkwBL1C/A55caAzrC0Bg+i+aEaQTI9EQdsN6GcARa+2PCi09BdBN6hA5IXSGcJ1SbkIsD4agESIXCe4SjFmCN+gVInym8RzhqAVwhrjDC4QCPoRXq/wO/F3ABY1RQXffnoLAAAAAASUVORK5CYII=">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Shopping Tracker">
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAv0lEQVR4nO1UQQ6AIAwbxrsP8w2+zjf4Ht/g0XjQgyEhZpMyWSCGnghpRteyufXYTyqIruTjTUATQETU+8M8DixhWjZTAcUdcG97wLti6UIfp8jxpEBqou4IiO7utREgEUIO5IjgkwBL1C/A55caAzrC0Bg+i+aEaQTI9EQdsN6GcARa+2PCi09BdBN6hA5IXSGcJ1SbkIsD4agESIXCe4SjFmCN+gVInym8RzhqAVwhrjDC4QCPoRXq/wO/F3ABY1RQXffnoLAAAAAASUVORK5CYII=">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAv0lEQVR4nO1UQQ6AIAwbxrsP8w2+zjf4Ht/g0XjQgyEhZpMyWSCGnghpRteyufXYTyqIruTjTUATQETU+8M8DixhWjZTAcUdcG97wLti6UIfp8jxpEBqou4IiO7utREgEUIO5IjgkwBL1C/A55caAzrC0Bg+i+aEaQTI9EQdsN6GcARa+2PCi09BdBN6hA5IXSGcJ1SbkIsD4agESIXCe4SjFmCN+gVInym8RzhqAVwhrjDC4QCPoRXq/wO/F3ABY1RQXffnoLAAAAAASUVORK5CYII=">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -343,7 +341,6 @@ function updateDays(id,val){const it=items.find(x=>x.id===id);if(!it)return;it.d
 function clearDue(id){const it=items.find(x=>x.id===id);if(!it)return;it.due='';it.daysInput='';saveState();const tr=document.querySelector(`tr[data-id="${id}"]`);if(tr){tr.querySelector('.td-due').innerHTML=`<button class="due-btn due-none" onclick="openPopup(${it.id},this)">+ date</button>`;tr.classList.remove('urgent-row','warn-row');const inp=tr.querySelector('.days-input');if(inp)inp.value='';}}
 
 
-// ── DATE POPUP ──
 var _popupOpen=false;
 function openPopup(id,triggerEl){
   event.stopPropagation();
@@ -372,36 +369,28 @@ function openPopup(id,triggerEl){
   popup.style.left=left+'px';
 }
 
-
 document.addEventListener('click',function(e){
   if(!_popupOpen)return;
   const popup=document.getElementById('date-popup');
   if(!popup.contains(e.target))closePopup();
 });
 
-
 function closePopup(){document.getElementById('date-popup').style.display='none';popupItemId=null;_popupOpen=false;}
-
 
 function applyPopup(){if(popupItemId===null)return;const it=items.find(x=>x.id===popupItemId);if(!it)return;const offset=document.getElementById('popup-offset').value.trim();const direct=document.getElementById('popup-direct').value;if(offset!==''){const n=parseInt(offset);if(!isNaN(n)){const base=it.due?parseDue(it.due):today();const newDate=new Date(base.getTime()+n*86400000);it.due=newDate.toISOString().slice(0,10);}}else if(direct){it.due=direct;}it.daysInput='';backfillDaysInput();saveState();renderTable();closePopup();}
 
-
 function clearPopupDate(){if(popupItemId===null)return;clearDue(popupItemId);closePopup();}
-
 
 function openVeggieShift(){document.getElementById('veggie-shift-days').value='';document.getElementById('veggie-modal').classList.add('open');}
 function closeVeggieModal(){document.getElementById('veggie-modal').classList.remove('open');}
 function applyVeggieShift(){const n=parseInt(document.getElementById('veggie-shift-days').value);if(isNaN(n)||n===0){alert('Enter a number of days (positive to push forward, negative to pull back).');return;}items.forEach(it=>{if(it.veggie&&it.due){const d=parseDue(it.due);if(!d)return;const newDate=new Date(d.getTime()+n*86400000);it.due=newDate.toISOString().slice(0,10);it.daysInput='';}});backfillDaysInput();saveState();renderTable();closeVeggieModal();}
 
-
 function sortByDate(){items.sort((a,b)=>{const da=a.due?parseDue(a.due):null,db=b.due?parseDue(b.due):null;if(da&&db){if(da<db)return -1;if(da>db)return 1;return 0;}if(da)return -1;if(db)return 1;return 0;});saveState();renderTable();}
 function sortByStore(){items.sort((a,b)=>{const nd=(b.need?1:0)-(a.need?1:0);if(nd!==0)return nd;if(a.need&&b.need){const na=String(a.num||''),nb=String(b.num||''),numA=parseInt(na),numB=parseInt(nb);if(!isNaN(numA)&&!isNaN(numB))return numA-numB;if(!isNaN(numA))return -1;if(!isNaN(numB))return 1;return na.localeCompare(nb);}return 0;});saveState();renderTable();}
-
 
 function openShoppingMode(){const needed=items.filter(it=>it.need);const groups={};needed.forEach(it=>{const key=(it.num||'zzz')+'|'+(it.store||'No Store');if(!groups[key])groups[key]={num:it.num,store:it.store,items:[]};groups[key].items.push(it);});const sorted=Object.values(groups).sort((a,b)=>{const na=parseInt(a.num),nb=parseInt(b.num);if(!isNaN(na)&&!isNaN(nb))return na-nb;if(!isNaN(na))return -1;if(!isNaN(nb))return 1;return(a.store||'').localeCompare(b.store||'');});const body=document.getElementById('shopping-mode-body');body.innerHTML='';sorted.forEach(group=>{const h=document.createElement('div');h.className='shop-store-header';h.textContent=(group.num?'#'+group.num+' — ':'')+(group.store||'No Store').toUpperCase();body.appendChild(h);group.items.forEach(it=>{const div=document.createElement('div');div.className='shop-item';div.dataset.id=it.id;const price=fmtPrice(it.price);const due=it.due?'📅 Due: '+formatDue(it.due):'';div.innerHTML=`<div class="shop-item-name">${escHtml(it.item)}</div><div class="shop-item-price">${escHtml(price)}</div>${due?`<div class="shop-item-due">${due}</div>`:''}${it.notes?`<div class="shop-item-notes">${escHtml(it.notes)}</div>`:''}<div class="shop-item-got"><label class="shop-got-check"><input type="checkbox" onchange="toggleGotIt(this.closest('.shop-item'),this.checked)"> Got it ✓</label></div>`;body.appendChild(div);});});document.getElementById('shopping-mode').classList.add('open');document.body.style.overflow='hidden';}
 function closeShoppingMode(){document.getElementById('shopping-mode').classList.remove('open');document.body.style.overflow='';}
 function toggleGotIt(el,checked){el.classList.toggle('got-it',checked);}
-
 
 function openEditModal(id){editingId=id;const it=items.find(x=>x.id===id);if(!it)return;document.getElementById('modal-title').textContent='Edit Item';document.getElementById('m-item').value=it.item;document.getElementById('m-store').value=it.store;document.getElementById('m-num').value=it.num;document.getElementById('m-price').value=it.price;document.getElementById('m-notes').value=it.notes;document.getElementById('m-calc').value=it.calc||'days';document.getElementById('m-veggie').checked=!!it.veggie;document.getElementById('modal-delete-btn').style.display='';document.getElementById('edit-modal').classList.add('open');}
 function openAddModal(){editingId=null;document.getElementById('modal-title').textContent='Add Item';['m-item','m-store','m-num','m-price','m-notes'].forEach(id=>document.getElementById(id).value='');document.getElementById('m-calc').value='days';document.getElementById('m-veggie').checked=false;document.getElementById('modal-delete-btn').style.display='none';document.getElementById('edit-modal').classList.add('open');}
@@ -411,26 +400,19 @@ function deleteItem(){if(!confirm('Delete this item?'))return;items=items.filter
 document.getElementById('edit-modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
 document.getElementById('veggie-modal').addEventListener('click',function(e){if(e.target===this)closeVeggieModal();});
 
-
 var JBIN_ID='69cc8912856a682189ea4991';
 var JBIN_KEY='$2a$10$tpjsSaIqmjzoWXjpvpu7n.AdJJdQf8JUbDhBDfNoCC5rzN0vxDh/m';
 var JBIN_URL='https://api.jsonbin.io/v3/b/'+JBIN_ID;
 
-
 function setSyncStatus(msg,cls){var el=document.getElementById('sync-status');if(el){el.textContent=msg;el.style.color=cls==='sync-ok'?'#2e7d32':cls==='sync-err'?'#c04a2a':'#b07d20';}}
-
 
 function buildDiff(){var diff={__added:[],__changes:{}};var rawNames=new Set(RAW_DATA.map(function(d){return d.item;}));items.forEach(function(it){if(!rawNames.has(it.item)){diff.__added.push({item:it.item,store:it.store,num:it.num,price:it.price,notes:it.notes,calc:it.calc,need:it.need,due:it.due,daysInput:it.daysInput,veggie:it.veggie});}else{var defaultNeed=PRESET_NEED.has(it.item);if(it.need!==defaultNeed||it.due){diff.__changes[it.item]={need:it.need,due:it.due||'',daysInput:it.daysInput||''}; }}});return diff;}
 
-
 function applyDiff(data){initFromRaw();if(data.__changes){items.forEach(function(it){var c=data.__changes[it.item];if(c){if(c.need!==undefined)it.need=c.need;if(c.due!==undefined)it.due=c.due;if(c.daysInput!==undefined)it.daysInput=c.daysInput;}});}if(data.__added){data.__added.forEach(function(it){items.push(it);});}}
-
 
 function pushToGoogle(){var diff=buildDiff();setSyncStatus('Saving...','sync-pending');fetch(JBIN_URL,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':JBIN_KEY,'X-Bin-Versioning':'false'},body:JSON.stringify(diff)}).then(function(r){return r.json();}).then(function(){setSyncStatus('Saved '+new Date().toLocaleTimeString(),'sync-ok');}).catch(function(e){setSyncStatus('Save failed: '+e,'sync-err');});}
 
-
 function pullFromGoogle(){setSyncStatus('Loading...','sync-pending');fetch(JBIN_URL+'/latest',{method:'GET',headers:{'X-Master-Key':JBIN_KEY}}).then(function(r){return r.json();}).then(function(resp){var data=resp.record;if(data&&(data.__changes||data.__added)){applyDiff(data);backfillDaysInput();saveState();renderTable();setSyncStatus('Loaded '+new Date().toLocaleTimeString(),'sync-ok');}else{setSyncStatus('Nothing saved yet','sync-err');}}).catch(function(e){setSyncStatus('Could not connect: '+e,'sync-err');});}
-
 
 function init(){loadState();loadFinance();renderTable();}
 init();
