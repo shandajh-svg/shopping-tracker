@@ -52,8 +52,11 @@
   #item-count { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; margin-left: auto; }
   #add-row-btn { display: inline-block; margin: 0; padding: 5px 14px; border: none; border-radius: 4px; background: #1a73e8; color: white; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.04em; }
   #add-row-btn:hover { background: #1558b0; }
-  #bulk-bar { background: #fff8e8; border-bottom: 1px solid var(--border); padding: 6px 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 11px; }
-  #bulk-bar .bulk-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); font-weight: 600; }
+  /* BULK BAR — relabeled and reorganized */
+  #bulk-bar { background: var(--bg); border-bottom: 1px solid var(--border); padding: 6px 16px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 11px; }
+  #bulk-bar .bulk-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; white-space: nowrap; }
+  #bulk-bar .bulk-group { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+  #bulk-bar .bulk-divider { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
   #table-wrap { overflow-x: auto; padding: 0 16px 40px; }
   table { width: 100%; border-collapse: collapse; min-width: 820px; }
   thead th { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; color: var(--text-muted); text-transform: uppercase; padding: 7px 5px; border-bottom: 2px solid var(--border); text-align: left; white-space: nowrap; background: var(--bg); }
@@ -90,11 +93,31 @@
   .egg-row { display: flex; align-items: center; gap: 4px; }
   .egg-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; }
   .egg-result { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); }
+  /* EDIT BUTTON — visible column between Days and Price */
+  td.td-edit-inline { width: 34px; text-align: center; padding: 4px 2px; }
+  .edit-inline-btn { width: 26px; height: 26px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.15s; line-height: 1; }
+  .edit-inline-btn:hover { background: var(--text); color: white; border-color: var(--text); }
   td.td-price { width: 68px; min-width: 68px; text-align: right; font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; }
   td.td-notes { max-width: 220px; }
-  .notes-text { font-size: 12px; font-weight: 500; color: var(--text-muted); white-space: pre-line; max-height: 48px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; cursor: pointer; text-transform: uppercase; }
-  .notes-text.expanded { max-height: none; -webkit-line-clamp: unset; }
-  td.td-edit { width: 28px; padding: 4px 2px; text-align: center; }
+  /* FIXED notes expand/collapse */
+  .notes-text {
+    font-size: 12px; font-weight: 500; color: var(--text-muted);
+    white-space: pre-line; cursor: pointer; text-transform: uppercase;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    max-height: 3.2em; /* fallback for browsers that don't support -webkit-line-clamp */
+    transition: max-height 0.2s ease;
+  }
+  .notes-text.expanded {
+    display: block;
+    -webkit-line-clamp: unset;
+    max-height: none;
+    overflow: visible;
+  }
+  .notes-expand-hint { font-size: 9px; color: var(--accent); cursor: pointer; display: block; margin-top: 1px; text-transform: uppercase; letter-spacing: 0.05em; }
+  td.td-edit { width: 28px; padding: 4px 2px; text-align: center; display: none; }  /* hidden — replaced by inline edit col */
   .date-popup { position: fixed; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; box-shadow: var(--shadow-md); z-index: 500; width: 240px; }
   .date-popup h4 { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; font-weight: 600; }
   .date-popup-field { margin-bottom: 8px; }
@@ -133,6 +156,9 @@
   #backup-modal.open { display: flex; }
   #backup-modal .modal-box { width: 480px; }
   #backup-modal textarea { width: 100%; height: 120px; font-family: 'DM Mono', monospace; font-size: 11px; background: #f5f5f5; border: 1px solid var(--border); border-radius: 4px; padding: 8px; resize: vertical; }
+  /* Duplicate highlight */
+  .dup-warning { background: #fff3cd !important; }
+  .dup-badge { display: inline-block; background: #ff9800; color: white; font-size: 9px; font-weight: 700; border-radius: 3px; padding: 1px 4px; margin-left: 4px; vertical-align: middle; }
 </style>
 </head>
 <body>
@@ -146,6 +172,9 @@
     </div>
     <button class="btn btn-light" onclick="sortByDate()">⇅ Date</button>
     <button class="btn btn-light" onclick="sortByStore()">⇅ Store</button>
+    <button class="btn btn-light" onclick="sortByItemAZ()">A→Z Item</button>
+    <button class="btn btn-light" onclick="sortByStoreAZ()">A→Z Store</button>
+    <button class="btn btn-light" onclick="findDuplicates()">⚑ Dupes</button>
     <button class="btn btn-accent" onclick="openShoppingMode()">🛒 Shop Mode</button>
   </div>
 </div>
@@ -167,14 +196,23 @@
   <div id="fin-notes-area"></div>
   <button class="btn btn-light btn-sm" onclick="addFinNote()" style="font-size:11px;">+ Note</button>
 </div>
-<!-- Bulk action bar -->
+
+<!-- BULK BAR — clarified labels -->
 <div id="bulk-bar">
-  <span class="bulk-label">Bulk Actions:</span>
-  <button class="btn btn-secondary btn-sm" onclick="uncheckAllNeeds()">☐ Uncheck All Needs</button>
-  <button class="btn btn-secondary btn-sm" onclick="clearAllDates()">✕ Clear All Dates</button>
-  <button class="btn btn-secondary btn-sm" onclick="uncheckVisibleNeeds()">☐ Uncheck Visible</button>
-  <button class="btn btn-secondary btn-sm" onclick="clearVisibleDates()">✕ Clear Visible Dates</button>
+  <span class="bulk-label">Bulk:</span>
+  <div class="bulk-group">
+    <span style="font-size:10px;color:var(--text-muted);font-weight:600;">NEEDS:</span>
+    <button class="btn btn-secondary btn-sm" onclick="uncheckAllNeeds()" title="Uncheck every item in the entire list, regardless of current filter or search">☐ Uncheck ALL Items</button>
+    <button class="btn btn-secondary btn-sm" onclick="uncheckVisibleNeeds()" title="Uncheck only the items currently shown on screen (respects your active filter/search)">☐ Uncheck Shown Only</button>
+  </div>
+  <div class="bulk-divider"></div>
+  <div class="bulk-group">
+    <span style="font-size:10px;color:var(--text-muted);font-weight:600;">DATES:</span>
+    <button class="btn btn-secondary btn-sm" onclick="clearAllDates()" title="Clear due dates from every item in the entire list">✕ Clear ALL Dates</button>
+    <button class="btn btn-secondary btn-sm" onclick="clearVisibleDates()" title="Clear due dates only from the items currently shown on screen">✕ Clear Shown Dates</button>
+  </div>
 </div>
+
 <div id="controls">
   <input id="search-input" type="text" placeholder="Search items, stores, notes…" oninput="renderTable()">
   <button class="filter-btn active" id="filter-all" onclick="setFilter('all')">All</button>
@@ -198,9 +236,9 @@
         <th class="th-item">Item</th>
         <th class="th-store">Store</th>
         <th class="th-days" style="width:100px">Days Left</th>
+        <th style="width:34px;text-align:center;"></th><!-- edit button col -->
         <th class="th-price" style="text-align:right;width:68px">Price</th>
         <th class="th-notes">Notes <span style="font-size:9px;font-weight:400;color:var(--text-muted)">(click to expand)</span></th>
-        <th class="th-edit"></th>
       </tr>
     </thead>
     <tbody id="table-body"></tbody>
@@ -299,11 +337,9 @@ const PRESET_DAYS_INPUT={"tomato paste - 4 cans = 16 days":"3","blueberries (16 
 const PRESET_NEED=new Set(["tomato paste - 4 cans = 16 days","blueberries (16 oz) 3 bags","avocados; mini (6/bag)","mushrooms, enoki - three 200-gram pkgs = 16 days","mushrooms, king oyster - three 270-gram pkgs = 810g for 16 days - or - two 1 lb packages = 908g for 16 days","ginger root","milk; whole, organic - 292g/day average - 1,892g=1/2-gallon","cabbage, red","oatley original oatmilk","daikon radish root - get 1/3 lb","italian parsley","broccoli, 2 lb bag = 16 days","brussels sprouts ~ 2 lbs= 16 days","spinach - 2 lb box","cilantro - buy at vons if it's not 4 for $5 at sprouts - get 2 bunches","carrots","swiss chard","heavy cream, organic","celery - 20 oz - get 2","eggs; pasture-raised organic","good earth sweet spice - buy at sprouts if on sale at 2 for $5 ~ each box lasts 9 days","flaxseed, whole","tofu; nature's raw tofu","tofu; pulmuone organic soft for stews ($1.29)","ground beef, 93% grass fed, organic","italian panko breadcrumbs","whole chicken","barbacoa; del real","black beans (from freezer)","black olives; large lindsay","bread: Oroweat / Arnold Organic 22 Grains & Seed Bread","carnitas"]);
 
 var items=[], currentFilter='all', editingId=null, popupItemId=null;
-// Track the next unique ID for any new items
 var _nextId = 0;
 
 function genId() {
-  // Use timestamp + increment to guarantee uniqueness
   return Date.now() * 1000 + (_nextId++);
 }
 
@@ -311,7 +347,7 @@ function initFromRaw(){
   _nextId = 0;
   items = RAW_DATA.map(function(d, i) {
     return {
-      id: i,  // stable integer IDs for raw items
+      id: i,
       item: d.item, store: d.store, num: d.num, price: d.price,
       notes: d.notes, calc: d.calc||'days',
       need: PRESET_NEED.has(d.item),
@@ -364,11 +400,8 @@ function loadState(){
           if(ai===-1)return 1;if(bi===-1)return -1;return ai-bi;
         });
       }
-      // Load added items — ensure each has a unique id that doesn't collide with raw indices
       if(savedMap.__added){
-        var rawMax = RAW_DATA.length;
         savedMap.__added.forEach(function(it){
-          // Re-assign IDs to avoid collisions with raw item indices
           it.id = genId();
           items.push(it);
         });
@@ -480,7 +513,6 @@ function numClass(n){
 function fmtPrice(p){if(!p)return '';var s=p.toString();return s.startsWith('$')?s:(isNaN(parseFloat(s))?s:'$'+parseFloat(s).toFixed(2));}
 function escHtml(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-// Build due cell HTML for a given item
 function dueCellHtml(it) {
   var dc = dueClass(it.due);
   if(it.due){
@@ -491,7 +523,31 @@ function dueCellHtml(it) {
   }
 }
 
+// Duplicate detection
+var _dupNames = new Set();
+function computeDuplicates() {
+  var counts = {};
+  items.forEach(function(it) {
+    var key = it.item.trim().toLowerCase();
+    counts[key] = (counts[key]||0) + 1;
+  });
+  _dupNames = new Set();
+  Object.keys(counts).forEach(function(k){ if(counts[k]>1) _dupNames.add(k); });
+}
+
+function findDuplicates() {
+  computeDuplicates();
+  if(_dupNames.size === 0) { alert('No duplicate item names found!'); return; }
+  // Set search to show first dup
+  var firstDup = Array.from(_dupNames)[0];
+  document.getElementById('search-input').value = firstDup;
+  setFilter('all');
+  alert('Found ' + _dupNames.size + ' duplicate item name(s). They are highlighted in yellow.\n\nSearch has been set to show the first one. Clear the search to see all duplicates highlighted.');
+  renderTable();
+}
+
 function renderTable(){
+  computeDuplicates();
   var filtered=getFilteredItems();
   document.getElementById('item-count').textContent=filtered.length+' items';
   updateFinance();
@@ -499,8 +555,10 @@ function renderTable(){
   tbody.innerHTML='';
   filtered.forEach(function(it){
     var urgency=rowUrgency(it);
+    var isDup = _dupNames.has(it.item.trim().toLowerCase());
     var tr=document.createElement('tr');
-    tr.className=[it.need?'need-row':'',urgency].filter(Boolean).join(' ');
+    var classes=[it.need?'need-row':'',urgency,isDup?'dup-warning':''].filter(Boolean).join(' ');
+    tr.className=classes;
     tr.dataset.id=it.id;
 
     // Need checkbox
@@ -517,17 +575,22 @@ function renderTable(){
     var tdNum=document.createElement('td');tdNum.className='td-num';tdNum.dataset.num=it.num||'';
     tdNum.innerHTML=it.num?'<span class="store-num '+numClass(it.num)+'">'+it.num+'</span>':'';
 
-    // Item name
+    // Item name — clicking anywhere on the cell opens edit
     var tdItem=document.createElement('td');tdItem.className='td-item';
-    tdItem.innerHTML='<div class="item-name">'+escHtml(it.item)+'</div>';
+    var dupBadge = isDup ? '<span class="dup-badge">DUP</span>' : '';
+    tdItem.innerHTML='<div class="item-name">'+escHtml(it.item)+dupBadge+'</div>';
     tdItem.style.cursor='pointer';
-    (function(itemId){tdItem.ondblclick=function(e){e.stopPropagation();openEditModal(itemId);};})(it.id);
+    (function(itemId){
+      tdItem.onclick=function(e){e.stopPropagation();openEditModal(itemId);};
+    })(it.id);
 
-    // Store
+    // Store — clicking opens edit
     var tdStore=document.createElement('td');tdStore.className='td-store';
     tdStore.innerHTML='<span class="store-name">'+escHtml(it.store)+'</span>';
     tdStore.style.cursor='pointer';
-    (function(itemId){tdStore.ondblclick=function(e){e.stopPropagation();openEditModal(itemId);};})(it.id);
+    (function(itemId){
+      tdStore.onclick=function(e){e.stopPropagation();openEditModal(itemId);};
+    })(it.id);
 
     // Days input
     var tdDays=document.createElement('td');tdDays.className='td-days';
@@ -542,7 +605,6 @@ function renderTable(){
     } else {
       tdDays.innerHTML='<div class="days-wrap"><input class="days-input" type="number" min="0" value="'+escHtml(it.daysInput)+'" placeholder="days"><span class="days-label">d</span></div>';
     }
-    // Attach event to the input using closure
     (function(itemId){
       var inp=tdDays.querySelector('.days-input');
       if(inp){
@@ -551,27 +613,36 @@ function renderTable(){
       }
     })(it.id);
 
-    // Price
-    var tdPrice=document.createElement('td');tdPrice.className='td-price';tdPrice.textContent=fmtPrice(it.price);
-
-    // Notes
-    var tdNotes=document.createElement('td');tdNotes.className='td-notes';
-    if(it.notes)tdNotes.innerHTML='<div class="notes-text" onclick="this.classList.toggle(\'expanded\')">'+escHtml(it.notes)+'</div>';
-
-    // Edit button
-    var tdEdit=document.createElement('td');tdEdit.className='td-edit';
+    // INLINE EDIT BUTTON — between Days and Price
+    var tdEditInline=document.createElement('td');tdEditInline.className='td-edit-inline';
     var editBtn=document.createElement('button');
-    editBtn.className='btn btn-light btn-sm';editBtn.style.cssText='font-size:10px;padding:2px 5px;';
-    editBtn.textContent='✎';
+    editBtn.className='edit-inline-btn';
+    editBtn.title='Edit item';
+    editBtn.innerHTML='✎';
     (function(itemId){
       editBtn.onclick=function(e){
         e.stopPropagation();
         openEditModal(itemId);
       };
     })(it.id);
-    tdEdit.appendChild(editBtn);
+    tdEditInline.appendChild(editBtn);
 
-    tr.append(tdNeed,tdDue,tdNum,tdItem,tdStore,tdDays,tdPrice,tdNotes,tdEdit);
+    // Price
+    var tdPrice=document.createElement('td');tdPrice.className='td-price';tdPrice.textContent=fmtPrice(it.price);
+
+    // Notes — fixed expand/collapse
+    var tdNotes=document.createElement('td');tdNotes.className='td-notes';
+    if(it.notes){
+      var notesDiv=document.createElement('div');
+      notesDiv.className='notes-text';
+      notesDiv.textContent=it.notes;
+      notesDiv.onclick=function(){
+        this.classList.toggle('expanded');
+      };
+      tdNotes.appendChild(notesDiv);
+    }
+
+    tr.append(tdNeed,tdDue,tdNum,tdItem,tdStore,tdDays,tdEditInline,tdPrice,tdNotes);
     tbody.appendChild(tr);
   });
 }
@@ -620,25 +691,62 @@ function clearDue(id){
 
 // Bulk actions
 function uncheckAllNeeds(){
-  if(!confirm('Uncheck ALL need checkboxes?'))return;
+  if(!confirm('Uncheck ALL need checkboxes in the entire list?'))return;
   items.forEach(function(it){it.need=false;});
   saveState();renderTable();
 }
 function clearAllDates(){
-  if(!confirm('Clear ALL due dates and day counts?'))return;
+  if(!confirm('Clear ALL due dates from the entire list?'))return;
   items.forEach(function(it){it.due='';it.daysInput='';});
   saveState();renderTable();
 }
 function uncheckVisibleNeeds(){
   var filtered=getFilteredItems();
-  if(!confirm('Uncheck needs for the '+filtered.length+' visible items?'))return;
+  if(!confirm('Uncheck needs for the '+filtered.length+' currently visible items only?'))return;
   filtered.forEach(function(it){it.need=false;});
   saveState();renderTable();
 }
 function clearVisibleDates(){
   var filtered=getFilteredItems();
-  if(!confirm('Clear dates for the '+filtered.length+' visible items?'))return;
+  if(!confirm('Clear dates for the '+filtered.length+' currently visible items only?'))return;
   filtered.forEach(function(it){it.due='';it.daysInput='';});
+  saveState();renderTable();
+}
+
+// Sort functions
+function sortByDate(){
+  items.sort(function(a,b){
+    var da=a.due?parseDue(a.due):null,db=b.due?parseDue(b.due):null;
+    if(da&&db){if(da<db)return -1;if(da>db)return 1;return 0;}
+    if(da)return -1;if(db)return 1;return 0;
+  });
+  saveState();renderTable();
+}
+function sortByStore(){
+  items.sort(function(a,b){
+    var nd=(b.need?1:0)-(a.need?1:0);if(nd!==0)return nd;
+    if(a.need&&b.need){
+      var na=String(a.num||''),nb=String(b.num||''),numA=parseInt(na),numB=parseInt(nb);
+      if(!isNaN(numA)&&!isNaN(numB))return numA-numB;
+      if(!isNaN(numA))return -1;if(!isNaN(numB))return 1;
+      return na.localeCompare(nb);
+    }
+    return 0;
+  });
+  saveState();renderTable();
+}
+function sortByItemAZ(){
+  items.sort(function(a,b){
+    return a.item.toLowerCase().localeCompare(b.item.toLowerCase());
+  });
+  saveState();renderTable();
+}
+function sortByStoreAZ(){
+  items.sort(function(a,b){
+    var sa=(a.store||'').toLowerCase(),sb=(b.store||'').toLowerCase();
+    if(sa<sb)return -1;if(sa>sb)return 1;
+    return a.item.toLowerCase().localeCompare(b.item.toLowerCase());
+  });
   saveState();renderTable();
 }
 
@@ -690,28 +798,6 @@ function applyPopup(){
 
 function clearPopupDate(){if(popupItemId===null)return;clearDue(popupItemId);closePopup();}
 
-function sortByDate(){
-  items.sort(function(a,b){
-    var da=a.due?parseDue(a.due):null,db=b.due?parseDue(b.due):null;
-    if(da&&db){if(da<db)return -1;if(da>db)return 1;return 0;}
-    if(da)return -1;if(db)return 1;return 0;
-  });
-  saveState();renderTable();
-}
-function sortByStore(){
-  items.sort(function(a,b){
-    var nd=(b.need?1:0)-(a.need?1:0);if(nd!==0)return nd;
-    if(a.need&&b.need){
-      var na=String(a.num||''),nb=String(b.num||''),numA=parseInt(na),numB=parseInt(nb);
-      if(!isNaN(numA)&&!isNaN(numB))return numA-numB;
-      if(!isNaN(numA))return -1;if(!isNaN(numB))return 1;
-      return na.localeCompare(nb);
-    }
-    return 0;
-  });
-  saveState();renderTable();
-}
-
 function openShoppingMode(){
   var needed=items.filter(function(it){return it.need;});
   var groups={};
@@ -749,7 +835,7 @@ function openShoppingMode(){
 function closeShoppingMode(){document.getElementById('shopping-mode').classList.remove('open');document.body.style.overflow='';}
 function toggleGotIt(el,checked){el.classList.toggle('got-it',checked);}
 
-// Edit modal — FIX: modal-box has onclick stopPropagation; backdrop click closes modal
+// Edit modal
 var _modalOpening = false;
 function openEditModal(id){
   _modalOpening = true;
@@ -758,15 +844,14 @@ function openEditModal(id){
   if(!it){ _modalOpening=false; return; }
   document.getElementById('modal-title').textContent='Edit Item';
   document.getElementById('m-item').value=it.item;
-  document.getElementById('m-store').value=it.store;
-  document.getElementById('m-num').value=it.num;
-  document.getElementById('m-price').value=it.price;
-  document.getElementById('m-notes').value=it.notes;
+  document.getElementById('m-store').value=it.store||'';
+  document.getElementById('m-num').value=it.num||'';
+  document.getElementById('m-price').value=it.price||'';
+  document.getElementById('m-notes').value=it.notes||'';
   document.getElementById('m-calc').value=it.calc||'days';
   document.getElementById('modal-delete-btn').style.display='';
   document.getElementById('edit-modal').classList.add('open');
-  // Use timeout so the triggering click doesn't immediately close via backdrop
-  setTimeout(function(){ _modalOpening = false; }, 0);
+  setTimeout(function(){ _modalOpening = false; }, 50);
 }
 function openAddModal(){
   _modalOpening = true;
@@ -776,9 +861,9 @@ function openAddModal(){
   document.getElementById('m-calc').value='days';
   document.getElementById('modal-delete-btn').style.display='none';
   document.getElementById('edit-modal').classList.add('open');
-  setTimeout(function(){ _modalOpening = false; }, 0);
+  setTimeout(function(){ _modalOpening = false; }, 50);
 }
-function closeModal(){document.getElementById('edit-modal').classList.remove('open');}
+function closeModal(){document.getElementById('edit-modal').classList.remove('open');editingId=null;}
 function saveModal(){
   var itemVal=document.getElementById('m-item').value.trim();
   if(!itemVal){alert('Item name required');return;}
@@ -803,7 +888,7 @@ function deleteItem(){
   saveState();closeModal();renderTable();
 }
 
-// Backdrop click closes modal (but not when modal is just opening)
+// Backdrop click closes modal
 document.getElementById('edit-modal').addEventListener('click',function(e){
   if(_modalOpening)return;
   if(e.target===this)closeModal();
@@ -849,7 +934,6 @@ function restoreBackup(){
     if(data.items && Array.isArray(data.items)){
       if(!confirm('This will replace all current data. Continue?'))return;
       items = data.items;
-      // Re-assign ids to prevent collisions
       items.forEach(function(it, i){ it.id = i; });
       _nextId = items.length;
       saveState();
