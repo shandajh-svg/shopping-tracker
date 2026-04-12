@@ -177,6 +177,7 @@
   <button onclick="pushToGoogle()" style="background:#1a56c4;color:white;border:none;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">Sync ↑ Push</button>
   <button onclick="pullFromGoogle()" style="background:#2e7d32;color:white;border:none;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">Sync ↓ Pull</button>
   <button onclick="openBackupModal()" style="background:#7b5ea7;color:white;border:none;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">💾 Backup</button>
+  <button onclick="resetAndClean()" style="background:#c04a2a;color:white;border:none;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">🧹 Reset &amp; Clean</button>
   <span id="sync-status" style="font-size:11px;font-weight:600;font-family:monospace;"></span>
 </div>
 <div id="finance-bar">
@@ -1010,6 +1011,24 @@ function pullFromGoogle(){
     }).catch(function(e){setSyncStatus('Could not connect: '+e,'sync-err');});
 }
 
+
+function resetAndClean(){
+  if(!confirm('Step 3 of 7:\n\nThis will:\n1. Wipe localStorage on THIS device\n2. Push the current clean list to JSONBin\n3. Reload the page\n\nMake sure you have already deleted all duplicates before clicking OK.')) return;
+  var cleanDiff=buildDiff();
+  localStorage.removeItem('shopping-items-v2');
+  localStorage.removeItem('shopping-finance');
+  setSyncStatus('Cleaning...','sync-pending');
+  fetch(JBIN_URL,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':JBIN_KEY,'X-Bin-Versioning':'false'},body:JSON.stringify(cleanDiff)})
+    .then(function(r){return r.json();})
+    .then(function(){
+      setSyncStatus('Clean done — reloading…','sync-ok');
+      setTimeout(function(){location.reload(true);},900);
+    })
+    .catch(function(e){
+      setSyncStatus('Push failed: '+e,'sync-err');
+      alert('JSONBin push failed. Error: '+e);
+    });
+}
 
 function init(){loadState();loadFinance();renderTable();}
 init();
