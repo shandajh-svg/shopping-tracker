@@ -186,9 +186,6 @@
   <div class="fin-group"><span class="fin-label">Available</span><input class="fin-input" id="fin-available" type="number" step="0.01" value="0" placeholder="0.00" oninput="saveFinance();updateFinance()"></div>
   <div class="fin-group"><span class="fin-label">Left Over</span><span class="fin-value" id="fin-leftover">$0.00</span></div>
   <div class="fin-divider"></div>
-  <div class="fin-group"><span class="fin-label">Amazon Need</span><input class="fin-input" id="fin-amazon" type="number" step="0.01" value="0" placeholder="0.00" oninput="saveFinance();updateFinance()"></div>
-  <div class="fin-group"><span class="fin-label">ATM</span><input class="fin-input" id="fin-atm" type="number" step="0.01" value="0" placeholder="0" oninput="saveFinance();updateFinance()"></div>
-  <div class="fin-divider"></div>
   <div id="fin-notes-area"></div>
   <button class="btn btn-light btn-sm" onclick="addFinNote()" style="font-size:11px;">+ Note</button>
 </div>
@@ -213,7 +210,6 @@
   <button class="filter-btn active" id="filter-all" onclick="setFilter('all')">All</button>
   <button class="filter-btn" id="filter-need" onclick="setFilter('need')">Needs Only (✓)</button>
   <button class="filter-btn" id="filter-dated" onclick="setFilter('dated')">Has Date</button>
-  <button class="filter-btn" id="filter-urgent" onclick="setFilter('urgent')">Due Soon</button>
   <label style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px;">
     Due by: <input type="date" id="filter-due-by" style="padding:3px 6px;border:1px solid var(--border);border-radius:3px;font-size:12px;" oninput="renderTable()">
     <button class="filter-btn" onclick="document.getElementById('filter-due-by').value='';renderTable()" style="padding:2px 6px;font-size:10px;">✕</button>
@@ -278,11 +274,41 @@
     <div class="modal-field"><label>Notes</label><textarea id="m-notes"></textarea></div>
     <div class="modal-field">
       <label>Special Calculation</label>
-      <select id="m-calc">
+      <select id="m-calc" onchange="toggleGramsFields()">
         <option value="days">Direct days input</option>
         <option value="eggs">Eggs (÷ 1.5)</option>
         <option value="cans">Tomato paste (× 4 days/can)</option>
         <option value="bags">Blueberries bags (bags × 16oz × 28.35 ÷ 100g/day)</option>
+        <option value="grams">Grams on hand ÷ grams/day → auto due date</option>
+      </select>
+    </div>
+    <div id="grams-fields" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:10px;">
+      <div style="font-size:10px;color:var(--text-muted);font-weight:600;margin-bottom:8px;text-transform:uppercase;">Grams Calculator</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:100px;">
+          <label style="display:block;font-size:10px;color:var(--text-muted);margin-bottom:3px;">Grams on Hand</label>
+          <input id="m-grams-onhand" type="number" step="0.1" placeholder="e.g. 238" style="width:100%;padding:5px 7px;border:1px solid var(--border);border-radius:4px;font-size:13px;background:var(--surface);" oninput="updateGramsPreview()">
+        </div>
+        <div style="flex:1;min-width:100px;">
+          <label style="display:block;font-size:10px;color:var(--text-muted);margin-bottom:3px;">Grams per Day</label>
+          <input id="m-grams-perday" type="number" step="0.1" placeholder="e.g. 5" style="width:100%;padding:5px 7px;border:1px solid var(--border);border-radius:4px;font-size:13px;background:var(--surface);" oninput="updateGramsPreview()">
+        </div>
+        <div style="flex:1;min-width:100px;">
+          <label style="display:block;font-size:10px;color:var(--text-muted);margin-bottom:3px;">Total Grams/Pkg</label>
+          <input id="m-grams-total" type="number" step="0.1" placeholder="e.g. 453" style="width:100%;padding:5px 7px;border:1px solid var(--border);border-radius:4px;font-size:13px;background:var(--surface);" oninput="updateGramsPreview()">
+        </div>
+      </div>
+      <div id="grams-preview" style="margin-top:8px;font-size:11px;color:var(--accent);font-family:'DM Mono',monospace;"></div>
+    </div>
+    <div class="modal-field">
+      <label>Section / Category</label>
+      <select id="m-section">
+        <option value="">— Regular item —</option>
+        <option value="veggie-a">Veggie Session A</option>
+        <option value="veggie-b">Veggie Session B</option>
+        <option value="skip-day">Skip Day item</option>
+        <option value="blend-4day">Every-4-Day Blend</option>
+        <option value="supply">Supply Tracker</option>
       </select>
     </div>
     <div class="modal-actions">
@@ -318,7 +344,7 @@
 
 <script>
 function today(){var d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate());}
-function addDays(n){var d=today();d.setDate(d.getDate()+Math.round(n));return d.toISOString().slice(0,10);}
+function addDays(n){var d=today();d.setDate(d.getDate()+Math.round(n));var mm=d.getMonth()+1;var dd=d.getDate();return d.getFullYear()+'-'+(mm<10?'0':'')+mm+'-'+(dd<10?'0':'')+dd;}
 function parseDue(str){if(!str)return null;var d=new Date(str+'T00:00:00');return isNaN(d)?null:d;}
 function formatDue(str){var d=parseDue(str);if(!d)return '';return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);}
 function dueClass(str){var d=parseDue(str);if(!d)return 'due-none';var diff=Math.floor((d-today())/86400000);if(diff<=2)return 'due-past';if(diff<=7)return 'due-soon';return 'due-ok';}
@@ -393,6 +419,10 @@ function loadState(){
           if(s.num!==undefined)it.num=s.num;
           if(s.price!==undefined)it.price=s.price;
           if(s.calc!==undefined)it.calc=s.calc;
+          if(s.section!==undefined)it.section=s.section;
+          if(s.gramsOnHand!==undefined)it.gramsOnHand=s.gramsOnHand;
+          if(s.gramsPerDay!==undefined)it.gramsPerDay=s.gramsPerDay;
+          if(s.gramsTotal!==undefined)it.gramsTotal=s.gramsTotal;
         }
       });
       if(savedMap.__order){
@@ -434,7 +464,7 @@ function saveState(){
     // Deduplicate __added by item name (last one wins) to prevent accumulation
     var addedMap={};
     items.forEach(function(it){
-      map[it.item]={need:it.need,due:it.due,daysInput:it.daysInput,notes:it.notes,store:it.store,num:it.num,price:it.price,calc:it.calc};
+      map[it.item]={need:it.need,due:it.due,daysInput:it.daysInput,notes:it.notes,store:it.store,num:it.num,price:it.price,calc:it.calc,section:it.section||'',gramsOnHand:it.gramsOnHand||'',gramsPerDay:it.gramsPerDay||'',gramsTotal:it.gramsTotal||''};
       if(!rawNames.has(it.item)) addedMap[it.item.trim().toLowerCase()]=it;
     });
     map.__added=Object.values(addedMap);
@@ -448,8 +478,6 @@ function loadFinance(){
     if(raw){
       var f=JSON.parse(raw);
       if(f.available!==undefined)document.getElementById('fin-available').value=f.available;
-      if(f.amazon!==undefined)document.getElementById('fin-amazon').value=f.amazon;
-      if(f.atm!==undefined)document.getElementById('fin-atm').value=f.atm;
       if(f.notes)f.notes.forEach(function(n){addFinNote(n);});
     }
   }catch(e){}
@@ -462,8 +490,6 @@ function saveFinance(){
     document.querySelectorAll('.fin-note-input').forEach(function(el){notes.push(el.value);});
     localStorage.setItem('shopping-finance',JSON.stringify({
       available:document.getElementById('fin-available').value,
-      amazon:document.getElementById('fin-amazon').value,
-      atm:document.getElementById('fin-atm').value,
       notes:notes
     }));
   }catch(e){}
@@ -496,6 +522,10 @@ function computeDue(item,val){
   if(item.calc==='eggs')days=v/1.5;
   else if(item.calc==='cans')days=v*4;
   else if(item.calc==='bags')days=v*16*28.35/100;
+  else if(item.calc==='grams'){
+    var gpd=parseFloat(item.gramsPerDay);
+    if(!isNaN(gpd)&&gpd>0)days=v/gpd; else return item.due;
+  }
   else days=v;
   return addDays(days);
 }
@@ -532,8 +562,10 @@ function escHtml(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').repla
 
 function dueCellHtml(it) {
   var dc = dueClass(it.due);
+  var vpBadge = it.vpSynced ? '<span title="Auto-synced from Veggie Prep" style="font-size:8px;color:var(--accent);margin-left:2px;vertical-align:middle;">↺</span>' : '';
   if(it.due){
     return '<button class="due-btn '+dc+'" onclick="openPopup('+it.id+',this);event.stopPropagation()">'+formatDue(it.due)+'</button>'
+      +vpBadge
       +'<button class="due-clear" onclick="clearDue('+it.id+');event.stopPropagation()" title="Clear date">✕</button>';
   } else {
     return '<button class="due-btn due-none" onclick="openPopup('+it.id+',this);event.stopPropagation()">+ date</button>';
@@ -588,7 +620,11 @@ function renderTable(){
 
     var tdItem=document.createElement('td');tdItem.className='td-item';
     var dupBadge = isDup ? '<span class="dup-badge">DUP</span>' : '';
-    tdItem.innerHTML='<div class="item-name">'+escHtml(it.item)+dupBadge+'</div>';
+    var sectionLabels={'veggie-a':'VEG-A','veggie-b':'VEG-B','skip-day':'SKIP','blend-4day':'4-DAY','supply':'SUPPLY'};
+    var sectionColors={'veggie-a':'#2e7d32','veggie-b':'#1565c0','skip-day':'#b07d20','blend-4day':'#6a1b9a','supply':'#c04a2a'};
+    var secLabel=it.section&&sectionLabels[it.section]?it.section:null;
+    var sectionBadge=secLabel?'<span style="display:inline-block;background:'+sectionColors[it.section]+';color:white;font-size:8px;font-weight:700;border-radius:2px;padding:1px 3px;margin-left:4px;vertical-align:middle;">'+sectionLabels[it.section]+'</span>':'';
+    tdItem.innerHTML='<div class="item-name">'+escHtml(it.item)+dupBadge+sectionBadge+'</div>';
     tdItem.style.cursor='pointer';
     (function(itemId){tdItem.onclick=function(e){e.stopPropagation();openEditModal(itemId);};})(it.id);
 
@@ -606,6 +642,11 @@ function renderTable(){
     } else if(it.calc==='bags'){
       var r2=it.daysInput?(parseFloat(it.daysInput)*16*28.35/100).toFixed(1):'';
       tdDays.innerHTML='<div class="egg-wrap"><div class="egg-row"><span class="egg-label">bags:</span><input class="days-input" type="number" min="0" step="0.25" value="'+escHtml(it.daysInput)+'" placeholder="bags"></div><div class="egg-row"><span class="egg-label">= days:</span><span class="egg-result">'+r2+'</span></div></div>';
+    } else if(it.calc==='grams'){
+      var gpd=parseFloat(it.gramsPerDay);
+      var goh=parseFloat(it.gramsOnHand);
+      var grDays=(!isNaN(gpd)&&gpd>0&&!isNaN(goh))?Math.round(goh/gpd):'?';
+      tdDays.innerHTML='<div class="egg-wrap"><div class="egg-row"><span class="egg-label">g left:</span><span class="egg-result">'+(it.gramsOnHand||'—')+'g</span></div><div class="egg-row"><span class="egg-label">= days:</span><span class="egg-result">'+grDays+'</span></div></div>';
     } else {
       tdDays.innerHTML='<div class="days-wrap"><input class="days-input" type="number" min="0" value="'+escHtml(it.daysInput)+'" placeholder="days"><span class="days-label">d</span></div>';
     }
@@ -766,7 +807,7 @@ function applyPopup(){
   var direct=document.getElementById('popup-direct').value;
   if(offset!==''){
     var n=parseInt(offset);
-    if(!isNaN(n)){var base=it.due?parseDue(it.due):today();var newDate=new Date(base.getTime()+n*86400000);it.due=newDate.toISOString().slice(0,10);}
+    if(!isNaN(n)){var base=it.due?parseDue(it.due):today();var nd=new Date(base.getTime()+n*86400000);var mm=nd.getMonth()+1;var dd=nd.getDate();it.due=nd.getFullYear()+'-'+(mm<10?'0':'')+mm+'-'+(dd<10?'0':'')+dd;}
   } else if(direct){it.due=direct;}
   it.daysInput='';backfillDaysInput();saveState();renderTable();closePopup();
 }
@@ -823,6 +864,11 @@ function openEditModal(id){
   document.getElementById('m-price').value=it.price||'';
   document.getElementById('m-notes').value=it.notes||'';
   document.getElementById('m-calc').value=it.calc||'days';
+  document.getElementById('m-section').value=it.section||'';
+  document.getElementById('m-grams-onhand').value=it.gramsOnHand||'';
+  document.getElementById('m-grams-perday').value=it.gramsPerDay||'';
+  document.getElementById('m-grams-total').value=it.gramsTotal||'';
+  toggleGramsFields();updateGramsPreview();
   document.getElementById('modal-delete-btn').style.display='';
   document.getElementById('edit-modal').classList.add('open');
   setTimeout(function(){ _modalOpening = false; }, 50);
@@ -833,26 +879,67 @@ function openAddModal(){
   document.getElementById('modal-title').textContent='Add Item';
   ['m-item','m-store','m-num','m-price','m-notes'].forEach(function(id){document.getElementById(id).value='';});
   document.getElementById('m-calc').value='days';
+  document.getElementById('m-section').value='';
+  document.getElementById('m-grams-onhand').value='';
+  document.getElementById('m-grams-perday').value='';
+  document.getElementById('m-grams-total').value='';
+  toggleGramsFields();
   document.getElementById('modal-delete-btn').style.display='none';
   document.getElementById('edit-modal').classList.add('open');
   setTimeout(function(){ _modalOpening = false; }, 50);
+}
+function toggleGramsFields(){
+  var calc=document.getElementById('m-calc').value;
+  document.getElementById('grams-fields').style.display=(calc==='grams')?'block':'none';
+  if(calc==='grams')updateGramsPreview();
+}
+function updateGramsPreview(){
+  var onhand=parseFloat(document.getElementById('m-grams-onhand').value);
+  var perday=parseFloat(document.getElementById('m-grams-perday').value);
+  var total=parseFloat(document.getElementById('m-grams-total').value);
+  var prev=document.getElementById('grams-preview');
+  if(!isNaN(onhand)&&!isNaN(perday)&&perday>0){
+    var days=onhand/perday;
+    var runout=new Date(today());runout.setDate(runout.getDate()+Math.round(days));
+    var label=(runout.getMonth()+1)+'/'+runout.getDate()+'/'+String(runout.getFullYear()).slice(2);
+    var refill=!isNaN(total)&&total>0?'\n  '+Math.round(total/perday)+' days per full package':'';
+    prev.textContent='Runs out in '+Math.round(days)+' days ('+label+')'+refill;
+  } else {prev.textContent='';}
 }
 function closeModal(){document.getElementById('edit-modal').classList.remove('open');editingId=null;}
 function saveModal(){
   var itemVal=document.getElementById('m-item').value.trim();
   if(!itemVal){alert('Item name required');return;}
+  var calcVal=document.getElementById('m-calc').value;
+  var sectionVal=document.getElementById('m-section').value;
+  var gramsOnHand=document.getElementById('m-grams-onhand').value;
+  var gramsPerDay=document.getElementById('m-grams-perday').value;
+  var gramsTotal=document.getElementById('m-grams-total').value;
   if(editingId!==null){
     var it=items.find(function(x){return x.id===editingId;});
     if(it){
       it.item=itemVal;it.store=document.getElementById('m-store').value;
       it.num=document.getElementById('m-num').value;it.price=document.getElementById('m-price').value;
-      it.notes=document.getElementById('m-notes').value;it.calc=document.getElementById('m-calc').value;
+      it.notes=document.getElementById('m-notes').value;it.calc=calcVal;
+      it.section=sectionVal;
+      it.gramsOnHand=gramsOnHand;it.gramsPerDay=gramsPerDay;it.gramsTotal=gramsTotal;
+      if(calcVal==='grams'&&gramsOnHand&&gramsPerDay){
+        var gpd=parseFloat(gramsPerDay);
+        if(gpd>0){var days=parseFloat(gramsOnHand)/gpd;it.due=addDays(days);it.daysInput=gramsOnHand;}
+      }
     }
   } else {
-    items.push({id:genId(),item:itemVal,store:document.getElementById('m-store').value,
+    var newIt={id:genId(),item:itemVal,store:document.getElementById('m-store').value,
       num:document.getElementById('m-num').value,price:document.getElementById('m-price').value,
-      notes:document.getElementById('m-notes').value,calc:document.getElementById('m-calc').value,
-      need:false,due:'',daysInput:''});
+      notes:document.getElementById('m-notes').value,calc:calcVal,
+      section:sectionVal,
+      gramsOnHand:gramsOnHand,gramsPerDay:gramsPerDay,gramsTotal:gramsTotal,
+      need:false,due:'',daysInput:''};
+    if(calcVal==='grams'&&gramsOnHand&&gramsPerDay){
+      var gpd2=parseFloat(gramsPerDay);
+      if(gpd2>0){var days2=parseFloat(gramsOnHand)/gpd2;newIt.due=addDays(days2);newIt.daysInput=gramsOnHand;}
+    }
+    items.push(newIt);
   }
   saveState();closeModal();renderTable();
 }
@@ -869,9 +956,7 @@ document.getElementById('edit-modal').addEventListener('click',function(e){
 
 function openBackupModal(){
   var data = {items: items, finance: {
-    available: document.getElementById('fin-available').value,
-    amazon: document.getElementById('fin-amazon').value,
-    atm: document.getElementById('fin-atm').value
+    available: document.getElementById('fin-available').value
   }};
   document.getElementById('backup-export-text').value = JSON.stringify(data, null, 2);
   document.getElementById('backup-import-text').value = '';
@@ -917,8 +1002,6 @@ function restoreBackup(){
       saveState();
       if(data.finance){
         if(data.finance.available)document.getElementById('fin-available').value=data.finance.available;
-        if(data.finance.amazon)document.getElementById('fin-amazon').value=data.finance.amazon;
-        if(data.finance.atm)document.getElementById('fin-atm').value=data.finance.atm;
         saveFinance();
       }
       renderTable();closeBackupModal();
@@ -945,7 +1028,7 @@ function buildDiff(){
   items.forEach(function(it){
     if(!rawNames.has(it.item)){
       // deduplicate by name only
-      addedSeen[it.item.trim().toLowerCase()]={item:it.item,store:it.store,num:it.num,price:it.price,notes:it.notes,calc:it.calc,need:it.need,due:it.due,daysInput:it.daysInput};
+      addedSeen[it.item.trim().toLowerCase()]={item:it.item,store:it.store,num:it.num,price:it.price,notes:it.notes,calc:it.calc,need:it.need,due:it.due,daysInput:it.daysInput,section:it.section||'',gramsOnHand:it.gramsOnHand||'',gramsPerDay:it.gramsPerDay||'',gramsTotal:it.gramsTotal||''};
     } else {
       var defaultNeed=PRESET_NEED.has(it.item);
       if(it.need!==defaultNeed||it.due){
@@ -966,7 +1049,7 @@ function applyDiff(data){
   if(data.__changes){
     items.forEach(function(it){
       var c=data.__changes[it.item];
-      if(c){if(c.need!==undefined)it.need=c.need;if(c.due!==undefined)it.due=c.due;if(c.daysInput!==undefined)it.daysInput=c.daysInput;}
+      if(c){if(c.need!==undefined)it.need=c.need;if(c.due!==undefined)it.due=c.due;if(c.daysInput!==undefined)it.daysInput=c.daysInput;if(c.section!==undefined)it.section=c.section;if(c.gramsOnHand!==undefined)it.gramsOnHand=c.gramsOnHand;if(c.gramsPerDay!==undefined)it.gramsPerDay=c.gramsPerDay;if(c.gramsTotal!==undefined)it.gramsTotal=c.gramsTotal;}
     });
   }
   if(data.__added){
@@ -1030,7 +1113,114 @@ function resetAndClean(){
     });
 }
 
-function init(){loadState();loadFinance();renderTable();}
+// Veggie Prep JSONBin sync
+var VP_JBIN_ID='69d627d5856a6821890eb408';
+var VP_JBIN_KEY='$2a$10$tpjsSaIqmjzoWXjpvpu7n.AdJJdQf8JUbDhBDfNoCC5rzN0vxDh/m';
+var VP_JBIN_URL='https://api.jsonbin.io/v3/b/'+VP_JBIN_ID+'/latest';
+
+// Map from Veggie Prep itemData keys to Shopping Tracker item name fragments
+// Each entry: { vpKey, nameMatch } where nameMatch is a lowercase substring of the ST item name
+var VP_ITEM_MAP=[
+  {vpKey:'enoki',            match:'enoki'},
+  {vpKey:'celery',           match:'celery - 20 oz'},
+  {vpKey:'cabbage',          match:'cabbage, red'},
+  {vpKey:'kingoyster',       match:'king oyster'},
+  {vpKey:'broccoli',         match:'broccoli, 2 lb'},
+  {vpKey:'parsley',          match:'italian parsley'},
+  {vpKey:'cilantro',         match:'cilantro'},
+  {vpKey:'spinach',          match:'spinach - 2 lb'},
+  {vpKey:'carrots',          match:'carrots'},
+  {vpKey:'chard',            match:'swiss chard'},
+  {vpKey:'brussels',         match:'brussels sprouts'},
+  {vpKey:'supply-ginger',    match:'ginger root'},
+  {vpKey:'supply-garlic',    match:'garlic cloves'},
+  {vpKey:'supply-blueberries',match:'blueberries'},
+  {vpKey:'supply-flaxseed',  match:'flaxseed, whole'},
+  {vpKey:'supply-daikon',    match:'daikon radish'},
+];
+
+// Tomato paste uses blend data: tomatoDaysOpen + tomatoFullCans*4
+// Fish oil, collagen, chia use blend days (entered as days remaining)
+var VP_BLEND_MAP=[
+  {blendKey:'tomatoDaysOpen', blendCans:'tomatoFullCans', match:'tomato paste'},
+  {catalogId:'blend-fishoil',  blendDays:'fishOilDays',   match:'fish oil'},
+  {catalogId:'blend-collagen', blendDays:'collagenDays',  match:'collagen'},
+  {catalogId:'blend-chia',     blendDays:'chiaDays',      match:'chia seeds'},
+];
+
+function calcVPDueDate(grams, gpd){
+  if(!grams||!gpd||gpd<=0)return '';
+  var days=Math.floor(grams/gpd);
+  return addDays(days);
+}
+
+function findSTItem(matchStr){
+  var m=matchStr.toLowerCase();
+  return items.find(function(it){return it.item.toLowerCase().indexOf(m)>=0;});
+}
+
+function applyVPDates(vpData){
+  var itemData=vpData.itemData||{};
+  var blend=vpData.blend||{};
+
+  // Regular items: grams / gpd
+  VP_ITEM_MAP.forEach(function(entry){
+    var d=itemData[entry.vpKey];
+    if(!d)return;
+    var grams=parseFloat(d.grams);
+    var gpd=parseFloat(d.gpd);
+    if(isNaN(grams)||isNaN(gpd)||gpd<=0)return;
+    var due=calcVPDueDate(grams,gpd);
+    if(!due)return;
+    var it=findSTItem(entry.match);
+    if(it){it.due=due;it.vpSynced=true;}
+  });
+
+  // Tomato paste: tomatoDaysOpen + tomatoFullCans*4
+  var tomatoDaysOpen=parseFloat(blend.tomatoDaysOpen)||0;
+  var tomatoFullCans=parseFloat(blend.tomatoFullCans)||0;
+  var tomatoDays=tomatoDaysOpen+(tomatoFullCans*4);
+  if(tomatoDays>0){
+    var tomatoItem=findSTItem('tomato paste');
+    if(tomatoItem){tomatoItem.due=addDays(tomatoDays);tomatoItem.vpSynced=true;}
+  }
+
+  // Fish oil, collagen, chia — stored as days remaining in blend object
+  var blendDaysMap={
+    'fish oil': parseFloat(blend.fishOilDays)||0,
+    'collagen': parseFloat(blend.collagenDays)||0,
+    'chia seeds': parseFloat(blend.chiaDays)||0,
+  };
+  Object.keys(blendDaysMap).forEach(function(matchStr){
+    var days=blendDaysMap[matchStr];
+    if(days>0){
+      var it=findSTItem(matchStr);
+      if(it){it.due=addDays(days);it.vpSynced=true;}
+    }
+  });
+}
+
+function syncFromVeggiePrepAndInit(){
+  loadState();loadFinance();
+  setSyncStatus('Syncing veggie dates…','sync-pending');
+  fetch(VP_JBIN_URL,{method:'GET',headers:{'X-Master-Key':VP_JBIN_KEY}})
+    .then(function(r){return r.json();})
+    .then(function(resp){
+      if(resp&&resp.record){
+        applyVPDates(resp.record);
+        setSyncStatus('Veggie dates synced '+new Date().toLocaleTimeString(),'sync-ok');
+      } else {
+        setSyncStatus('Veggie sync: no data','sync-err');
+      }
+      renderTable();
+    })
+    .catch(function(e){
+      setSyncStatus('Veggie sync failed — showing saved dates','sync-err');
+      renderTable();
+    });
+}
+
+function init(){syncFromVeggiePrepAndInit();}
 init();
 </script>
 </body>
