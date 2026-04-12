@@ -401,17 +401,21 @@ function loadState(){
           if(ai===-1)return 1;if(bi===-1)return -1;return ai-bi;
         });
       }
-      // *** FIX: deduplicate __added items against existing items before pushing ***
       if(savedMap.__added){
-        var existingKeys=new Set(items.map(itemKey));
+        // Self-healing: reject anything whose name exists in RAW_DATA (name-only check, no store)
+        var rawNames=new Set(RAW_DATA.map(function(d){return d.item.trim().toLowerCase();}));
+        var existingNames=new Set(items.map(function(it){return it.item.trim().toLowerCase();}));
         savedMap.__added.forEach(function(it){
-          var k=itemKey(it);
-          if(!existingKeys.has(k)){
+          var n=it.item.trim().toLowerCase();
+          if(!rawNames.has(n)&&!existingNames.has(n)){
             it.id=genId();
             items.push(it);
-            existingKeys.add(k);
+            existingNames.add(n);
           }
         });
+        // Re-save immediately so the cleaned __added is written back to localStorage
+        // (schedules after current call stack so items is fully built first)
+        setTimeout(saveState, 0);
       }
     }else{
       initFromRaw();
@@ -930,15 +934,17 @@ var JBIN_URL='https://api.jsonbin.io/v3/b/'+JBIN_ID;
 function setSyncStatus(msg,cls){var el=document.getElementById('sync-status');if(el){el.textContent=msg;el.style.color=cls==='sync-ok'?'#2e7d32':cls==='sync-err'?'#c04a2a':'#b07d20';}}
 
 function buildDiff(){
-  var diff={__added:[],__changes:{},__deleted:[]};
+  var diff={__added:[],__changes:{},__deleted:[],__order:items.map(function(it){return it.item;})};
   var rawNames=new Set(RAW_DATA.map(function(d){return d.item;}));
   var currentNames=new Set(items.map(function(it){return it.item;}));
   RAW_DATA.forEach(function(d){
     if(!currentNames.has(d.item))diff.__deleted.push(d.item);
   });
+  var addedSeen={};
   items.forEach(function(it){
     if(!rawNames.has(it.item)){
-      diff.__added.push({item:it.item,store:it.store,num:it.num,price:it.price,notes:it.notes,calc:it.calc,need:it.need,due:it.due,daysInput:it.daysInput});
+      // deduplicate by name only
+      addedSeen[it.item.trim().toLowerCase()]={item:it.item,store:it.store,num:it.num,price:it.price,notes:it.notes,calc:it.calc,need:it.need,due:it.due,daysInput:it.daysInput};
     } else {
       var defaultNeed=PRESET_NEED.has(it.item);
       if(it.need!==defaultNeed||it.due){
@@ -946,6 +952,7 @@ function buildDiff(){
       }
     }
   });
+  diff.__added=Object.values(addedSeen);
   return diff;
 }
 
@@ -961,16 +968,24 @@ function applyDiff(data){
       if(c){if(c.need!==undefined)it.need=c.need;if(c.due!==undefined)it.due=c.due;if(c.daysInput!==undefined)it.daysInput=c.daysInput;}
     });
   }
-  // *** FIX: deduplicate __added items against existing items before pushing ***
   if(data.__added){
-    var existingKeys=new Set(items.map(itemKey));
+    var rawNames=new Set(RAW_DATA.map(function(d){return d.item.trim().toLowerCase()}));
+    var existingNames=new Set(items.map(function(it){return it.item.trim().toLowerCase();}));
     data.__added.forEach(function(it){
-      var k=itemKey(it);
-      if(!existingKeys.has(k)){
+      var n=it.item.trim().toLowerCase();
+      // only add if name is not already in RAW_DATA and not already in list
+      if(!rawNames.has(n)&&!existingNames.has(n)){
         it.id=genId();
         items.push(it);
-        existingKeys.add(k);
+        existingNames.add(n);
       }
+    });
+  }
+  if(data.__order){
+    var order=data.__order;
+    items.sort(function(a,b){
+      var ai=order.indexOf(a.item),bi=order.indexOf(b.item);
+      if(ai===-1)return 1;if(bi===-1)return -1;return ai-bi;
     });
   }
 }
