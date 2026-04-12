@@ -330,12 +330,15 @@ const PRESET_DAYS_INPUT={"tomato paste - 4 cans = 16 days":"3","blueberries (16 
 const PRESET_NEED=new Set(["tomato paste - 4 cans = 16 days","blueberries (16 oz) 3 bags","avocados; mini (6/bag)","mushrooms, enoki - three 200-gram pkgs = 16 days","mushrooms, king oyster - three 270-gram pkgs = 810g for 16 days - or - two 1 lb packages = 908g for 16 days","ginger root","milk; whole, organic - 292g/day average - 1,892g=1/2-gallon","cabbage, red","oatley original oatmilk","daikon radish root - get 1/3 lb","italian parsley","broccoli, 2 lb bag = 16 days","brussels sprouts ~ 2 lbs= 16 days","spinach - 2 lb box","cilantro - buy at vons if it's not 4 for $5 at sprouts - get 2 bunches","carrots","swiss chard","heavy cream, organic","celery - 20 oz - get 2","eggs; pasture-raised organic","good earth sweet spice - buy at sprouts if on sale at 2 for $5 ~ each box lasts 9 days","flaxseed, whole","tofu; nature's raw tofu","tofu; pulmuone organic soft for stews ($1.29)","ground beef, 93% grass fed, organic","italian panko breadcrumbs","whole chicken","barbacoa; del real","black beans (from freezer)","black olives; large lindsay","bread: Oroweat / Arnold Organic 22 Grains & Seed Bread","carnitas"]);
 
 var items=[], currentFilter='all', editingId=null, popupItemId=null;
-// _dupKeys: Set of "itemname|||storename" pairs that appear more than once (true duplicates)
 var _dupKeys = new Set();
-var _dupNames = new Set(); // kept for compat, not used for detection
+var _dupNames = new Set();
 var _nextId = 0;
 
 function genId() { return Date.now() * 1000 + (_nextId++); }
+
+function itemKey(it) {
+  return (it.item||'').trim().toLowerCase() + '|||' + (it.store||'').trim().toLowerCase();
+}
 
 function initFromRaw(){
   _nextId = 0;
@@ -374,7 +377,6 @@ function loadState(){
     if(raw){
       var savedMap=JSON.parse(raw);
       initFromRaw();
-      // Honor deletions first
       if(savedMap.__deleted&&savedMap.__deleted.length){
         var delSet=new Set(savedMap.__deleted);
         items=items.filter(function(it){return !delSet.has(it.item);});
@@ -399,10 +401,16 @@ function loadState(){
           if(ai===-1)return 1;if(bi===-1)return -1;return ai-bi;
         });
       }
+      // *** FIX: deduplicate __added items against existing items before pushing ***
       if(savedMap.__added){
+        var existingKeys=new Set(items.map(itemKey));
         savedMap.__added.forEach(function(it){
-          it.id = genId();
-          items.push(it);
+          var k=itemKey(it);
+          if(!existingKeys.has(k)){
+            it.id=genId();
+            items.push(it);
+            existingKeys.add(k);
+          }
         });
       }
     }else{
@@ -524,17 +532,14 @@ function dueCellHtml(it) {
   }
 }
 
-// FIXED: duplicate detection keys on item name + store (case-insensitive)
-// Only flags items where BOTH the item name AND the store are identical
 function computeDuplicates() {
   var counts = {};
   items.forEach(function(it) {
-    var key = it.item.trim().toLowerCase() + '|||' + (it.store||'').trim().toLowerCase();
+    var key = itemKey(it);
     counts[key] = (counts[key]||0) + 1;
   });
   _dupKeys = new Set();
   Object.keys(counts).forEach(function(k){ if(counts[k]>1) _dupKeys.add(k); });
-  _dupNames = new Set(); // not used for detection
 }
 
 function findDuplicates() {
@@ -556,8 +561,7 @@ function renderTable(){
   tbody.innerHTML='';
   filtered.forEach(function(it){
     var urgency=rowUrgency(it);
-    // FIXED: isDup uses item+store key
-    var isDup = _dupKeys.has(it.item.trim().toLowerCase() + '|||' + (it.store||'').trim().toLowerCase());
+    var isDup = _dupKeys.has(itemKey(it));
     var tr=document.createElement('tr');
     var classes=[it.need?'need-row':'',urgency,isDup?'dup-warning':''].filter(Boolean).join(' ');
     tr.className=classes;
@@ -892,7 +896,14 @@ function restoreBackup(){
     var data = JSON.parse(raw);
     if(data.items && Array.isArray(data.items)){
       if(!confirm('This will replace all current data. Continue?'))return;
-      items = data.items;
+      // Deduplicate restored items
+      var seen = new Set();
+      items = data.items.filter(function(it, i){
+        var k = itemKey(it);
+        if(seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      });
       items.forEach(function(it, i){ if(!it.id) it.id = i; });
       _nextId = items.length + 1000;
       saveState();
@@ -919,7 +930,6 @@ function buildDiff(){
   var diff={__added:[],__changes:{},__deleted:[]};
   var rawNames=new Set(RAW_DATA.map(function(d){return d.item;}));
   var currentNames=new Set(items.map(function(it){return it.item;}));
-  // Track deletions of RAW_DATA items so they stay gone after pull
   RAW_DATA.forEach(function(d){
     if(!currentNames.has(d.item))diff.__deleted.push(d.item);
   });
@@ -938,7 +948,6 @@ function buildDiff(){
 
 function applyDiff(data){
   initFromRaw();
-  // Honor deletions from remote sync
   if(data.__deleted&&data.__deleted.length){
     var delSet=new Set(data.__deleted);
     items=items.filter(function(it){return !delSet.has(it.item);});
@@ -949,10 +958,16 @@ function applyDiff(data){
       if(c){if(c.need!==undefined)it.need=c.need;if(c.due!==undefined)it.due=c.due;if(c.daysInput!==undefined)it.daysInput=c.daysInput;}
     });
   }
+  // *** FIX: deduplicate __added items against existing items before pushing ***
   if(data.__added){
+    var existingKeys=new Set(items.map(itemKey));
     data.__added.forEach(function(it){
-      it.id = genId();
-      items.push(it);
+      var k=itemKey(it);
+      if(!existingKeys.has(k)){
+        it.id=genId();
+        items.push(it);
+        existingKeys.add(k);
+      }
     });
   }
 }
@@ -982,3 +997,4 @@ init();
 </script>
 </body>
 </html>
+
