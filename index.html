@@ -177,6 +177,7 @@
   <button onclick="pushToGoogle()" style="background:#1a56c4;color:white;border:none;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">Sync ↑ Push</button>
   <button onclick="pullFromGoogle()" style="background:#2e7d32;color:white;border:none;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">Sync ↓ Pull</button>
   <button onclick="openBackupModal()" style="background:#7b5ea7;color:white;border:none;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">💾 Backup</button>
+  <button onclick="resetAndClean()" style="background:#c04a2a;color:white;border:none;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;" title="Wipes localStorage and JSONBin clean. Keeps your need/date changes.">🧹 Reset &amp; Clean</button>
   <span id="sync-status" style="font-size:11px;font-weight:600;font-family:monospace;"></span>
 </div>
 <div id="finance-bar">
@@ -426,10 +427,13 @@ function saveState(){
     var deleted=RAW_DATA.filter(function(d){return !currentNames.has(d.item);}).map(function(d){return d.item;});
     var map={__order:items.map(function(it){return it.item;}),__added:[],__deleted:deleted};
     var rawNames=new Set(RAW_DATA.map(function(d){return d.item;}));
+    // Deduplicate __added by item name (last one wins) to prevent accumulation
+    var addedMap={};
     items.forEach(function(it){
       map[it.item]={need:it.need,due:it.due,daysInput:it.daysInput,notes:it.notes,store:it.store,num:it.num,price:it.price,calc:it.calc};
-      if(!rawNames.has(it.item))map.__added.push(it);
+      if(!rawNames.has(it.item)) addedMap[it.item.trim().toLowerCase()]=it;
     });
+    map.__added=Object.values(addedMap);
     localStorage.setItem('shopping-items-v2',JSON.stringify(map));
   }catch(e){}
 }
@@ -992,9 +996,27 @@ function pullFromGoogle(){
     }).catch(function(e){setSyncStatus('Could not connect: '+e,'sync-err');});
 }
 
+function resetAndClean(){
+  if(!confirm('This will:\n1. Clear your browser localStorage for this app\n2. Push a clean (duplicate-free) state to JSONBin\n3. Reload the page\n\nYour need checkmarks, dates, and manually-added items will be preserved.\n\nContinue?')) return;
+  var cleanDiff=buildDiff();
+  localStorage.removeItem('shopping-items-v2');
+  localStorage.removeItem('shopping-finance');
+  setSyncStatus('Cleaning...','sync-pending');
+  fetch(JBIN_URL,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':JBIN_KEY,'X-Bin-Versioning':'false'},body:JSON.stringify(cleanDiff)})
+    .then(function(r){return r.json();})
+    .then(function(){
+      setSyncStatus('Clean done — reloading…','sync-ok');
+      setTimeout(function(){location.reload(true);},900);
+    })
+    .catch(function(e){
+      setSyncStatus('Push failed: '+e,'sync-err');
+      alert('JSONBin push failed, but localStorage was cleared. Reloading from RAW_DATA.\nError: '+e);
+      setTimeout(function(){location.reload(true);},1000);
+    });
+}
+
 function init(){loadState();loadFinance();renderTable();}
 init();
 </script>
 </body>
 </html>
-
