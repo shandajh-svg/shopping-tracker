@@ -869,7 +869,7 @@ function openShoppingMode(){
       html+='<div class="shop-item-price">'+fmtPrice(it.price)+'</div>';
       if(it.due)html+='<div class="shop-item-due">Due: '+formatDue(it.due)+'</div>';
       if(it.notes)html+='<div class="shop-item-notes">'+escHtml(it.notes)+'</div>';
-      html+='<div class="shop-item-got"><label class="shop-got-check"><input type="checkbox" onchange="toggleGotIt('si-'+it.id+'',this.checked)" style="width:16px;height:16px;accent-color:var(--accent);"> Got it</label></div>';
+      html+='<div class="shop-item-got"><label class="shop-got-check"><input type="checkbox" onchange="toggleGotIt(\'si-'+it.id+'\'  ,this.checked)" style="width:16px;height:16px;accent-color:var(--accent);"> Got it</label></div>';
       html+='</div>';
     });
   });
