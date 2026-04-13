@@ -946,9 +946,88 @@ function restoreBackup(){
 }
 
 // ---- INIT ----
+// ---- VEGGIE PREP SYNC ----
+var VP_JBIN_KEY='$2a$10$tpjsSaIqmjzoWXjpvpu7n.AdJJdQf8JUbDhBDfNoCC5rzN0vxDh/m';
+var VP_JBIN_URL='https://api.jsonbin.io/v3/b/69d627d5856a6821890eb408/latest';
+
+// Map VP itemData keys to Shopping Tracker item name substrings (lowercase)
+var VP_MAP=[
+  {key:'enoki',          match:'enoki'},
+  {key:'celery',         match:'celery'},
+  {key:'cabbage',        match:'cabbage, red'},
+  {key:'kingoyster',     match:'king oyster'},
+  {key:'broccoli',       match:'broccoli'},
+  {key:'parsley',        match:'italian parsley'},
+  {key:'cilantro',       match:'cilantro'},
+  {key:'spinach',        match:'spinach'},
+  {key:'carrots',        match:'carrots'},
+  {key:'chard',          match:'swiss chard'},
+  {key:'brussels',       match:'brussels sprouts'},
+  {key:'supply-ginger',  match:'ginger root'},
+  {key:'supply-garlic',  match:'garlic cloves'},
+  {key:'supply-blueberries', match:'blueberries'},
+  {key:'supply-flaxseed',match:'flaxseed, whole'},
+  {key:'supply-daikon',  match:'daikon radish'},
+];
+
+function findItemByMatch(matchStr){
+  var m=matchStr.toLowerCase();
+  return items.find(function(it){return it.item.toLowerCase().indexOf(m)>=0;});
+}
+
+function applyVPDates(vp){
+  var itemData=vp.itemData||{};
+  var blend=vp.blend||{};
+
+  // Grams-based items
+  VP_MAP.forEach(function(entry){
+    var d=itemData[entry.key];
+    if(!d)return;
+    var grams=parseFloat(d.grams);
+    var gpd=parseFloat(d.gpd);
+    if(isNaN(grams)||isNaN(gpd)||gpd<=0||grams<=0)return;
+    var days=Math.floor(grams/gpd);
+    if(days<=0)return;
+    var it=findItemByMatch(entry.match);
+    if(it)it.due=addDays(days);
+  });
+
+  // Tomato paste: tomatoDaysOpen + tomatoFullCans*4
+  var tOpen=parseFloat(blend.tomatoDaysOpen)||0;
+  var tCans=parseFloat(blend.tomatoFullCans)||0;
+  var tDays=tOpen+(tCans*4);
+  if(tDays>0){var tp=findItemByMatch('tomato paste');if(tp)tp.due=addDays(tDays);}
+
+  // Fish oil, collagen, chia — stored as days remaining in blend
+  var blendMap={'fish oil':parseFloat(blend.fishOilDays)||0,'collagen':parseFloat(blend.collagenDays)||0,'chia seeds':parseFloat(blend.chiaDays)||0};
+  Object.keys(blendMap).forEach(function(m){
+    var days=blendMap[m];
+    if(days>0){var it=findItemByMatch(m);if(it)it.due=addDays(days);}
+  });
+}
+
+function syncVPAndRender(){
+  setSyncStatus('Syncing veggie dates…','pending');
+  fetch(VP_JBIN_URL,{method:'GET',headers:{'X-Master-Key':VP_JBIN_KEY}})
+    .then(function(r){return r.json();})
+    .then(function(resp){
+      if(resp&&resp.record){
+        applyVPDates(resp.record);
+        setSyncStatus('Synced '+new Date().toLocaleTimeString(),'ok');
+      } else {
+        setSyncStatus('VP sync: no data','err');
+      }
+      renderTable();
+    })
+    .catch(function(){
+      setSyncStatus('VP sync failed — using saved dates','err');
+      renderTable();
+    });
+}
+
 loadItems();
 loadFinance();
-renderTable();
+syncVPAndRender();
 </script>
 </body>
 </html>
