@@ -11,149 +11,122 @@
 <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAv0lEQVR4nO1UQQ6AIAwbxrsP8w2+zjf4Ht/g0XjQgyEhZpMyWSCGnghpRteyufXYTyqIruTjTUATQETU+8M8DixhWjZTAcUdcG97wLti6UIfp8jxpEBqou4IiO7utREgEUIO5IjgkwBL1C/A55caAzrC0Bg+i+aEaQTI9EQdsN6GcARa+2PCi09BdBN6hA5IXSGcJ1SbkIsD4agESIXCe4SjFmCN+gVInym8RzhqAVwhrjDC4QCPoRXq/wO/F3ABY1RQXffnoLAAAAAASUVORK5CYII=">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #f5f2eb; --surface: #ffffff; --border: #d8d0c0; --border-light: #ece7dd;
-    --text: #2c2416; --text-muted: #8a7d68; --accent: #5c7a3e; --accent-light: #e8f0e0;
-    --urgent: #c04a2a; --urgent-light: #fceee9; --warn: #b07d20; --warn-light: #fdf5e0;
-    --need-bg: #eef4e8; --shadow-md: 0 4px 12px rgba(44,36,22,0.10);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 13px; line-height: 1.4; text-transform: uppercase; }
-  #app-header { background: var(--text); color: #f5f2eb; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; }
-  #app-header h1 { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; letter-spacing: 0.05em; white-space: nowrap; }
-  .header-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-  .btn { padding: 5px 10px; border-radius: 4px; border: 1px solid; font-family: system-ui, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.15s; text-transform: uppercase; }
-  .btn-light { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.25); color: #f5f2eb; }
-  .btn-light:hover { background: rgba(255,255,255,0.22); }
-  .btn-accent { background: var(--accent); border-color: var(--accent); color: white; }
-  .btn-accent:hover { background: #4d6834; }
-  .btn-warn { background: var(--warn); border-color: var(--warn); color: white; }
-  .btn-warn:hover { background: #9a6d1a; }
-  .btn-sm { padding: 3px 8px; font-size: 11px; }
-  .btn-danger { background: var(--urgent); border-color: var(--urgent); color: white; }
-  .btn-secondary { background: var(--surface); border-color: var(--border); color: var(--text); }
-  #finance-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 8px 16px; display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
-  .fin-group { display: flex; align-items: center; gap: 5px; }
-  .fin-label { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.06em; color: var(--text-muted); text-transform: uppercase; white-space: nowrap; }
-  .fin-input { width: 76px; font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--text); border: 1px solid var(--border); border-radius: 3px; padding: 2px 5px; background: var(--bg); text-align: right; }
-  .fin-input:focus { outline: none; border-color: var(--accent); }
-  .fin-value { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; }
-  .fin-divider { width: 1px; height: 20px; background: var(--border); }
-  .fin-positive { color: var(--accent); }
-  .fin-negative { color: var(--urgent); }
-  #fin-notes-area { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
-  .fin-note-wrap { display: flex; gap: 3px; align-items: center; }
-  #controls { background: var(--bg); padding: 7px 16px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; border-bottom: 1px solid var(--border-light); }
-  #search-input { flex: 1; min-width: 150px; max-width: 260px; padding: 5px 9px; border: 1px solid var(--border); border-radius: 4px; font-family: system-ui, sans-serif; font-size: 12px; background: var(--surface); text-transform: uppercase; }
-  #search-input:focus { outline: none; border-color: var(--accent); }
-  .filter-btn { padding: 4px 9px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); font-size: 11px; font-weight: 600; cursor: pointer; color: var(--text-muted); transition: all 0.15s; text-transform: uppercase; }
-  .filter-btn.active { background: var(--text); color: white; border-color: var(--text); }
-  .filter-btn:hover:not(.active) { border-color: var(--text-muted); color: var(--text); }
-  #item-count { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; margin-left: auto; }
-  #add-row-btn { display: inline-block; margin: 0; padding: 5px 14px; border: none; border-radius: 4px; background: #1a73e8; color: white; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.04em; }
-  #add-row-btn:hover { background: #1558b0; }
-  #bulk-bar { background: var(--bg); border-bottom: 1px solid var(--border); padding: 6px 16px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 11px; }
-  #bulk-bar .bulk-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; white-space: nowrap; }
-  #bulk-bar .bulk-group { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
-  #bulk-bar .bulk-divider { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
-  #table-wrap { overflow-x: auto; padding: 0 16px 40px; }
-  table { width: 100%; border-collapse: collapse; min-width: 820px; }
-  thead th { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; color: var(--text-muted); text-transform: uppercase; padding: 7px 5px; border-bottom: 2px solid var(--border); text-align: left; white-space: nowrap; background: var(--bg); }
-  thead th.center { text-align: center; }
-  tbody tr { border-bottom: 1px solid var(--border-light); transition: background 0.1s; }
-  tbody tr:hover { background: rgba(255,255,255,0.7); }
-  tbody tr.need-row { background: var(--need-bg); }
-  tbody tr.need-row:hover { background: #e4f0db; }
-  tbody tr.urgent-row { background: var(--urgent-light); }
-  tbody tr.warn-row { background: var(--warn-light); }
-  td { padding: 4px 5px; vertical-align: middle; }
-  td.td-need { text-align: center; width: 28px; }
-  .need-check { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
-  td.td-due { width: 80px; white-space: nowrap; }
-  .due-btn { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 600; background: none; border: none; cursor: pointer; padding: 2px 4px; border-radius: 3px; text-decoration: underline dotted; }
-  .due-btn:hover { background: rgba(0,0,0,0.06); }
-  .due-past { color: var(--urgent); } .due-soon { color: var(--warn); } .due-ok { color: var(--accent); } .due-none { color: var(--text-muted); }
-  .due-clear { font-size: 9px; color: var(--text-muted); background: none; border: none; cursor: pointer; padding: 1px 2px; margin-left: 1px; }
-  .due-clear:hover { color: var(--urgent); }
-  td.td-num { width: 26px; text-align: center; padding: 4px 2px; }
-  .store-num { display: inline-block; width: 20px; height: 20px; border-radius: 50%; background: var(--border-light); font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; text-align: center; line-height: 20px; color: var(--text-muted); }
-  .store-num.sn-1{background:#e8daf5;color:#6b3fa0}.store-num.sn-2{background:#fce4ec;color:#c2185b}.store-num.sn-3{background:#e3f2fd;color:#1565c0}.store-num.sn-4{background:#fff8e1;color:#f57f17}.store-num.sn-5{background:#fce8d5;color:#b84a00}.store-num.sn-6{background:#e8f5e9;color:#2e7d32}.store-num.sn-7{background:#e0f7fa;color:#006064}.store-num.sn-8{background:#fffde7;color:#827717}.store-num.sn-9{background:#f3e5f5;color:#6a1b9a}.store-num.sn-10{background:#e8eaf6;color:#283593}.store-num.sn-11{background:#fbe9e7;color:#bf360c}
-  td.td-item { width: 190px; max-width: 190px; }
-  .item-name { font-weight: 700; font-size: 12px; line-height: 1.3; text-transform: uppercase; color: var(--text); }
-  td.td-store { width: 85px; max-width: 85px; }
-  .store-name { font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; }
-  td.td-days { width: 100px; }
-  .days-wrap { display: flex; gap: 4px; align-items: center; }
-  .days-input { width: 60px; height: 34px; padding: 2px 4px 2px 8px; border: 1px solid var(--border); border-radius: 3px; font-family: 'DM Mono', monospace; font-size: 14px; text-align: left; background: var(--surface); color: var(--text); -moz-appearance: textfield; }
-  .days-input::-webkit-inner-spin-button { -webkit-appearance: inner-spin-button; width: 22px; height: 34px; cursor: pointer; opacity: 1; }
-  .days-input:focus { outline: none; border-color: var(--accent); }
-  .days-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
-  .egg-wrap { display: flex; flex-direction: column; gap: 2px; }
-  .egg-row { display: flex; align-items: center; gap: 4px; }
-  .egg-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; }
-  .egg-result { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); }
-  td.td-edit-inline { width: 34px; text-align: center; padding: 4px 2px; }
-  .edit-inline-btn { width: 26px; height: 26px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.15s; line-height: 1; }
-  .edit-inline-btn:hover { background: var(--text); color: white; border-color: var(--text); }
-  td.td-price { width: 68px; min-width: 68px; text-align: right; font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; }
-  td.td-notes { max-width: 220px; }
-  .notes-text {
-    font-size: 12px; font-weight: 500; color: var(--text-muted);
-    white-space: pre-line; cursor: pointer; text-transform: uppercase;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    max-height: 3.2em;
-    transition: max-height 0.2s ease;
-  }
-  .notes-text.expanded {
-    display: block;
-    -webkit-line-clamp: unset;
-    max-height: none;
-    overflow: visible;
-  }
-  .notes-expand-hint { font-size: 9px; color: var(--accent); cursor: pointer; display: block; margin-top: 1px; text-transform: uppercase; letter-spacing: 0.05em; }
-  td.td-edit { width: 28px; padding: 4px 2px; text-align: center; display: none; }
-  .date-popup { position: fixed; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; box-shadow: var(--shadow-md); z-index: 500; width: 240px; }
-  .date-popup h4 { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; font-weight: 600; }
-  .date-popup-field { margin-bottom: 8px; }
-  .date-popup-field label { display: block; font-size: 10px; color: var(--text-muted); margin-bottom: 3px; font-weight: 600; }
-  .date-popup-field input { width: 100%; padding: 5px 7px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; font-family: 'DM Mono', monospace; background: var(--bg); }
-  .date-popup-field input:focus { outline: none; border-color: var(--accent); }
-  .date-popup-actions { display: flex; gap: 6px; margin-top: 10px; justify-content: space-between; align-items: center; }
-  .date-popup-clear { font-size: 11px; color: var(--urgent); background: none; border: none; cursor: pointer; text-decoration: underline; text-transform: uppercase; }
-  #shopping-mode { display: none; position: fixed; inset: 0; background: white; z-index: 300; overflow-y: auto; }
-  #shopping-mode.open { display: block; }
-  #shopping-mode-header { background: var(--text); color: white; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
-  #shopping-mode-header h2 { font-size: 16px; font-weight: 600; }
-  .shop-store-header { background: var(--accent); color: white; padding: 8px 16px; font-size: 17px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; position: sticky; top: 48px; }
-  .shop-item { padding: 12px 16px; border-bottom: 1px solid var(--border-light); display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; }
-  .shop-item-name { font-size: 21px; font-weight: 700; color: var(--text); line-height: 1.2; grid-column: 1; }
-  .shop-item-price { font-size: 21px; font-weight: 700; color: var(--accent); font-family: 'DM Mono', monospace; grid-column: 2; text-align: right; white-space: nowrap; }
-  .shop-item-due { font-size: 12px; color: var(--text-muted); grid-column: 1 / -1; font-family: 'DM Mono', monospace; }
-  .shop-item-notes { font-size: 12px; color: var(--text-muted); grid-column: 1 / -1; line-height: 1.4; margin-top: 2px; white-space: pre-line; }
-  .shop-item-got { grid-column: 1 / -1; margin-top: 6px; }
-  .shop-got-check { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--accent); cursor: pointer; }
-  .shop-item.got-it { opacity: 0.4; }
-  .shop-item.got-it .shop-item-name { text-decoration: line-through; }
-  #edit-modal { display: none; position: fixed; inset: 0; background: rgba(44,36,22,0.5); z-index: 200; align-items: center; justify-content: center; }
-  #edit-modal.open { display: flex; }
-  .modal-box { background: var(--surface); border-radius: 8px; padding: 20px; width: 500px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-md); }
-  .modal-title { font-size: 14px; font-weight: 600; margin-bottom: 14px; }
-  .modal-field { margin-bottom: 10px; }
-  .modal-field label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 3px; font-weight: 500; }
-  .modal-field input, .modal-field textarea, .modal-field select { width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; font-family: 'DM Sans', sans-serif; font-size: 13px; background: var(--bg); }
-  .modal-field textarea { height: 100px; resize: vertical; }
-  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
-  .urgency-legend { display: flex; gap: 10px; align-items: center; font-size: 10px; color: rgba(255,255,255,0.6); }
-  .legend-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 2px; }
-  #backup-modal { display: none; position: fixed; inset: 0; background: rgba(44,36,22,0.5); z-index: 250; align-items: center; justify-content: center; }
-  #backup-modal.open { display: flex; }
-  #backup-modal .modal-box { width: 480px; }
-  #backup-modal textarea { width: 100%; height: 120px; font-family: 'DM Mono', monospace; font-size: 11px; background: #f5f5f5; border: 1px solid var(--border); border-radius: 4px; padding: 8px; resize: vertical; }
-  .dup-warning { background: #fff3cd !important; }
-  .dup-badge { display: inline-block; background: #ff9800; color: white; font-size: 9px; font-weight: 700; border-radius: 3px; padding: 1px 4px; margin-left: 4px; vertical-align: middle; }
+:root{--bg:#f5f2eb;--surface:#ffffff;--border:#d8d0c0;--border-light:#ece7dd;--text:#2c2416;--text-muted:#8a7d68;--accent:#5c7a3e;--accent-light:#e8f0e0;--urgent:#c04a2a;--urgent-light:#fceee9;--warn:#b07d20;--warn-light:#fdf5e0;--need-bg:#eef4e8;--shadow-md:0 4px 12px rgba(44,36,22,0.10);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.4;text-transform:uppercase;}
+#app-header{background:var(--text);color:#f5f2eb;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:0;z-index:100;flex-wrap:wrap;}
+#app-header h1{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;letter-spacing:0.05em;white-space:nowrap;}
+.header-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.btn{padding:5px 10px;border-radius:4px;border:1px solid;font-family:system-ui,sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all 0.15s;text-transform:uppercase;}
+.btn-light{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.25);color:#f5f2eb;}
+.btn-light:hover{background:rgba(255,255,255,0.22);}
+.btn-accent{background:var(--accent);border-color:var(--accent);color:white;}
+.btn-accent:hover{background:#4d6834;}
+.btn-sm{padding:3px 8px;font-size:11px;}
+.btn-danger{background:var(--urgent);border-color:var(--urgent);color:white;}
+.btn-secondary{background:var(--surface);border-color:var(--border);color:var(--text);}
+#sync-bar{background:#e8f0fe;border-bottom:1px solid #aac4f5;padding:6px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:11px;}
+#finance-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;}
+.fin-group{display:flex;align-items:center;gap:5px;}
+.fin-label{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:0.06em;color:var(--text-muted);text-transform:uppercase;white-space:nowrap;}
+.fin-input{width:76px;font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--text);border:1px solid var(--border);border-radius:3px;padding:2px 5px;background:var(--bg);text-align:right;}
+.fin-input:focus{outline:none;border-color:var(--accent);}
+.fin-value{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;}
+.fin-divider{width:1px;height:20px;background:var(--border);}
+.fin-positive{color:var(--accent);}
+.fin-negative{color:var(--urgent);}
+#fin-notes-area{display:flex;flex-wrap:wrap;gap:5px;align-items:center;}
+.fin-note-wrap{display:flex;gap:3px;align-items:center;}
+#controls{background:var(--bg);padding:7px 16px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--border-light);}
+#add-row-btn{display:inline-block;margin:0;padding:5px 14px;border:none;border-radius:4px;background:#1a73e8;color:white;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;text-transform:uppercase;letter-spacing:0.04em;}
+#add-row-btn:hover{background:#1558b0;}
+#search-input{flex:1;min-width:150px;max-width:260px;padding:5px 9px;border:1px solid var(--border);border-radius:4px;font-family:system-ui,sans-serif;font-size:12px;background:var(--surface);text-transform:uppercase;}
+#search-input:focus{outline:none;border-color:var(--accent);}
+.filter-btn{padding:4px 9px;border-radius:4px;border:1px solid var(--border);background:var(--surface);font-size:11px;font-weight:600;cursor:pointer;color:var(--text-muted);transition:all 0.15s;text-transform:uppercase;}
+.filter-btn.active{background:var(--text);color:white;border-color:var(--text);}
+.filter-btn:hover:not(.active){border-color:var(--text-muted);color:var(--text);}
+#item-count{font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;margin-left:auto;}
+#bulk-bar{background:var(--bg);border-bottom:1px solid var(--border);padding:6px 16px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:11px;}
+#bulk-bar .bulk-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;white-space:nowrap;}
+#bulk-bar .bulk-group{display:flex;gap:4px;align-items:center;flex-wrap:wrap;}
+#bulk-bar .bulk-divider{width:1px;height:18px;background:var(--border);margin:0 4px;}
+#table-wrap{overflow-x:auto;padding:0 16px 40px;}
+table{width:100%;border-collapse:collapse;min-width:700px;}
+thead th{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.06em;color:var(--text-muted);text-transform:uppercase;padding:7px 5px;border-bottom:2px solid var(--border);text-align:left;white-space:nowrap;background:var(--bg);}
+thead th.center{text-align:center;}
+tbody tr{border-bottom:1px solid var(--border-light);transition:background 0.1s;}
+tbody tr:hover{background:rgba(255,255,255,0.7);}
+tbody tr.need-row{background:var(--need-bg);}
+tbody tr.need-row:hover{background:#e4f0db;}
+tbody tr.urgent-row{background:var(--urgent-light);}
+tbody tr.warn-row{background:var(--warn-light);}
+tbody tr.dup-warning{background:#fff3cd;}
+td{padding:4px 5px;vertical-align:middle;}
+td.td-need{text-align:center;width:28px;}
+.need-check{width:16px;height:16px;cursor:pointer;accent-color:var(--accent);}
+td.td-due{width:80px;white-space:nowrap;}
+.due-btn{font-family:'DM Mono',monospace;font-size:12px;font-weight:600;background:none;border:none;cursor:pointer;padding:2px 4px;border-radius:3px;text-decoration:underline dotted;}
+.due-btn:hover{background:rgba(0,0,0,0.06);}
+.due-past{color:var(--urgent);}
+.due-soon{color:var(--warn);}
+.due-ok{color:var(--accent);}
+.due-none{color:var(--text-muted);}
+.due-clear{font-size:9px;color:var(--text-muted);background:none;border:none;cursor:pointer;padding:1px 2px;margin-left:1px;}
+.due-clear:hover{color:var(--urgent);}
+td.td-num{width:26px;text-align:center;padding:4px 2px;}
+.store-num{display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--border-light);font-family:'DM Mono',monospace;font-size:10px;font-weight:500;text-align:center;line-height:20px;color:var(--text-muted);}
+.store-num.sn-1{background:#e8daf5;color:#6b3fa0}.store-num.sn-2{background:#fce4ec;color:#c2185b}.store-num.sn-3{background:#e3f2fd;color:#1565c0}.store-num.sn-4{background:#fff8e1;color:#f57f17}.store-num.sn-5{background:#fce8d5;color:#b84a00}.store-num.sn-6{background:#e8f5e9;color:#2e7d32}.store-num.sn-7{background:#e0f7fa;color:#006064}.store-num.sn-8{background:#fffde7;color:#827717}.store-num.sn-9{background:#f3e5f5;color:#6a1b9a}.store-num.sn-10{background:#e8eaf6;color:#283593}.store-num.sn-11{background:#fbe9e7;color:#bf360c}.store-num.sn-12{background:#f1f8e9;color:#33691e}
+td.td-item{width:200px;max-width:200px;}
+.item-name{font-weight:700;font-size:12px;line-height:1.3;text-transform:uppercase;color:var(--text);cursor:pointer;}
+.item-name:hover{text-decoration:underline;}
+.dup-badge{display:inline-block;background:#ff9800;color:white;font-size:9px;font-weight:700;border-radius:3px;padding:1px 4px;margin-left:4px;vertical-align:middle;}
+td.td-store{width:90px;max-width:90px;}
+.store-name{font-size:12px;font-weight:500;color:var(--text-muted);text-transform:uppercase;cursor:pointer;}
+.store-name:hover{text-decoration:underline;}
+td.td-price{width:68px;min-width:68px;text-align:right;font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;}
+td.td-edit{width:30px;text-align:center;padding:4px 2px;}
+.edit-btn{width:26px;height:26px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.edit-btn:hover{background:var(--text);color:white;border-color:var(--text);}
+td.td-notes{max-width:220px;}
+.notes-text{font-size:12px;font-weight:500;color:var(--text-muted);white-space:pre-line;cursor:pointer;text-transform:uppercase;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;max-height:3.2em;}
+.notes-text.expanded{display:block;-webkit-line-clamp:unset;max-height:none;overflow:visible;}
+.date-popup{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;box-shadow:var(--shadow-md);z-index:500;width:240px;}
+.date-popup h4{font-size:11px;color:var(--text-muted);margin-bottom:10px;font-weight:600;}
+.date-popup-field{margin-bottom:8px;}
+.date-popup-field label{display:block;font-size:10px;color:var(--text-muted);margin-bottom:3px;font-weight:600;}
+.date-popup-field input{width:100%;padding:5px 7px;border:1px solid var(--border);border-radius:4px;font-size:12px;font-family:'DM Mono',monospace;background:var(--bg);}
+.date-popup-field input:focus{outline:none;border-color:var(--accent);}
+.date-popup-actions{display:flex;gap:6px;margin-top:10px;justify-content:space-between;align-items:center;}
+.date-popup-clear{font-size:11px;color:var(--urgent);background:none;border:none;cursor:pointer;text-decoration:underline;text-transform:uppercase;}
+#shopping-mode{display:none;position:fixed;inset:0;background:white;z-index:300;overflow-y:auto;}
+#shopping-mode.open{display:block;}
+#shopping-mode-header{background:var(--text);color:white;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+#shopping-mode-header h2{font-size:16px;font-weight:600;}
+.shop-store-header{background:var(--accent);color:white;padding:8px 16px;font-size:17px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;position:sticky;top:48px;}
+.shop-item{padding:12px 16px;border-bottom:1px solid var(--border-light);display:grid;grid-template-columns:1fr auto;gap:3px 10px;}
+.shop-item-name{font-size:21px;font-weight:700;color:var(--text);line-height:1.2;grid-column:1;}
+.shop-item-price{font-size:21px;font-weight:700;color:var(--accent);font-family:'DM Mono',monospace;grid-column:2;text-align:right;white-space:nowrap;}
+.shop-item-due{font-size:12px;color:var(--text-muted);grid-column:1/-1;font-family:'DM Mono',monospace;}
+.shop-item-notes{font-size:12px;color:var(--text-muted);grid-column:1/-1;line-height:1.4;margin-top:2px;white-space:pre-line;}
+.shop-item-got{grid-column:1/-1;margin-top:6px;}
+.shop-got-check{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--accent);cursor:pointer;}
+.shop-item.got-it{opacity:0.4;}
+.shop-item.got-it .shop-item-name{text-decoration:line-through;}
+#edit-modal{display:none;position:fixed;inset:0;background:rgba(44,36,22,0.5);z-index:200;align-items:center;justify-content:center;}
+#edit-modal.open{display:flex;}
+.modal-box{background:var(--surface);border-radius:8px;padding:20px;width:500px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-md);}
+.modal-title{font-size:14px;font-weight:600;margin-bottom:14px;}
+.modal-field{margin-bottom:10px;}
+.modal-field label{display:block;font-size:11px;color:var(--text-muted);margin-bottom:3px;font-weight:500;}
+.modal-field input,.modal-field textarea,.modal-field select{width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:4px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--bg);}
+.modal-field textarea{height:80px;resize:vertical;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;}
+.urgency-legend{display:flex;gap:10px;align-items:center;font-size:10px;color:rgba(255,255,255,0.6);}
+.legend-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:2px;}
+#backup-modal{display:none;position:fixed;inset:0;background:rgba(44,36,22,0.5);z-index:250;align-items:center;justify-content:center;}
+#backup-modal.open{display:flex;}
+#backup-modal .modal-box{width:480px;}
+#backup-modal textarea{width:100%;height:120px;font-family:'DM Mono',monospace;font-size:11px;background:#f5f5f5;border:1px solid var(--border);border-radius:4px;padding:8px;resize:vertical;}
 </style>
 </head>
 <body>
@@ -166,70 +139,65 @@
       <span><span class="legend-dot" style="background:#5c7a3e"></span>dated</span>
     </div>
     <button class="btn btn-light" onclick="sortByDate()">⇅ Date</button>
-    <button class="btn btn-light" onclick="sortByStore()">⇅ Store</button>
-    <button class="btn btn-light" onclick="sortByItemAZ()">A→Z Item</button>
     <button class="btn btn-light" onclick="sortByStoreAZ()">A→Z Store</button>
+    <button class="btn btn-light" onclick="sortByItemAZ()">A→Z Item</button>
+    <button class="btn btn-light" onclick="sortByStoreNum()">⇅ Store #</button>
     <button class="btn btn-light" onclick="findDuplicates()">⚑ Dupes</button>
-    <button class="btn btn-accent" onclick="openShoppingMode()">🛒 Shop Mode</button>
+    <button class="btn btn-accent" onclick="openShoppingMode()">🛒 Shop</button>
   </div>
 </div>
 <div id="sync-bar" style="background:#e8f0fe;border-bottom:1px solid #aac4f5;padding:6px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:11px;">
-  <button onclick="pushToGoogle()" style="background:#1a56c4;color:white;border:none;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">Sync ↑ Push</button>
-  <button onclick="pullFromGoogle()" style="background:#2e7d32;color:white;border:none;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">Sync ↓ Pull</button>
+  <button onclick="pushToCloud()" style="background:#1a56c4;color:white;border:none;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">↑ Push</button>
+  <button onclick="pullFromCloud()" style="background:#2e7d32;color:white;border:none;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">↓ Pull</button>
   <button onclick="openBackupModal()" style="background:#7b5ea7;color:white;border:none;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">💾 Backup</button>
-  <button onclick="resetAndClean()" style="background:#c04a2a;color:white;border:none;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">🧹 Reset &amp; Clean</button>
+  <button onclick="resetAndClean()" style="background:#c04a2a;color:white;border:none;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">🧹 Reset</button>
   <span id="sync-status" style="font-size:11px;font-weight:600;font-family:monospace;"></span>
 </div>
 <div id="finance-bar">
   <div class="fin-group"><span class="fin-label">Total Needed</span><span class="fin-value" id="fin-total-needed">$0.00</span></div>
   <div class="fin-divider"></div>
-  <div class="fin-group"><span class="fin-label">Available</span><input class="fin-input" id="fin-available" type="number" step="0.01" value="0" placeholder="0.00" oninput="saveFinance();updateFinance()"></div>
+  <div class="fin-group"><span class="fin-label">Available</span><input class="fin-input" id="fin-available" type="number" step="0.01" value="0" oninput="saveFinance();updateFinance()"></div>
   <div class="fin-group"><span class="fin-label">Left Over</span><span class="fin-value" id="fin-leftover">$0.00</span></div>
   <div class="fin-divider"></div>
   <div id="fin-notes-area"></div>
-  <button class="btn btn-light btn-sm" onclick="addFinNote()" style="font-size:11px;">+ Note</button>
+  <button class="btn btn-sm" onclick="addFinNote()" style="font-size:11px;background:var(--surface);border-color:var(--border);color:var(--text);">+ Note</button>
 </div>
-
 <div id="bulk-bar">
   <span class="bulk-label">Bulk:</span>
   <div class="bulk-group">
-    <span style="font-size:10px;color:var(--text-muted);font-weight:600;">NEEDS:</span>
-    <button class="btn btn-secondary btn-sm" onclick="uncheckAllNeeds()" title="Uncheck every item in the entire list">☐ Uncheck ALL Items</button>
-    <button class="btn btn-secondary btn-sm" onclick="uncheckVisibleNeeds()" title="Uncheck only the items currently shown on screen">☐ Uncheck Shown Only</button>
+    <button class="btn btn-secondary btn-sm" onclick="uncheckAllNeeds()">☐ Uncheck All</button>
+    <button class="btn btn-secondary btn-sm" onclick="uncheckVisibleNeeds()">☐ Uncheck Shown</button>
   </div>
   <div class="bulk-divider"></div>
   <div class="bulk-group">
-    <span style="font-size:10px;color:var(--text-muted);font-weight:600;">DATES:</span>
-    <button class="btn btn-secondary btn-sm" onclick="clearAllDates()" title="Clear due dates from every item">✕ Clear ALL Dates</button>
-    <button class="btn btn-secondary btn-sm" onclick="clearVisibleDates()" title="Clear due dates only from items currently shown">✕ Clear Shown Dates</button>
+    <button class="btn btn-secondary btn-sm" onclick="clearAllDates()">✕ Clear All Dates</button>
+    <button class="btn btn-secondary btn-sm" onclick="clearVisibleDates()">✕ Clear Shown Dates</button>
   </div>
 </div>
-
 <div id="controls">
+  <button id="add-row-btn" onclick="openAddModal()">+ ADD ITEM</button>
   <input id="search-input" type="text" placeholder="Search items, stores, notes…" oninput="renderTable()">
   <button class="filter-btn active" id="filter-all" onclick="setFilter('all')">All</button>
-  <button class="filter-btn" id="filter-need" onclick="setFilter('need')">Needs Only (✓)</button>
+  <button class="filter-btn" id="filter-need" onclick="setFilter('need')">Needs Only</button>
   <button class="filter-btn" id="filter-dated" onclick="setFilter('dated')">Has Date</button>
   <label style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px;">
     Due by: <input type="date" id="filter-due-by" style="padding:3px 6px;border:1px solid var(--border);border-radius:3px;font-size:12px;" oninput="renderTable()">
     <button class="filter-btn" onclick="document.getElementById('filter-due-by').value='';renderTable()" style="padding:2px 6px;font-size:10px;">✕</button>
   </label>
   <span id="item-count"></span>
-  <button id="add-row-btn" onclick="openAddModal()">+ ADD ITEM</button>
 </div>
 <div id="table-wrap">
   <table id="main-table">
     <thead>
       <tr>
-        <th class="center th-need">Need</th>
-        <th class="th-due">Due Date</th>
-        <th class="center th-num">#</th>
-        <th class="th-item">Item</th>
-        <th class="th-store">Store</th>
-        <th class="th-days" style="width:100px">Days Left</th>
-        <th style="width:34px;text-align:center;"></th>
-        <th class="th-price" style="text-align:right;width:68px">Price</th>
-        <th class="th-notes">Notes <span style="font-size:9px;font-weight:400;color:var(--text-muted)">(click to expand)</span></th>
+        <th class="center">Need</th>
+        <th style="width:80px">Due Date</th>
+        <th class="center" style="width:26px">#</th>
+        <th style="width:200px">Item</th>
+        <th style="width:90px">Store</th>
+        <th style="text-align:right;width:68px">Price</th>
+        <th style="width:30px"></th>
+        <th>Notes <span style="font-size:9px;font-weight:400;color:var(--text-muted)">(click to expand)</span></th>
       </tr>
     </thead>
     <tbody id="table-body"></tbody>
@@ -269,46 +237,16 @@
     <div class="modal-title" id="modal-title">Edit Item</div>
     <div class="modal-field"><label>Item Name</label><input id="m-item" type="text"></div>
     <div class="modal-field"><label>Store</label><input id="m-store" type="text"></div>
-    <div class="modal-field"><label>Store # (1–11, a, b, .)</label><input id="m-num" type="text"></div>
+    <div class="modal-field"><label>Store # (1–12)</label><input id="m-num" type="text"></div>
     <div class="modal-field"><label>Price</label><input id="m-price" type="text"></div>
     <div class="modal-field"><label>Notes</label><textarea id="m-notes"></textarea></div>
     <div class="modal-field">
-      <label>Special Calculation</label>
-      <select id="m-calc" onchange="toggleGramsFields()">
-        <option value="days">Direct days input</option>
-        <option value="eggs">Eggs (÷ 1.5)</option>
-        <option value="cans">Tomato paste (× 4 days/can)</option>
-        <option value="bags">Blueberries bags (bags × 16oz × 28.35 ÷ 100g/day)</option>
-        <option value="grams">Grams on hand ÷ grams/day → auto due date</option>
-      </select>
-    </div>
-    <div id="grams-fields" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:10px;">
-      <div style="font-size:10px;color:var(--text-muted);font-weight:600;margin-bottom:8px;text-transform:uppercase;">Grams Calculator</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <div style="flex:1;min-width:100px;">
-          <label style="display:block;font-size:10px;color:var(--text-muted);margin-bottom:3px;">Grams on Hand</label>
-          <input id="m-grams-onhand" type="number" step="0.1" placeholder="e.g. 238" style="width:100%;padding:5px 7px;border:1px solid var(--border);border-radius:4px;font-size:13px;background:var(--surface);" oninput="updateGramsPreview()">
-        </div>
-        <div style="flex:1;min-width:100px;">
-          <label style="display:block;font-size:10px;color:var(--text-muted);margin-bottom:3px;">Grams per Day</label>
-          <input id="m-grams-perday" type="number" step="0.1" placeholder="e.g. 5" style="width:100%;padding:5px 7px;border:1px solid var(--border);border-radius:4px;font-size:13px;background:var(--surface);" oninput="updateGramsPreview()">
-        </div>
-        <div style="flex:1;min-width:100px;">
-          <label style="display:block;font-size:10px;color:var(--text-muted);margin-bottom:3px;">Total Grams/Pkg</label>
-          <input id="m-grams-total" type="number" step="0.1" placeholder="e.g. 453" style="width:100%;padding:5px 7px;border:1px solid var(--border);border-radius:4px;font-size:13px;background:var(--surface);" oninput="updateGramsPreview()">
-        </div>
-      </div>
-      <div id="grams-preview" style="margin-top:8px;font-size:11px;color:var(--accent);font-family:'DM Mono',monospace;"></div>
-    </div>
-    <div class="modal-field">
-      <label>Section / Category</label>
-      <select id="m-section">
-        <option value="">— Regular item —</option>
-        <option value="veggie-a">Veggie Session A</option>
-        <option value="veggie-b">Veggie Session B</option>
-        <option value="skip-day">Skip Day item</option>
-        <option value="blend-4day">Every-4-Day Blend</option>
-        <option value="supply">Supply Tracker</option>
+      <label>Special Calculation (for due date)</label>
+      <select id="m-calc">
+        <option value="days">None</option>
+        <option value="eggs">Eggs (qty ÷ 1.5)</option>
+        <option value="cans">Tomato paste (cans × 4 days)</option>
+        <option value="bags">Blueberries (bags × 16oz × 28.35 ÷ 100g)</option>
       </select>
     </div>
     <div class="modal-actions">
@@ -318,186 +256,386 @@
     </div>
   </div>
 </div>
-
 <div id="backup-modal">
   <div class="modal-box" onclick="event.stopPropagation()">
     <div class="modal-title">💾 Backup & Restore</div>
-    <p style="font-size:11px;color:var(--text-muted);margin-bottom:12px;">Save a backup by copying the text below. To restore, paste a backup and click Restore.</p>
+    <p style="font-size:11px;color:var(--text-muted);margin-bottom:12px;">Copy the backup text below, or paste a previous backup to restore.</p>
     <div class="modal-field">
-      <label>Current Backup Data</label>
+      <label>Current Backup</label>
       <textarea id="backup-export-text" readonly onclick="this.select()"></textarea>
     </div>
     <div style="display:flex;gap:6px;margin-bottom:12px;">
-      <button class="btn btn-accent btn-sm" onclick="copyBackup()">📋 Copy to Clipboard</button>
-      <button class="btn btn-accent btn-sm" onclick="downloadBackup()">⬇ Download File</button>
+      <button class="btn btn-accent btn-sm" onclick="copyBackup()">📋 Copy</button>
+      <button class="btn btn-accent btn-sm" onclick="downloadBackup()">⬇ Download</button>
     </div>
     <div class="modal-field">
-      <label>Restore from Backup (paste here)</label>
-      <textarea id="backup-import-text" placeholder="Paste backup data here…"></textarea>
+      <label>Restore from Backup</label>
+      <textarea id="backup-import-text" placeholder="Paste backup here…"></textarea>
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary btn-sm" onclick="closeBackupModal()">Close</button>
-      <button class="btn btn-danger btn-sm" onclick="restoreBackup()">⚠ Restore (overwrites current data)</button>
+      <button class="btn btn-danger btn-sm" onclick="restoreBackup()">⚠ Restore</button>
     </div>
   </div>
 </div>
-
 <script>
+var INITIAL_DATA=[{id:23,item:"heavy cream, organic",store:"sprouts",num:"9",price:"4.79",notes:"don't buy non-organic - 1 carton = 1 month - $4.79 sprouts, $7.49 at vons, $7.99 smart & final",calc:"days",need:false,due:""},
+{id:18,item:"brussels sprouts",store:"sprouts",num:"9",price:"8.98",notes:"1 lb $3.99 is cheaper than the 12 oz bag of frozen for $4.79 unless it's on sale for $2.50 which is then cheaper than fresh. $3.99 is also cheaper than TJ's $3.69 for 14 oz",calc:"days",need:true,due:"2026-04-22"},
+{id:21,item:"carrots",store:"sprouts",num:"9",price:"1.91",notes:"$1.49/lb = 3.46 for 4",calc:"days",need:true,due:"2026-04-22"},
+{id:20,item:"cilantro",store:"sprouts",num:"9",price:"1.25",notes:"Vons: $1.25 \ud83c\udfc6\nSprouts (Sale): $1.25 (4 for $5)\nH-Mart: $1.49\nSmart & Final: $1.49\nStater Bros: $1.49\nSprouts (Reg): $1.69",calc:"days",need:true,due:"2026-04-22"},
+{id:11,item:"daikon radish",store:"sprouts",num:"9",price:"2.49",notes:"1.5 lbs = 12 days, 1.68 lbs = 14 days - sale price is .98/lb - pick up 6.11 lbs for $5.99 for a savings of $9.22 . Sprouts regular price is $1.99/lb",calc:"days",need:true,due:"2026-04-22"},
+{id:12,item:"parsley",store:"sprouts",num:"9",price:"2.00",notes:"$2.00 sprouts, $2.49 h mart, $1.49 at vons but selection is never fresh, $1.49 at smart & final but only curly",calc:"days",need:true,due:"2026-04-22"},
+{id:22,item:"swiss chard",store:"sprouts",num:"9",price:"$4.98",notes:"2 bunches at $2.49 each",calc:"days",need:true,due:"2026-04-22"},
+{id:25,item:"eggs; pasture-raised organic",store:"sprouts",num:"9",price:"12.99",notes:"$6.99 1 dozen = .58 each - 2 dozen = .54 each - sales price was $9.99 once on a Monday",calc:"eggs",need:false,due:"2026-04-29"},
+{id:1776051513240298,item:"SPINACH",store:"NORTHGATE MARKET",num:"12",price:"14.97",notes:"  \ud83c\udfea Northgate:\n     Buy 3 \u00d7 10oz = 30oz \u00b7 $14.97 \u00b7 earns $50 EBT rebate",calc:"days",need:false,due:"2026-04-29"},
+{id:13,item:"broccoli, 2 lb bag",store:"sprouts",num:"9",price:"8.49",notes:"short stem 2 in, 65% floret yield \u2192 $4.60/lb, pre-cut $4.25/lb. avg stem 3.5 in \u2192 pre-cut cheaper",calc:"days",need:false,due:"2026-04-30"},
+{id:24,item:"celery",store:"trader joe's",num:"10",price:"2.99",notes:"Trader Joe's: $0.10/oz ($2.99/16oz pkg \u2014 Note: actual weight was 29.4oz) \ud83c\udfc6\nSprouts: $0.14/oz ($3.29/24oz)\nVons: $0.15/oz ($2.99/20oz)\nH Mart: $0.19/oz ($2.99/16oz)",calc:"days",need:false,due:"2026-04-30"},
+{id:3,item:"mushrooms, enoki - three 200-gram pkgs = 16 days",store:"h mart",num:"5",price:"8.97",notes:"",calc:"days",need:false,due:"2026-04-30"},
+{id:4,item:"mushrooms, king oyster - three 270-gram pkgs = 810g for 16 days - or - two 1 lb packages = 908g for 16 days",store:"h mart",num:"5",price:"14.97",notes:"",calc:"days",need:false,due:"2026-04-30"},
+{id:270,item:"tomato paste - 4 cans = 16 days",store:"vons",num:"11",price:"3.75",notes:"Trader Joe's: $0.99 (doesn't say BPA-Free)\nVons: $1.25 (BPA-Free)\nWalmart: $1.28 (doesn't say BPA-Free)\nSprouts (Can): $2.49\nSprouts (Glass): $3.49 (BPA-Free)",calc:"cans",need:true,due:"2026-04-30"},
+{id:1,item:"blueberries",store:"trader joe's",num:"10",price:"7.47",notes:"3 bags = 13 days. Each bag 16oz \u00d7 28.35g = 453.6g \u00f7 100g/day = 4.54 days/bag",calc:"bags",need:false,due:"2026-05-01"},
+{id:19,item:"spinach",store:"sprouts",num:"9",price:"8.98",notes:"  \ud83c\udf3f Sprouts:  Buy 2 \u00d7 16oz bags = 32oz \u00b7 $8.98",calc:"days",need:false,due:"2026-05-13"},
+{id:9,item:"cabbage, red",store:"smart & final",num:"7",price:"2.99",notes:"$8-9 per HEAD at H Mart, $2.99 per HEAD at smart & final, $1.49 per LB at Vons = $3/HEAD, $1.99/lb at sprouts = $4/HEAD",calc:"days",need:false,due:"2026-05-17"},
+{id:28,item:"flaxseed, whole",store:"h mart",num:"5",price:"2.49",notes:"$2.49 for 12 oz = $0.208/oz - h mart\n$4.07 for 16 oz = $0.254/oz - whole foods sale price\n$5.49 for 16 oz = $0.343/oz - whole foods reg price",calc:"days",need:false,due:"2026-05-19"},
+{id:5,item:"ginger root",store:"h mart",num:"5",price:"4.46",notes:"sprouts organic $7.99 for 28 oz \u2248 $4.57 per lb\nh mart conventional $4.46 for 1 lb",calc:"days",need:false,due:"2026-05-20"},
+{id:26,item:"good earth sweet spice - buy at sprouts if on sale at 2 for $5 ~ each box lasts 9 days",store:"",num:"",price:"17.50",notes:"",calc:"days",need:false,due:"2026-05-20"},
+{id:27,item:"garlic cloves",store:"smart & final",num:"7",price:"12.99",notes:"5 lb bag at h mart for $25.99 vs. 3 lb bag at Smart & Final for $12.99, which is cheaper per pound than h mart's bag (about $4.33 vs $5.20).",calc:"days",need:false,due:"2026-11-10"},
+{id:48,item:"5 oz 5% fage yogurt",store:"vons",num:"11",price:"1.79",notes:"",calc:"days",need:false,due:""},
+{id:239,item:"91% isopropyl alcohol - sprayer",store:"walmart",num:"8",price:"",notes:"",calc:"days",need:false,due:""},
+{id:100,item:"almond flour",store:"sprouts",num:"9",price:"",notes:"",calc:"days",need:false,due:""},
+{id:49,item:"amazon card",store:"cvs",num:".",price:"",notes:"",calc:"days",need:false,due:""},
+{id:241,item:"apple cider vinegar 32 oz",store:"walmart",num:"8",price:"6.48",notes:"",calc:"days",need:true,due:""},
+{id:210,item:"apples",store:"vons",num:"11",price:"3.04",notes:"$1.52 each; walmart $2.28/lb, sprouts $3.29/lb",calc:"days",need:true,due:""},
+{id:242,item:"arm & hammer with oxi clean 166.5 oz",store:"walmart",num:"8",price:"",notes:"$13.98 for 166.5 oz for 8.4\u00a2/oz, but if 100.5 oz is 7.97 then that is a better deal at 7.9\u00a2/oz",calc:"days",need:false,due:""},
+{id:203,item:"artichokes on the go",store:"trader joe's",num:"10",price:"1.49",notes:"$1.49 each",calc:"days",need:false,due:""},
+{id:101,item:"asparagus - non-organic",store:"sprouts",num:"9",price:"4.99",notes:"$4.99/lb = .31/same price at Vons",calc:"days",need:false,due:""},
+{id:211,item:"asparagus - non-organic",store:"vons",num:"11",price:"4.99",notes:"$4.99/lb = .31/same price at Sprouts",calc:"days",need:false,due:""},
+{id:61,item:"auntie anne's",store:"birthday",num:"b",price:"",notes:"2013 brea mall",calc:"days",need:false,due:""},
+{id:243,item:"avocado oil",store:"walmart",num:"8",price:"10.97",notes:"16.9 oz - $11.99 at sprouts",calc:"days",need:false,due:""},
+{id:244,item:"avocado oil spray",store:"walmart",num:"8",price:"11.47",notes:"13.5 oz",calc:"days",need:false,due:""},
+{id:2,item:"avocados; mini (6/bag)",store:"walmart",num:"8",price:"2.78",notes:"sprouts $4.99 - same price at h mart - don't get at grocery outlet because they're too big and cost $3.99",calc:"days",need:false,due:""},
+{id:77,item:"baby arugula 1 lb",store:"h mart",num:"5",price:"4.99",notes:"$4.99 at h mart for 1 lb or $4.99 at sprouts for 10 oz",calc:"days",need:false,due:""},
+{id:39,item:"baby kale",store:"sprouts",num:"9",price:"4.99",notes:"same price as lacinto kale",calc:"days",need:false,due:""},
+{id:45,item:"baby spinach 5 oz package",store:"sprouts",num:"9",price:"3.50",notes:"don't get at hmart - 60% of the box was spoiled $2.99 h mart",calc:"days",need:false,due:""},
+{id:197,item:"balsamic vinegar",store:"trader joe's",num:"10",price:"5.99",notes:"Gold Aceto Balsamico di Modena 8.5 oz if you want a glaze. Organic $5.99 for 8.5 oz for daily salad vinegar.",calc:"days",need:false,due:""},
+{id:294,item:"balsamic vinegar",store:"walmart online",num:"1",price:"",notes:"https://www.walmart.com/ip/seort/179935477",calc:"days",need:false,due:""},
+{id:296,item:"balsamic vinegar",store:"williams sonoma - scp",num:"1",price:"35.50",notes:"VSOP 25-Year Barrel-Aged Balsamic Vinegar, 459-ml ($44.14 if bought online)",calc:"days",need:false,due:""},
+{id:171,item:"banana",store:"target",num:"2",price:"0.29",notes:".79/lb at sprouts = .88 for one extra large - .69/lb at vons = .66 for one large - target was .29 for a large",calc:"days",need:false,due:""},
+{id:159,item:"bar keepers friend powder",store:"stater bros",num:"3",price:"",notes:"same price at smart & final",calc:"days",need:false,due:""},
+{id:245,item:"bar keepers friend powder",store:"walmart",num:"8",price:"",notes:"sale price only: $2.99 at smart & final or stater bros",calc:"days",need:false,due:""},
+{id:55,item:"bar keepers friend toilet bowl cleaner",store:"amazon",num:"a",price:"",notes:"",calc:"days",need:false,due:""},
+{id:212,item:"barbacoa; del real",store:"vons",num:"11",price:"9.99",notes:"walmart $10.98",calc:"days",need:false,due:""},
+{id:62,item:"baskin robbins",store:"birthday",num:"b",price:"",notes:"",calc:"days",need:false,due:""},
+{id:240,item:"bay leafs",store:"walmart",num:"8",price:"2.98",notes:"",calc:"days",need:false,due:""},
+{id:246,item:"black olives; jumbo great value",store:"walmart",num:"8",price:"1.97",notes:"vons $1.49 per can sale price - regular price $3.50. $2.47 at walmart",calc:"days",need:false,due:""},
+{id:213,item:"black olives; large lindsay",store:"vons",num:"11",price:"3.50",notes:"$1.49 per can sale price - regular price $3.50. $2.47 at walmart",calc:"days",need:false,due:""},
+{id:78,item:"black sesame seeds",store:"h mart",num:"5",price:"3.49",notes:"",calc:"days",need:false,due:""},
+{id:79,item:"blackberries",store:"h mart",num:"5",price:"4.49",notes:"",calc:"days",need:false,due:""},
+{id:247,item:"bonne maman cherry preserves 13 oz",store:"walmart",num:"8",price:"6.28",notes:"$4.97 on sale",calc:"days",need:false,due:""},
+{id:214,item:"botan rice",store:"vons",num:"11",price:"7.99",notes:"walmart sale $9.49, stater bros $8.99 reg/$6.99 sale",calc:"days",need:false,due:""},
+{id:63,item:"boudin",store:"birthday",num:"b",price:"",notes:"2800 main",calc:"days",need:false,due:""},
+{id:102,item:"bread: Oroweat / Arnold Organic 22 Grains & Seed Bread",store:"sprouts",num:"9",price:"7.79",notes:"sale price $6.49",calc:"days",need:false,due:""},
+{id:172,item:"brown sugar; dark",store:"target",num:"2",price:"2.29",notes:"32 oz - $2.29 at vons for 16 oz",calc:"days",need:false,due:""},
+{id:248,item:"bueno mild red chili",store:"walmart",num:"8",price:"3.97",notes:"$3.99 vons 14 oz",calc:"days",need:false,due:""},
+{id:71,item:"butter; unsalted",store:"grocery outlet",num:"6",price:"3.29",notes:"$7.99 sprouts (organic) $3.99 smart & final (non-organic) for 16 oz or $9.99 smart & final for 48 oz would be $3.33 for 16 oz",calc:"days",need:false,due:""},
+{id:249,item:"buttermilk",store:"walmart",num:"8",price:"2.84",notes:"$3.49 smart & final",calc:"days",need:false,due:""},
+{id:250,item:"cake mix; duncan hines white",store:"walmart",num:"8",price:"1.73",notes:"$2.99 smart & final",calc:"days",need:false,due:""},
+{id:215,item:"capers, mezzetta",store:"vons",num:"11",price:"4.29",notes:"4 oz",calc:"days",need:false,due:""},
+{id:251,item:"carbone marinara",store:"walmart",num:"8",price:"7.97",notes:"sales at $6.36 & $7.17, regular $7.97 - sprouts sale price is still higher at $7.12",calc:"days",need:false,due:""},
+{id:173,item:"carnitas",store:"target",num:"2",price:"$7.99 (sale, usually $9.99)",notes:"2 pkgs $15.13 with 5% discount + bag discount. past sales: 6/1/25, 9/2/25",calc:"days",need:false,due:""},
+{id:92,item:"cayenne",store:"smart & final",num:"7",price:"1.39",notes:".93 oz smart & final & stater bros: el guapo $1.39 for 1.5 oz",calc:"days",need:false,due:""},
+{id:17,item:"cereal lovebird honey grain free",store:"sprouts",num:"9",price:"11.49",notes:"sale price $9.49",calc:"days",need:false,due:""},
+{id:15,item:"cereal seven sundays honey almond little crispies",store:"sprouts",num:"9",price:"7.99",notes:"",calc:"days",need:false,due:""},
+{id:16,item:"cereal seven sundays simply honey oat",store:"sprouts",num:"9",price:"7.99",notes:"",calc:"days",need:false,due:""},
+{id:14,item:"cereal three wishes honey grain free (get honey next time)",store:"sprouts",num:"9",price:"6.99",notes:"sale price $5.99",calc:"days",need:false,due:""},
+{id:185,item:"change ring battery",store:"to do",num:".",price:"",notes:"",calc:"days",need:false,due:""},
+{id:52,item:"change trading pw on moo moo",store:"to do",num:".",price:"",notes:"",calc:"days",need:false,due:""},
+{id:72,item:"cheddar cheese 2 lb (mild)",store:"grocery outlet",num:"6",price:"7.49",notes:"walmart $10.48",calc:"days",need:false,due:""},
+{id:64,item:"cheesecake factory",store:"birthday",num:"b",price:"",notes:"120 brea mall way",calc:"days",need:false,due:""},
+{id:65,item:"chick-fil-a",store:"birthday",num:"b",price:"",notes:"",calc:"days",need:false,due:""},
+{id:103,item:"chicken breast",store:"sprouts",num:"9",price:"17.98",notes:"2 lbs - $8.99/lb",calc:"days",need:false,due:""},
+{id:209,item:"chicken breast strips 24 oz; just bare lightly breaded",store:"vons",num:"11",price:"12.99",notes:".54/oz (the larger 36 oz bag is .56/oz)",calc:"days",need:false,due:""},
+{id:160,item:"cinnamon stick",store:"stater bros",num:"3",price:"3.99",notes:"$1.45/oz for 2.75 oz bag",calc:"days",need:false,due:""},
+{id:252,item:"cleaning vinegar",store:"walmart",num:"8",price:"",notes:"128 oz sale price $3.86",calc:"days",need:false,due:""},
+{id:174,item:"coffee filters",store:"target",num:"2",price:"",notes:"have to purchase online at target ($5.99 smart & final)",calc:"days",need:false,due:""},
+{id:253,item:"coffee; decaf",store:"walmart",num:"8",price:"",notes:"",calc:"days",need:false,due:""},
+{id:66,item:"corner bakery",store:"birthday",num:"b",price:"",notes:"2789 n main",calc:"days",need:false,due:""},
+{id:161,item:"cottage cheese, daisy",store:"stater bros",num:"3",price:"3.49",notes:"(for bone broth) 16 oz $2.99 sale",calc:"days",need:false,due:""},
+{id:254,item:"cotton balls",store:"walmart",num:"8",price:"",notes:"",calc:"days",need:false,due:""},
+{id:175,item:"cotton rounds; premium",store:"target",num:"2",price:"",notes:"don't get walmart ones, they split apart",calc:"days",need:false,due:""},
+{id:255,item:"cream cheese, philadelphia",store:"walmart",num:"8",price:"3.13",notes:"$2.99 sale price",calc:"days",need:false,due:""},
+{id:56,item:"dawn dish soap",store:"amazon",num:"a",price:"",notes:"",calc:"days",need:false,due:""},
+{id:80,item:"dish gloves, up & up medium ultra comfort",store:"h mart",num:"5",price:"",notes:"new pair 5/20 & 9/3 - don't buy the clorox ultra comfort for $5.41 at target",calc:"days",need:false,due:""},
+{id:162,item:"distilled water, gallon",store:"stater bros",num:"3",price:"",notes:"",calc:"days",need:false,due:""},
+{id:256,item:"dried chiles de arbol",store:"walmart",num:"8",price:"1.97",notes:"el guapo 2 oz bag",calc:"days",need:false,due:""},
+{id:81,item:"dried seaweed (fueru wakame)",store:"h mart",num:"5",price:"",notes:"",calc:"days",need:false,due:""},
+{id:73,item:"eggs; organic not pasture-raised",store:"grocery outlet",num:"6",price:"5.29",notes:"cheapest is 'organic NOT pasture-raised' at grocery outlet 1 dozen for $5.29 but if sprouts has sale of $9.99 for 2 dozen, that is the cheapest at .42 each",calc:"eggs",need:false,due:""},
+{id:198,item:"english cucumber",store:"trader joe's",num:"10",price:"2.49",notes:"$2.99 at vons",calc:"days",need:false,due:""},
+{id:293,item:"eucerin intensive repair",store:"walmart - same exact price at amazon",num:"8",price:"",notes:"",calc:"days",need:false,due:""},
+{id:295,item:"evaporated milk; 365 by whole foods market organic",store:"whole foods tustin",num:"4",price:"3.19",notes:"12 oz cheaper out there but only one w/out carrageenan",calc:"days",need:false,due:""},
+{id:50,item:"family walmart retin-a good rx",store:"to do",num:".",price:"",notes:"retin-a .05%",calc:"days",need:false,due:""},
+{id:93,item:"feta; atlanta 7 oz 100% sheep from bulgaria",store:"smart & final",num:"7",price:"5.89",notes:"for greek ~ $6.79 sprouts ~ $3.99 grocery outlet ~ for atlanta bulgarian: $6.39 regular price at smart & final/$5.89 sale price",calc:"days",need:false,due:""},
+{id:74,item:"feta; greco 7 oz sheep & goat from greece",store:"grocery outlet",num:"6",price:"3.99",notes:"for greek ~ $6.79 sprouts ~ $3.99 grocery outlet",calc:"days",need:false,due:""},
+{id:104,item:"fish; crispy barramundi",store:"sprouts",num:"9",price:"9.89",notes:"barramundi $3.50 per 17 g protein",calc:"days",need:false,due:""},
+{id:216,item:"fish; gorton's beer battered fish fillets 10 count 18.2 oz",store:"vons",num:"11",price:"11.99",notes:".66/oz",calc:"days",need:false,due:""},
+{id:217,item:"fish; gorton's crispy battered fish portions 24.5 oz value pack",store:"vons",num:"11",price:"11.99",notes:".49/oz",calc:"days",need:false,due:""},
+{id:218,item:"fish; gorton's crunchy breaded fish filets 10 count 19 oz",store:"vons",num:"11",price:"11.99",notes:".63/oz",calc:"days",need:false,due:""},
+{id:219,item:"fish; gorton's garlic & herb fish fillets 6 count 11 oz",store:"vons",num:"11",price:"7.99",notes:".73/oz",calc:"days",need:false,due:""},
+{id:220,item:"fish; gorton's parmesan crusted fish fillets 10 count 18.2 oz",store:"vons",num:"11",price:"11.99",notes:".66/oz",calc:"days",need:false,due:""},
+{id:221,item:"fish; gorton's potato crunch fish fillets 10 count 18.2 oz",store:"vons",num:"11",price:"11.99",notes:".66/oz",calc:"days",need:false,due:""},
+{id:105,item:"fish; lemon herb barramundi",store:"sprouts",num:"9",price:"9.89",notes:"$3.30 per 17 g protein",calc:"days",need:false,due:""},
+{id:106,item:"fish; simply skinless barramundi",store:"sprouts",num:"9",price:"10.99",notes:"$2.92 per 17 g protein",calc:"days",need:false,due:""},
+{id:222,item:"fish; van de kamp's beer battered fish filets 10 count 19.1 oz",store:"vons",num:"11",price:"7.99",notes:".41/oz",calc:"days",need:false,due:""},
+{id:223,item:"fish; van de kamp's crispy battered fish filets 10 count 19.45 oz",store:"vons",num:"11",price:"7.99",notes:".41/oz",calc:"days",need:false,due:""},
+{id:57,item:"foods alive nutritional yeast - gross",store:"amazon",num:"a",price:"40.89",notes:"$40.89 for 2 lbs ($1.28/oz) compared to sprouts kal nutritional yeast at $3.20/oz",calc:"days",need:false,due:""},
+{id:107,item:"freeze dried garlic",store:"sprouts",num:"9",price:"",notes:"",calc:"days",need:false,due:""},
+{id:108,item:"freeze dried onion",store:"sprouts",num:"9",price:"5.49",notes:"",calc:"days",need:false,due:""},
+{id:109,item:"freeze dried oregano",store:"sprouts",num:"9",price:"",notes:"",calc:"days",need:false,due:""},
+{id:257,item:"freezer ziplocs hefty",store:"walmart",num:"8",price:"",notes:"",calc:"days",need:false,due:""},
+{id:110,item:"fresh dill",store:"sprouts",num:"9",price:"3.49",notes:"",calc:"days",need:false,due:""},
+{id:7,item:"frosted flakes (about 12 oz)",store:"grocery outlet",num:"6",price:"3.99",notes:"guessed on size and price",calc:"days",need:false,due:""},
+{id:163,item:"full circle bone broth - buy 3 cartons @ $3.99 each",store:"stater bros",num:"3",price:"11.97",notes:"pacific organic $5.74 at walmart, reg price at sprouts $7.99 or \"sale\" $6.99; $7.99 at vons",calc:"days",need:false,due:""},
+{id:258,item:"garlic powder",store:"walmart",num:"8",price:"1.28",notes:"",calc:"days",need:false,due:""},
+{id:259,item:"Germ-X Advanced Hand Sanitizer, Aloe, 1 L",store:"walmart",num:"8",price:"",notes:"",calc:"days",need:false,due:""},
+{id:111,item:"ghee",store:"sprouts",num:"9",price:"5.99",notes:"",calc:"days",need:false,due:""},
+{id:178,item:"gold bond retinol",store:"target",num:"2",price:"",notes:"$12.90 on amazon",calc:"days",need:false,due:""},
+{id:41,item:"good earth sweet & spicy caffeine free - shop for alternatives: celestial seasonings bengal spice, yogi egyptian licorice, stash licorice spice, republic of tea licorice cinnamon",store:"",num:"1",price:"",notes:"farmhouse teas herbal licorice spice, world spice mystic licorice",calc:"days",need:false,due:""},
+{id:94,item:"gorgonzola 4.78 oz",store:"smart & final",num:"7",price:"4.79",notes:"$4.59 sale price 91.9\u00a2/oz",calc:"days",need:false,due:""},
+{id:224,item:"gorton's golden crusted fish fillets 8 count 15.2 oz",store:"vons",num:"11",price:"11.99",notes:".79/oz",calc:"days",need:false,due:""},
+{id:225,item:"greek yogurt, fage 5% ~ 5.3 oz container",store:"vons",num:"11",price:"2.00",notes:"",calc:"days",need:false,due:""},
+{id:95,item:"greek yogurt, non-fat chobani - 170g/day for 16 days = 3 containers",store:"smart & final",num:"7",price:"5.99",notes:"walmart is $5.97 but don't trust their refrigerated section",calc:"days",need:false,due:""},
+{id:112,item:"greek yogurt, non-fat fage",store:"sprouts",num:"9",price:"7.49",notes:"sale price sprouts $7.99, regular $8.49. regular vons $7.99",calc:"days",need:false,due:""},
+{id:226,item:"greek yogurt, non-fat organics",store:"vons",num:"11",price:"6.99",notes:"",calc:"days",need:false,due:""},
+{id:113,item:"greek yogurt, non-fat stonyfield organic",store:"sprouts",num:"9",price:"7.99",notes:"",calc:"days",need:false,due:""},
+{id:164,item:"green chile, whole",store:"stater bros",num:"3",price:"6.49",notes:"27 oz $6.99 smart & final",calc:"days",need:false,due:""},
+{id:228,item:"green grapes",store:"vons",num:"11",price:"3.99",notes:"$3.99/lb - 1 bag is $11.48!!",calc:"days",need:false,due:""},
+{id:114,item:"green onions (scallions)",store:"sprouts",num:"9",price:"1.67",notes:"$1.99 at smart & final",calc:"days",need:false,due:""},
+{id:115,item:"ground beef, 85% grass fed 16 oz, organic",store:"sprouts",num:"9",price:"9.49",notes:"",calc:"days",need:false,due:""},
+{id:31,item:"ground beef, 93% grass fed, organic",store:"sprouts",num:"9",price:"10.49",notes:"3 lbs for $31.47",calc:"days",need:true,due:""},
+{id:116,item:"ground cardamom",store:"sprouts",num:"9",price:"4.99",notes:"walmart $5.46",calc:"days",need:false,due:""},
+{id:176,item:"ground coffee",store:"target",num:"2",price:"9.02",notes:"$12.99 at sprouts - the $9.02 at target was a sales price of $9.49 minus the 5% discount",calc:"days",need:false,due:""},
+{id:117,item:"ground turkey 93%",store:"sprouts",num:"9",price:"9.29",notes:"",calc:"days",need:false,due:""},
+{id:118,item:"ground wagyu",store:"sprouts",num:"9",price:"",notes:"sprouts sale price $7.12, regular $9.49\nsprouts thomas farms $10.49\nvons snake river $12.99",calc:"days",need:false,due:""},
+{id:119,item:"guittard sante chocolate chips",store:"sprouts",num:"9",price:"8.49",notes:"",calc:"days",need:false,due:""},
+{id:120,item:"gum",store:"sprouts",num:"9",price:"4.99",notes:"",calc:"days",need:false,due:""},
+{id:229,item:"hashbrown potatoes; ore-ida diced",store:"vons",num:"11",price:"5.49",notes:"next cheapest is walmart at $7.99 but not even in stock",calc:"days",need:false,due:""},
+{id:177,item:"head and shoulders",store:"target",num:"2",price:"",notes:"",calc:"days",need:false,due:""},
+{id:54,item:"hearts of palm",store:"albertsons",num:"10",price:"4.99",notes:"",calc:"days",need:false,due:""},
+{id:121,item:"hominy",store:"sprouts",num:"9",price:"1.89",notes:"25 oz $1.99 stater bros, $1.98 walmart",calc:"days",need:false,due:""},
+{id:82,item:"hondashi",store:"h mart",num:"5",price:"5.29",notes:"120 g (1/4 tsp per 360 ml water for miso soup)",calc:"days",need:false,due:""},
+{id:8,item:"honey nut cheerios 10.8 oz",store:"grocery outlet",num:"6",price:"3.99",notes:"",calc:"days",need:false,due:""},
+{id:122,item:"iceberg lettuce",store:"sprouts",num:"9",price:"2.99",notes:"",calc:"days",need:false,due:""},
+{id:32,item:"italian panko breadcrumbs",store:"sprouts",num:"9",price:"4.99",notes:"",calc:"days",need:false,due:""},
+{id:260,item:"italian seasoning",store:"walmart",num:"8",price:"1.28",notes:"sale price $1.18",calc:"days",need:false,due:""},
+{id:199,item:"joe's diner mac & cheese",store:"trader joe's",num:"10",price:"2.99",notes:"",calc:"days",need:false,due:""},
+{id:51,item:"kaiser rx",store:"to do",num:".",price:"",notes:"spironolactone & cream",calc:"days",need:false,due:""},
+{id:1776052602197299,item:"KEFIR; ALEXANDRE FARMS 2%",store:"SPROUTS",num:"9",price:"8.49",notes:"",calc:"days",need:true,due:""},
+{id:261,item:"king arthur bread flour 5 lb",store:"walmart",num:"8",price:"5.58",notes:"stater bros $6.99, amazon $7.87, vons $10.99",calc:"days",need:false,due:""},
+{id:262,item:"knorr tomato with chicken flavor bouillon cubes",store:"walmart",num:"8",price:"1.08",notes:"",calc:"days",need:false,due:""},
+{id:36,item:"kodiak pancake mix",store:"walmart",num:"8",price:"6.28",notes:"",calc:"days",need:false,due:""},
+{id:152,item:"koops stoneground mustard",store:"sprouts",num:"9",price:"",notes:"",calc:"days",need:false,due:""},
+{id:67,item:"krispy kreme",store:"birthday",num:"b",price:"",notes:"orange outlets",calc:"days",need:false,due:""},
+{id:170,item:"la roche-posay double repair face moisturizer",store:"target",num:"2",price:"",notes:"prices before tax: $24.99 amazon, $24.97 walmart, $24.69 (after 5% discount)",calc:"days",need:false,due:""},
+{id:40,item:"lacinto kale",store:"sprouts",num:"9",price:"5.00",notes:"price for 2 bunches = 1 lb. price for 2 bunches at vons would be $6",calc:"days",need:false,due:""},
+{id:230,item:"lasagna; cheese michael angelo (split into 4 servings)",store:"vons",num:"11",price:"",notes:"sale price $10.99; good but a little dry needs more red sauce and mozzarella",calc:"days",need:false,due:""},
+{id:165,item:"laughing cow cheese",store:"stater bros",num:"3",price:"3.99",notes:"$2.50 on sale at vons or their regular price is $5.49",calc:"days",need:false,due:""},
+{id:123,item:"lemon for greek chicken or salmon dill sauce",store:"sprouts",num:"9",price:"0.99",notes:"",calc:"days",need:false,due:""},
+{id:124,item:"lemon juice",store:"sprouts",num:"9",price:"10.09",notes:"sale price at 50% bogo = $7.57 each - bought 6 on 2/6/25 saving $15.12",calc:"days",need:false,due:""},
+{id:263,item:"lemon pepper",store:"walmart",num:"8",price:"1.28",notes:"",calc:"days",need:false,due:""},
+{id:125,item:"lime juice",store:"sprouts",num:"9",price:"10.09",notes:"",calc:"days",need:false,due:""},
+{id:75,item:"lime; whole",store:"grocery outlet",num:"6",price:"0.25",notes:"each",calc:"days",need:false,due:""},
+{id:58,item:"liquid stevia",store:"amazon",num:"a",price:"11.74",notes:"4 oz - $19.99 at sprouts",calc:"days",need:false,due:""},
+{id:204,item:"macadamia nuts - 1 bag = 28 days",store:"trader joe's",num:"10",price:"7.99",notes:"",calc:"days",need:false,due:""},
+{id:126,item:"maille whole grain mustard",store:"sprouts",num:"9",price:"3.97",notes:"only if on sale for bogo 50% - reg sprouts price is $5.29",calc:"days",need:false,due:""},
+{id:53,item:"make balsamic vinaigrette & soup veggies",store:"to do",num:".",price:"",notes:"",calc:"days",need:false,due:""},
+{id:186,item:"make bone broth",store:"to do",num:".",price:"",notes:"",calc:"days",need:false,due:""},
+{id:187,item:"make meat sauce",store:"to do",num:".",price:"",notes:"",calc:"days",need:false,due:""},
+{id:188,item:"make miso salmon",store:"to do",num:".",price:"",notes:"",calc:"days",need:false,due:""},
+{id:189,item:"make mushroom packs for pizza, quesadillas & meat sauce",store:"to do",num:".",price:"",notes:"",calc:"days",need:false,due:""},
+{id:190,item:"make panko chicken",store:"to do",num:".",price:"",notes:"",calc:"days",need:false,due:""},
+{id:191,item:"make pizza sauce",store:"to do",num:".",price:"",notes:"$5.99 at stater bros & walmart.",calc:"days",need:false,due:""},
+{id:192,item:"make powder jars and veggie packs",store:"to do",num:".",price:"",notes:"",calc:"days",need:false,due:""},
+{id:193,item:"make quinoa",store:"to do",num:".",price:"",notes:"",calc:"days",need:false,due:""},
+{id:194,item:"make rice",store:"to do",num:".",price:"",notes:"",calc:"days",need:false,due:""},
+{id:195,item:"make shredded chicken",store:"to do",num:".",price:"",notes:"",calc:"days",need:false,due:""},
+{id:37,item:"mandarin",store:"walmart",num:"8",price:"",notes:"season dec-jan - satsuma not good",calc:"days",need:false,due:""},
+{id:264,item:"maseca yellow instant corn masa flour (masa harina)",store:"walmart",num:"8",price:"2.13",notes:"2 lb bag",calc:"days",need:false,due:""},
+{id:265,item:"mayonnaise, avocado oil",store:"walmart",num:"8",price:"7.98",notes:"12 oz",calc:"days",need:false,due:""},
+{id:266,item:"mezzetta jalapenos",store:"walmart",num:"8",price:"3.27",notes:"sale price $2.87",calc:"days",need:false,due:""},
+{id:127,item:"micro arugula",store:"sprouts",num:"9",price:"3.99",notes:"",calc:"days",need:false,due:""},
+{id:128,item:"milk; nonfat, organic - 292g/day average - 1,892g=1/2-gallon",store:"sprouts",num:"9",price:"4.99",notes:"prices at sprouts: $4.50-$4.57 if on sale/reg $4.99 - vons has better expiration dates but sale price is $4.99 & regular price is $5.49",calc:"days",need:false,due:""},
+{id:6,item:"milk; whole, organic - 292g/day average - 1,892g=1/2-gallon",store:"grocery outlet",num:"6",price:"4.49",notes:"prices at sprouts: $4.50-$4.57 if on sale/reg $4.99 - vons has better expiration dates but sale price is $4.99 & regular price is $5.49 - $6.26 walmart",calc:"days",need:true,due:""},
+{id:129,item:"mini cucumbers (persian) (2 for the balsamic tofu salad)",store:"sprouts",num:"9",price:"3.99",notes:"$4.42 h mart, not organic. $3.99 at smart & final too",calc:"days",need:false,due:""},
+{id:231,item:"mint",store:"vons",num:"11",price:"1.49",notes:"",calc:"days",need:false,due:""},
+{id:130,item:"miso & easy original",store:"sprouts",num:"9",price:"6.99",notes:"",calc:"days",need:false,due:""},
+{id:83,item:"miso paste; white - Shirakiku Organic Reduced Sodium Miso (13.2 oz) $5.99",store:"h mart",num:"5",price:"5.99",notes:"organic soy bean miso shirakiku h mart 6.99 for 13.2 oz but reduced sodium buy and freeze",calc:"days",need:false,due:""},
+{id:84,item:"miso soup mushrooms",store:"h mart",num:"5",price:"4.99",notes:"shiitake $4.89, enoki $2.99, shimeji (brown beech) $2.49, 3.5 oz $4.99 smart & final",calc:"days",need:false,due:""},
+{id:267,item:"mozzarella; low-moisture part skim",store:"walmart",num:"8",price:"7.32",notes:"32 oz walmart sale price $6.58 - grocery outlet reg $7.49",calc:"days",need:false,due:""},
+{id:85,item:"msg",store:"h mart",num:"5",price:"3.79",notes:"8 oz (1/2 tsp per lb of meat)",calc:"days",need:false,due:""},
+{id:131,item:"mustard greens",store:"sprouts",num:"9",price:"2.49",notes:"sprouts $2.49, h mart & vons $2.99. 1 bunch/wk. cheaper at sprouts $2.49, but unable to find most of the time.",calc:"days",need:false,due:""},
+{id:232,item:"mustard greens",store:"vons",num:"11",price:"2.99",notes:"sprouts $2.49, h mart & vons $2.99. 1 bunch/wk.",calc:"days",need:false,due:""},
+{id:132,item:"nutritional yeast; kal unfortified 7.8 oz",store:"sprouts",num:"9",price:"24.99",notes:"$27.99 amazon",calc:"days",need:false,due:""},
+{id:10,item:"oatley original oatmilk",store:"walmart",num:"8",price:"5.27",notes:"",calc:"days",need:false,due:""},
+{id:133,item:"olive oil; 100% california 25.4 oz",store:"sprouts",num:"9",price:"31.99",notes:"buy one get one 50% off. unopened bottle in fridge lasts 3 years, opened in fridge lasts 2 years.",calc:"days",need:false,due:""},
+{id:44,item:"olives; mezzetta pitted kalamata",store:"walmart",num:"8",price:"4.98",notes:"",calc:"days",need:false,due:""},
+{id:96,item:"onion; red",store:"smart & final",num:"7",price:"1.03",notes:"price per lb * 0.7 = price for one\nH-Mart: TBD\nStater: $0.75/lb ($0.53 ea)\nSmart & Final: $0.99/lb ($0.69 ea)\nSprouts: $1.56/lb ($1.09 ea)",calc:"days",need:false,due:""},
+{id:46,item:"onion; yellow",store:"sprouts",num:"9",price:"",notes:".60/lb but they only have organic = .75 for a smaller/medium one",calc:"days",need:false,due:""},
+{id:38,item:"organic steel cut oats",store:"grocery outlet",num:"6",price:"3.49",notes:"",calc:"days",need:false,due:""},
+{id:134,item:"orzo",store:"sprouts",num:"9",price:"2.99",notes:"",calc:"days",need:false,due:""},
+{id:158,item:"paper",store:"staples",num:"1",price:"",notes:"only cheapest if staples has the sale of $17.23 (with tax) for 3 reams (1500 sheets)",calc:"days",need:false,due:""},
+{id:179,item:"paper",store:"target",num:"2",price:"",notes:"only cheapest if staples doesn't have the sale of $17.23 (with tax) for 3 reams",calc:"days",need:false,due:""},
+{id:180,item:"paper towels 12 rolls make-a-size up & up",store:"target",num:"2",price:"",notes:"",calc:"days",need:false,due:""},
+{id:233,item:"pasta; de cecco",store:"vons",num:"11",price:"4.76",notes:"don't believe the $2.18 sale or $2.78 reg price at the orange walmart - they didn't even carry it",calc:"days",need:false,due:""},
+{id:268,item:"pasta; rao's",store:"walmart",num:"8",price:"2.98",notes:"sprouts reg price $4.99 or bogo 50% = $3.74 each, vons $3.99",calc:"days",need:false,due:""},
+{id:99,item:"pepperoni; boar's head",store:"sprouts",num:"9",price:"5.99",notes:"",calc:"days",need:false,due:""},
+{id:97,item:"pickles; grillo's dill chips - 8 svgs/container",store:"smart & final",num:"7",price:"5.49",notes:"sale price at smart & final is $4.99 & regular price $5.49 - both cheaper than sprouts at $6.99",calc:"days",need:false,due:""},
+{id:269,item:"pie crust; pillsbury",store:"walmart",num:"8",price:"3.82",notes:"$5.19 smart & final",calc:"days",need:false,due:""},
+{id:200,item:"pine nuts",store:"trader joe's",num:"10",price:"10.99",notes:"whole foods 8 oz for $15.99 = $1.99/oz; trader joe's 8 oz for $10.99",calc:"days",need:false,due:""},
+{id:86,item:"pineapple",store:"h mart",num:"5",price:"4.99",notes:"$3.50 at sprouts",calc:"days",need:false,due:""},
+{id:135,item:"pineapple",store:"sprouts",num:"9",price:"3.50",notes:"",calc:"days",need:false,due:""},
+{id:136,item:"pink himalayan salt",store:"sprouts",num:"9",price:"bulk",notes:"",calc:"days",need:false,due:""},
+{id:137,item:"pinto beans, green valley food organic",store:"sprouts",num:"9",price:"2.29",notes:"15.5 oz",calc:"days",need:false,due:""},
+{id:234,item:"pinto beans; del real",store:"vons",num:"11",price:"4.99",notes:"",calc:"days",need:false,due:""},
+{id:98,item:"pizza & meat sauce mushrooms",store:"smart & final",num:"7",price:"9.99",notes:"baby bella 8 oz pkg = three 36-gram servings, 2.5 lbs (40 oz) $9.99 smart & final",calc:"days",need:false,due:""},
+{id:138,item:"pizza crust; brooklyn bred traditional 3-pack",store:"sprouts",num:"9",price:"4.99",notes:"red package round; 250 calories each",calc:"days",need:false,due:""},
+{id:181,item:"pizza sauce; rao's",store:"target",num:"2",price:"5.64",notes:"$5.99 at stater bros & walmart.",calc:"days",need:false,due:""},
+{id:182,item:"pizza; rao's",store:"target",num:"2",price:"10.69",notes:"$7 each sprouts on sale, must buy 2, otherwise $13.99",calc:"days",need:false,due:""},
+{id:139,item:"pizza; sprouts mushroom",store:"sprouts",num:"9",price:"13.49",notes:"bogo 50% = $6.74 each or $13.49 for 2",calc:"days",need:false,due:""},
+{id:140,item:"poppyseeds",store:"sprouts",num:"9",price:"3.33",notes:"$17.54/lb",calc:"days",need:false,due:""},
+{id:235,item:"tamales",store:"vons",num:"11",price:"11.99",notes:"sale price $5.00 for 24 oz but even at $11.99 still cheaper than Northgate Market's",calc:"days",need:false,due:""},
+{id:141,item:"potatoes; yukon gold",store:"sprouts",num:"9",price:"4.99",notes:"1.5 lbs - split bag in 1/2 and make for 3 days each 1/2 of bag",calc:"days",need:false,due:""},
+{id:205,item:"potatoes; yukon gold",store:"trader joe's",num:"10",price:"3.99",notes:"3 lbs - to last 12 days - cook 1/4 bag every 3 days",calc:"days",need:false,due:""},
+{id:59,item:"printer toner",store:"amazon",num:"a",price:"",notes:"2 for $211 orange staples store\n2 for $190.17 shipped from staples\n2 for $181 shipped from amazon",calc:"days",need:false,due:""},
+{id:201,item:"pure organic bourbon vanilla",store:"trader joe's",num:"10",price:"9.99",notes:"$6 for 2 oz at walmart",calc:"days",need:false,due:""},
+{id:142,item:"quinoa; tru roots sprouted",store:"sprouts",num:"9",price:"9.99",notes:"",calc:"days",need:false,due:""},
+{id:42,item:"reames homestyle egg noodles - frozen 24 oz - about 1 oz per serving",store:"walmart",num:"8",price:"6.63",notes:"other choices: pennsylvania dutch, kluski, manischewitz",calc:"days",need:false,due:""},
+{id:43,item:"red wine vinegar - star italian",store:"walmart",num:"8",price:"5.12",notes:"",calc:"days",need:false,due:""},
+{id:236,item:"refried beans - del real",store:"vons",num:"11",price:"5.99",notes:"$3.99 sale price",calc:"days",need:false,due:""},
+{id:271,item:"refried beans 16 oz; siete",store:"walmart",num:"8",price:"2.62",notes:"",calc:"days",need:false,due:""},
+{id:272,item:"rice vinegar",store:"walmart",num:"8",price:"",notes:"",calc:"days",need:false,due:""},
+{id:237,item:"roma tomato",store:"vons",num:"11",price:"1.99",notes:"$1.99/lb = .39 each (NEED 2)",calc:"days",need:false,due:""},
+{id:35,item:"romaine",store:"vons",num:"11",price:"5.98",notes:"2 heads = 12 days (2 small heads or 1 large at vons for $2.99 compared to 1 small at sprouts for same price)",calc:"days",need:false,due:""},
+{id:238,item:"roquefort",store:"vons",num:"11",price:"7.99",notes:"",calc:"days",need:false,due:""},
+{id:273,item:"salmon packet chicken of the sea 2.5 oz",store:"walmart",num:"8",price:"1.74",notes:"sale $1.54",calc:"days",need:false,due:""},
+{id:143,item:"salmon; wild caught sockeye salmon",store:"sprouts",num:"9",price:"34.98",notes:"850 grams/pkg for 230 grams protein = .15/gram, 10 svgs/pkg = $3.50/svg of 23 grams protein",calc:"days",need:false,due:""},
+{id:274,item:"sandwich bags, 200 ct",store:"walmart",num:"8",price:"",notes:"",calc:"days",need:false,due:""},
+{id:166,item:"sardines, king oscar mediterranean",store:"stater bros",num:"3",price:"3.76",notes:"amazon $4.30 $3.76 at walmart too",calc:"days",need:false,due:""},
+{id:275,item:"sardines, king oscar mediterranean",store:"walmart",num:"8",price:"3.76",notes:"amazon $4.30 $3.76 at stater bros too",calc:"days",need:false,due:""},
+{id:276,item:"scrubbing bubbles foaming bleach bathroom cleaner 32 oz",store:"walmart",num:"8",price:"4.17",notes:"",calc:"days",need:false,due:""},
+{id:183,item:"sesame oil (for mayo - not toasted)",store:"target",num:"2",price:"4.99",notes:"sprouts $6.49 8.45 oz organic unrefined, vons $7.49 for 16.9 oz, target 8.45 oz $4.99",calc:"days",need:false,due:""},
+{id:87,item:"sesame oil; kadoya pure toasted",store:"h mart",num:"5",price:"4.99",notes:"218 ml",calc:"days",need:false,due:""},
+{id:208,item:"setting sprays",store:"ulta",num:"1",price:"",notes:"mac fix+ stay over alcohol-free 24hr setting spray, pixi makeup fixing mist with rose water and green tea, mac prep and prime fix+, milk makeup hydro grip setting spray, e.l.f. makeup mist and set",calc:"days",need:false,due:""},
+{id:68,item:"sidecar doughnuts",store:"birthday",num:"b",price:"",notes:"270 e 17th street",calc:"days",need:false,due:""},
+{id:156,item:"siggi's plain greek whole milk yogurt 24 oz",store:"sprouts ~ sale $5.99 bogo 50% off = $8.99 for 2",num:"9",price:"8.99",notes:"Chobani (32 oz): $0.23/oz\nSiggi's (24 oz): $0.25/oz",calc:"days",need:false,due:""},
+{id:144,item:"smoked paprika",store:"sprouts",num:"9",price:"bulk",notes:"",calc:"days",need:false,due:""},
+{id:277,item:"snack bags, 100 ct",store:"walmart",num:"8",price:"",notes:"walmart $4.64",calc:"days",need:false,due:""},
+{id:278,item:"soda",store:"target",num:"6",price:"2.60",notes:"$1.12 at grocery outlet, $2.83 at home depot, $3.49 at cvs, $3.04 at vons, $2.85 at smart & final, $2.60 target (but they have zero sugar dr. pepper)",calc:"days",need:false,due:""},
+{id:76,item:"sour cream 14 oz tube",store:"grocery outlet",num:"6",price:"2.89",notes:"",calc:"days",need:false,due:""},
+{id:279,item:"sour cream daisy 8 oz",store:"walmart",num:"8",price:"1.74",notes:"",calc:"days",need:false,due:""},
+{id:88,item:"soy sauce; pearl river bridge superior light",store:"h mart",num:"5",price:"1.99",notes:"",calc:"days",need:false,due:""},
+{id:34,item:"st. elmo black spiced rum 750 ml; rum cake recipe",store:"bevmo",num:"1",price:"8.99",notes:"regular price $11.99",calc:"days",need:false,due:""},
+{id:196,item:"st. giorgio chianti riserva, 2021 375 ml; meat sauce recipe",store:"total wine & more brea",num:"1",price:"7.53",notes:"makes 3 meat sauce recipes",calc:"days",need:false,due:""},
+{id:280,item:"star anise",store:"walmart",num:"8",price:"1.18",notes:"la fiesta .62 oz",calc:"days",need:false,due:""},
+{id:157,item:"sumac",store:"sprouts or vons",num:"9",price:"4.67",notes:"for greek chicken",calc:"days",need:false,due:""},
+{id:202,item:"sundried tomatoes",store:"trader joe's",num:"10",price:"2.49",notes:"$4.99 for 3 oz at sprouts",calc:"days",need:false,due:""},
+{id:145,item:"sunflower oil",store:"sprouts",num:"9",price:"6.99",notes:"60% Avocado / 40% Sunflower or 70% Avocado / 30% Sunflower blends are best options",calc:"days",need:false,due:""},
+{id:206,item:"sweet relish",store:"trader joe's",num:"10",price:"",notes:"",calc:"days",need:false,due:""},
+{id:146,item:"sweet tea",store:"sprouts",num:"9",price:"2.00",notes:"",calc:"days",need:false,due:""},
+{id:281,item:"sweetened condensed milk, great value brand",store:"walmart",num:"8",price:"2.72",notes:"14 oz $1.78 sale; $2.49 at stater bros",calc:"days",need:false,due:""},
+{id:167,item:"sweetened condensed milk, stater bros brand",store:"stater bros",num:"3",price:"2.49",notes:"14 oz walmart reg $2.72 or $1.78 sale",calc:"days",need:false,due:""},
+{id:282,item:"swiss cheese ultra thin, sargento",store:"walmart",num:"8",price:"3.48",notes:"sale $2.48",calc:"days",need:false,due:""},
+{id:283,item:"taco bell seasoning packet",store:"walmart",num:"8",price:"0.88",notes:"",calc:"days",need:false,due:""},
+{id:168,item:"tapatio",store:"stater bros",num:"3",price:"1.49",notes:"$1.49 for 5 oz at Stater Bros, $2.79 for 10 oz at Stater Bros, or $3.14 for 10 oz at Walmart (sale: $2.28)",calc:"days",need:false,due:""},
+{id:69,item:"teaspoon",store:"birthday",num:"b",price:"",notes:"215 w birch st ste 3 brea",calc:"days",need:false,due:""},
+{id:29,item:"tofu; nature's raw tofu",store:"h mart",num:"5",price:"1.49",notes:"16 oz (nigari variant best) - look for this - sprouts organic is $2.50 but no soft",calc:"days",need:false,due:""},
+{id:30,item:"tofu; pulmuone organic soft for stews ($1.29)",store:"h mart",num:"5",price:"2.99",notes:"16 oz (nigari variant best) - look for this - sprouts organic is $2.50 but no soft",calc:"days",need:false,due:""},
+{id:284,item:"toilet paper",store:"walmart",num:"8",price:"",notes:"charmin ultra strong mega xl 12 at walmart for $26.48 is the cheapest per sq foot",calc:"days",need:false,due:""},
+{id:270,item:"TOMATO PASTE",store:"VONS",num:"8",price:"",notes:"",calc:"cans",need:false,due:""},
+{id:47,item:"tomatoes; wholesum organic cherry",store:"sprouts",num:"9",price:"5.49",notes:"247g",calc:"days",need:false,due:""},
+{id:169,item:"tortilla land uncooked burrito size 12 ct",store:"stater bros",num:"3",price:"3.99",notes:".33 each 1741 kellogg dr anaheim",calc:"days",need:false,due:""},
+{id:147,item:"tortillas; la fe burrito size 12 ct (250 kcal) - dry tasting",store:"sprouts",num:"9",price:"6.79",notes:".57 ea",calc:"days",need:false,due:""},
+{id:148,item:"tortillas; rise & puff burrito size 8 ct",store:"sprouts",num:"9",price:"6.79",notes:"",calc:"days",need:false,due:""},
+{id:285,item:"tortillas; romero's burrito size",store:"walmart",num:"8",price:"3.24",notes:"",calc:"days",need:false,due:""},
+{id:286,item:"tortillas; romero's casera soft taco size 8 ct",store:"walmart",num:"8",price:"1.34",notes:"$1.49 sale target, $1.49 reg stater bros, $1.34 walmart. 66 cal each",calc:"days",need:false,due:""},
+{id:149,item:"tortillas; vista hermosa burrito size 8 ct",store:"sprouts",num:"9",price:"9.99",notes:"",calc:"days",need:false,due:""},
+{id:287,item:"trash bags 13 gal 120 ct; great value",store:"walmart",num:"8",price:"",notes:"",calc:"days",need:false,due:""},
+{id:288,item:"triscuits; hint of salt",store:"walmart",num:"8",price:"3.97",notes:"reg price one box $3.97 or 3 for $8.91 on sale",calc:"days",need:false,due:""},
+{id:290,item:"tuna safe catch 3 oz",store:"walmart",num:"8",price:"2.86",notes:"",calc:"days",need:false,due:""},
+{id:289,item:"tuna; starkist 25% less sodium wild caught light tuna",store:"walmart",num:"8",price:"1.28",notes:"",calc:"days",need:false,due:""},
+{id:297,item:"ulta return wax",store:"",num:"1",price:"",notes:"",calc:"days",need:false,due:""},
+{id:184,item:"ultra soft 3-ply facial tissue - 4 rectangle boxes",store:"target",num:"2",price:"",notes:"",calc:"days",need:false,due:""},
+{id:291,item:"vanilla pudding 3.4 oz",store:"walmart",num:"8",price:"1.54",notes:"smart & final $1.69",calc:"days",need:false,due:""},
+{id:150,item:"walnuts",store:"whole foods",num:"4",price:"8.79",notes:"sprouts $8.99 for 10 oz = .899/oz; grocery outlet $5.99 for 6 oz = .998/oz; whole foods $8.79 for 10 oz = .879/oz",calc:"days",need:false,due:""},
+{id:207,item:"walnuts",store:"trader joe's",num:"10",price:"5.00",notes:"$9.89/lb at sprouts",calc:"days",need:false,due:""},
+{id:89,item:"watermelon, seedless",store:"h mart",num:"5",price:"5.99",notes:"alton $6.99, irvine blvd & buena park $5.99",calc:"days",need:false,due:""},
+{id:90,item:"watermelon, seedless orange",store:"h mart",num:"5",price:"8.99",notes:"",calc:"days",need:false,due:""},
+{id:91,item:"watermelon, seedless yellow",store:"h mart",num:"5",price:"4.99",notes:"",calc:"days",need:false,due:""},
+{id:70,item:"wetzel's pretzels",store:"birthday",num:"b",price:"",notes:"orange outlets",calc:"days",need:false,due:""},
+{id:60,item:"whey protein",store:"amazon",num:"a",price:"",notes:"",calc:"days",need:false,due:""},
+{id:33,item:"whole chicken",store:"sprouts",num:"9",price:"22.25",notes:"$4.49/lb ~ $22.45 for 5 lbs",calc:"days",need:false,due:""},
+{id:151,item:"whole seed pop smoked mustard",store:"sprouts",num:"9",price:"6.29",notes:"",calc:"days",need:false,due:""},
+{id:292,item:"worcestershire",store:"walmart",num:"8",price:"4.97",notes:"sale price $4.97/regular $5.47",calc:"days",need:false,due:""},
+{id:153,item:"zucchini",store:"sprouts",num:"9",price:"2.49",notes:"$2.49/lb",calc:"days",need:false,due:""},
+{id:154,item:"zuvia 12-pack",store:"sprouts",num:"9",price:"12.49",notes:"6-pack $7.32",calc:"days",need:false,due:""},
+{id:155,item:"zuvia creamy rootbeer",store:"sprouts",num:"9",price:"2.04",notes:"$1.99 each plus .05 crv = $2.04 each",calc:"days",need:false,due:""}];
+
+var STORE_KEY='st_v3';
+var JBIN_ID='69cc8912856a682189ea4991';
+var JBIN_KEY='$2a$10$tpjsSaIqmjzoWXjpvpu7n.AdJJdQf8JUbDhBDfNoCC5rzN0vxDh/m';
+var JBIN_URL='https://api.jsonbin.io/v3/b/'+JBIN_ID;
+
+var items=[], currentFilter='all', editingId=null, popupItemId=null, _dupKeys=new Set();
+var _modalOpening=false;
+
+function genId(){return Date.now()*1000+Math.floor(Math.random()*1000);}
+
 function today(){var d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate());}
-function addDays(n){var d=today();d.setDate(d.getDate()+Math.round(n));var mm=d.getMonth()+1;var dd=d.getDate();return d.getFullYear()+'-'+(mm<10?'0':'')+mm+'-'+(dd<10?'0':'')+dd;}
+function addDays(n){var d=today();d.setDate(d.getDate()+Math.round(n));var mm=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+'-'+(mm<10?'0':'')+mm+'-'+(dd<10?'0':'')+dd;}
 function parseDue(str){if(!str)return null;var d=new Date(str+'T00:00:00');return isNaN(d)?null:d;}
 function formatDue(str){var d=parseDue(str);if(!d)return '';return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);}
 function dueClass(str){var d=parseDue(str);if(!d)return 'due-none';var diff=Math.floor((d-today())/86400000);if(diff<=2)return 'due-past';if(diff<=7)return 'due-soon';return 'due-ok';}
 function rowUrgency(it){if(!it.due)return '';var d=parseDue(it.due);if(!d)return '';var diff=Math.floor((d-today())/86400000);if(diff<=2)return 'urgent-row';if(diff<=7)return 'warn-row';return '';}
+function fmtPrice(p){if(!p&&p!==0)return '';var s=String(p).trim();if(!s)return '';return s.startsWith('$')?s:(isNaN(parseFloat(s))?s:'$'+parseFloat(s).toFixed(2));}
+function escHtml(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function numClass(n){var m={'1':'sn-1','2':'sn-2','3':'sn-3','4':'sn-4','5':'sn-5','6':'sn-6','7':'sn-7','8':'sn-8','9':'sn-9','10':'sn-10','11':'sn-11','12':'sn-12'};return m[String(n)]||'';}
+function itemKey(it){return (it.item||'').trim().toLowerCase()+'|||'+(it.store||'').trim().toLowerCase();}
 
-const RAW_DATA=[{item:"tomato paste - 4 cans = 16 days",store:"vons",num:"11",price:"3.75",notes:"Trader Joe's: $0.99 (doesn't say BPA-Free)\nVons: $1.25 (BPA-Free)\nWalmart: $1.28 (doesn't say BPA-Free)\nSprouts (Can): $2.49\nSprouts (Glass): $3.49 (BPA-Free)",calc:"cans"},{item:"blueberries (16 oz) 3 bags",store:"trader joe's",num:"10",price:"7.47",notes:"3 bags = 13 days. Each bag 16oz × 28.35g = 453.6g ÷ 100g/day = 4.54 days/bag",calc:"bags"},{item:"avocados; mini (6/bag)",store:"walmart",num:"8",price:"2.78",notes:"sprouts $4.99 - same price at h mart - don't get at grocery outlet because they're too big and cost $3.99"},{item:"mushrooms, enoki - three 200-gram pkgs = 16 days",store:"h mart",num:"5",price:"8.97",notes:""},{item:"mushrooms, king oyster - three 270-gram pkgs = 810g for 16 days - or - two 1 lb packages = 908g for 16 days",store:"h mart",num:"5",price:"14.97",notes:""},{item:"ginger root",store:"h mart",num:"5",price:"4.46",notes:"sprouts organic $7.99 for 28 oz ≈ $4.57 per lb\nh mart conventional $4.46 for 1 lb"},{item:"milk; whole, organic - 292g/day average - 1,892g=1/2-gallon",store:"grocery outlet",num:"6",price:"4.49",notes:"prices at sprouts: $4.50-$4.57 if on sale/reg $4.99 - vons has better expiration dates but sale price is $4.99 & regular price is $5.49 - $6.26 walmart"},{item:"frosted flakes (about 12 oz)",store:"grocery outlet",num:"6",price:"3.99",notes:"guessed on size and price"},{item:"honey nut cheerios 10.8 oz",store:"grocery outlet",num:"6",price:"3.99",notes:""},{item:"cabbage, red",store:"smart & final",num:"7",price:"2.99",notes:"$8-9 per HEAD at H Mart, $2.99 per HEAD at smart & final, $1.49 per LB at Vons = $3/HEAD, $1.99/lb at sprouts = $4/HEAD"},{item:"oatley original oatmilk",store:"walmart",num:"8",price:"5.27",notes:""},{item:"daikon radish root - get 1/3 lb",store:"sprouts",num:"9",price:"2.49",notes:"1.5 lbs = 12 days, 1.68 lbs = 14 days - sale price is .98/lb - pick up 6.11 lbs for $5.99 for a savings of $9.22"},{item:"italian parsley",store:"sprouts",num:"9",price:"3.58",notes:"$1.79 sprouts, $2.49 h mart, $1.49 at vons but selection is never fresh, $1.49 at smart & final but only curly"},{item:"broccoli, 2 lb bag = 16 days",store:"sprouts",num:"9",price:"8.49",notes:"short stem 2 in, 65% floret yield → $4.60/lb, pre-cut $4.25/lb. avg stem 3.5 in → pre-cut cheaper"},{item:"cereal three wishes honey grain free (get honey next time)",store:"sprouts",num:"9",price:"6.99",notes:"sale price $5.99"},{item:"cereal seven sundays honey almond little crispies",store:"sprouts",num:"9",price:"7.99",notes:""},{item:"cereal seven sundays simply honey oat",store:"sprouts",num:"9",price:"7.99",notes:""},{item:"cereal lovebird honey grain free",store:"sprouts",num:"9",price:"11.49",notes:"sale price $9.49"},{item:"brussels sprouts ~ 2 lbs= 16 days",store:"sprouts",num:"9",price:"8.98",notes:"1 lb $3.99 is cheaper than the 12 oz bag of frozen for $4.79 unless it's on sale for $2.50 which is then cheaper than fresh. $3.99 is also cheaper than TJ's $3.69 for 14 oz"},{item:"spinach - 2 lb box",store:"sprouts",num:"9",price:"11.98",notes:"just buy the 2lb box for $12. Buying 4 bunches saves $2 but also costs a ton of time, trouble and mess to clean"},{item:"cilantro - buy at vons if it's not 4 for $5 at sprouts - get 2 bunches",store:"sprouts",num:"9",price:"1.25",notes:"Vons: $1.25 🏆\nSprouts (Sale): $1.25 (4 for $5)\nH-Mart: $1.49\nSmart & Final: $1.49\nStater Bros: $1.49\nSprouts (Reg): $1.69"},{item:"carrots",store:"sprouts",num:"9",price:"1.91",notes:"$1.49/lb = 1.91 for 4"},{item:"swiss chard",store:"sprouts",num:"9",price:"9.96",notes:"4 bunches at $2.49 each"},{item:"heavy cream, organic",store:"sprouts",num:"9",price:"4.79",notes:"don't buy non-organic - 1 carton = 1 month - $4.79 sprouts, $7.49 at vons, $7.99 smart & final"},{item:"celery - 20 oz - get 2",store:"trader joe's",num:"10",price:"5.98",notes:"Trader Joe's: $0.10/oz ($2.99/16oz pkg — Note: actual weight was 29.4oz) 🏆\nSprouts: $0.14/oz ($3.29/24oz)\nVons: $0.15/oz ($2.99/20oz)\nH Mart: $0.19/oz ($2.99/16oz)"},{item:"eggs; pasture-raised organic",store:"sprouts",num:"9",price:"12.99",notes:"$6.99 1 dozen = .58 each - 2 dozen = .54 each",calc:"eggs"},{item:"good earth sweet spice - buy at sprouts if on sale at 2 for $5 ~ each box lasts 9 days",store:"",num:"",price:"17.50",notes:""},{item:"garlic cloves",store:"smart & final",num:"7",price:"12.99",notes:"5 lb bag at h mart for $25.99 vs. 3 lb bag at Smart & Final for $12.99, which is cheaper per pound than h mart's bag (about $4.33 vs $5.20)."},{item:"flaxseed, whole",store:"h mart",num:"5",price:"2.49",notes:"$2.49 for 12 oz = $0.208/oz - h mart\n$4.07 for 16 oz = $0.254/oz - whole foods sale price\n$5.49 for 16 oz = $0.343/oz - whole foods reg price"},{item:"tofu; nature's raw tofu",store:"h mart",num:"5",price:"1.49",notes:"16 oz (nigari variant best) - look for this - sprouts organic is $2.50 but no soft"},{item:"tofu; pulmuone organic soft for stews ($1.29)",store:"h mart",num:"5",price:"2.99",notes:"16 oz (nigari variant best) - look for this - sprouts organic is $2.50 but no soft"},{item:"ground beef, 93% grass fed, organic",store:"sprouts",num:"9",price:"10.49",notes:"3 lbs for $31.47"},{item:"italian panko breadcrumbs",store:"sprouts",num:"9",price:"4.99",notes:""},{item:"whole chicken",store:"sprouts",num:"9",price:"22.25",notes:"$4.49/lb ~ $22.45 for 5 lbs"},{item:"st. elmo black spiced rum 750 ml",store:"bevmo",num:"1",price:"8.99",notes:"regular price $11.99"},{item:"romaine (2 bunches = 16 days)",store:"vons",num:"11",price:"5.98",notes:"2 heads = 12 days (2 small heads or 1 large at vons for $2.99 compared to 1 small at sprouts for same price)"},{item:"kodiak pancake mix",store:"walmart",num:"8",price:"6.28",notes:""},{item:"mandarin",store:"walmart",num:"8",price:"",notes:"season dec-jan - satsuma not good"},{item:"organic steel cut oats",store:"grocery outlet",num:"6",price:"3.49",notes:""},{item:"baby kale",store:"sprouts",num:"9",price:"4.99",notes:"same price as lacinto kale"},{item:"lacinto kale",store:"sprouts",num:"9",price:"5.00",notes:"price for 2 bunches = 1 lb. price for 2 bunches at vons would be $6"},{item:"good earth sweet & spicy caffeine free - shop for alternatives: celestial seasonings bengal spice, yogi egyptian licorice, stash licorice spice, republic of tea licorice cinnamon",store:"",num:"1",price:"",notes:"farmhouse teas herbal licorice spice, world spice mystic licorice"},{item:"reames homestyle egg noodles - frozen 24 oz - about 1 oz per serving",store:"walmart",num:"8",price:"6.63",notes:"other choices: pennsylvania dutch, kluski, manischewitz"},{item:"red wine vinegar - star italian",store:"walmart",num:"8",price:"5.12",notes:""},{item:"olives; mezzetta pitted kalamata",store:"walmart",num:"8",price:"4.98",notes:""},{item:"baby spinach 5 oz package",store:"sprouts",num:"9",price:"3.50",notes:"don't get at hmart - 60% of the box was spoiled $2.99 h mart"},{item:"onion; yellow",store:"sprouts",num:"9",price:"",notes:".60/lb but they only have organic = .75 for a smaller/medium one"},{item:"tomatoes; wholesum organic cherry",store:"sprouts",num:"9",price:"5.49",notes:"247g"},{item:"5 oz 5% fage yogurt",store:"vons",num:"11",price:"1.79",notes:""},{item:"amazon card",store:"cvs",num:".",price:"",notes:""},{item:"family walmart retin-a good rx",store:"to do",num:".",price:"",notes:"retin-a .05%"},{item:"kaiser rx",store:"to do",num:".",price:"",notes:"spironolactone & cream"},{item:"change trading pw on moo moo",store:"to do",num:".",price:"",notes:""},{item:"make balsamic vinaigrette & soup veggies",store:"to do",num:".",price:"",notes:""},{item:"hearts of palm",store:"albertsons",num:"10",price:"4.99",notes:""},{item:"bar keepers friend toilet bowl cleaner",store:"amazon",num:"a",price:"",notes:""},{item:"dawn dish soap",store:"amazon",num:"a",price:"",notes:""},{item:"foods alive nutritional yeast - gross",store:"amazon",num:"a",price:"40.89",notes:"$40.89 for 2 lbs ($1.28/oz) compared to sprouts kal nutritional yeast at $3.20/oz"},{item:"liquid stevia",store:"amazon",num:"a",price:"11.74",notes:"4 oz - $19.99 at sprouts"},{item:"printer toner",store:"amazon",num:"a",price:"",notes:"2 for $211 orange staples store\n2 for $190.17 shipped from staples\n2 for $181 shipped from amazon"},{item:"whey protein",store:"amazon",num:"a",price:"",notes:""},{item:"auntie anne's",store:"birthday",num:"b",price:"",notes:"2013 brea mall"},{item:"baskin robbins",store:"birthday",num:"b",price:"",notes:""},{item:"boudin",store:"birthday",num:"b",price:"",notes:"2800 main"},{item:"cheesecake factory",store:"birthday",num:"b",price:"",notes:"120 brea mall way"},{item:"chick-fil-a",store:"birthday",num:"b",price:"",notes:""},{item:"corner bakery",store:"birthday",num:"b",price:"",notes:"2789 n main"},{item:"krispy kreme",store:"birthday",num:"b",price:"",notes:"orange outlets"},{item:"sidecar doughnuts",store:"birthday",num:"b",price:"",notes:"270 e 17th street"},{item:"teaspoon",store:"birthday",num:"b",price:"",notes:"215 w birch st ste 3 brea"},{item:"wetzel's pretzels",store:"birthday",num:"b",price:"",notes:"orange outlets"},{item:"butter; unsalted",store:"grocery outlet",num:"6",price:"3.29",notes:"$7.99 sprouts (organic) $3.99 smart & final (non-organic) for 16 oz or $9.99 smart & final for 48 oz would be $3.33 for 16 oz"},{item:"cheddar cheese 2 lb (mild)",store:"grocery outlet",num:"6",price:"7.49",notes:"walmart $10.48"},{item:"eggs; organic not pasture-raised",store:"grocery outlet",num:"6",price:"5.29",notes:"cheapest is 'organic NOT pasture-raised' at grocery outlet 1 dozen for $5.29 but if sprouts has sale of $9.99 for 2 dozen, that is the cheapest at .42 each",calc:"eggs"},{item:"feta; greco 7 oz sheep & goat from greece",store:"grocery outlet",num:"6",price:"3.99",notes:"for greek ~ $6.79 sprouts ~ $3.99 grocery outlet"},{item:"lime; whole",store:"grocery outlet",num:"6",price:"0.25",notes:"each"},{item:"sour cream 14 oz tube",store:"grocery outlet",num:"6",price:"2.89",notes:""},{item:"baby arugula 1 lb",store:"h mart",num:"5",price:"4.99",notes:"$4.99 at h mart for 1 lb or $4.99 at sprouts for 10 oz"},{item:"black sesame seeds",store:"h mart",num:"5",price:"3.49",notes:""},{item:"blackberries",store:"h mart",num:"5",price:"4.49",notes:""},{item:"dish gloves, up & up medium ultra comfort",store:"h mart",num:"5",price:"",notes:"new pair 5/20 & 9/3 - don't buy the clorox ultra comfort for $5.41 at target"},{item:"dried seaweed (fueru wakame)",store:"h mart",num:"5",price:"",notes:""},{item:"hondashi",store:"h mart",num:"5",price:"5.29",notes:"120 g (1/4 tsp per 360 ml water for miso soup)"},{item:"miso paste; white - Shirakiku Organic Reduced Sodium Miso (13.2 oz) $5.99",store:"h mart",num:"5",price:"5.99",notes:"organic soy bean miso shirakiku h mart 6.99 for 13.2 oz but reduced sodium buy and freeze"},{item:"miso soup mushrooms",store:"h mart",num:"5",price:"4.99",notes:"shiitake $4.89, enoki $2.99, shimeji (brown beech) $2.49, 3.5 oz $4.99 smart & final"},{item:"msg",store:"h mart",num:"5",price:"3.79",notes:"8 oz (1/2 tsp per lb of meat)"},{item:"pineapple",store:"h mart",num:"5",price:"4.99",notes:"$3.50 at sprouts"},{item:"sesame oil; kadoya pure toasted",store:"h mart",num:"5",price:"4.99",notes:"218 ml"},{item:"soy sauce; pearl river bridge superior light",store:"h mart",num:"5",price:"1.99",notes:""},{item:"watermelon, seedless",store:"h mart",num:"5",price:"5.99",notes:"alton $6.99, irvine blvd & buena park $5.99"},{item:"watermelon, seedless orange",store:"h mart",num:"5",price:"8.99",notes:""},{item:"watermelon, seedless yellow",store:"h mart",num:"5",price:"4.99",notes:""},{item:"cayenne",store:"smart & final",num:"7",price:"1.39",notes:".93 oz smart & final & stater bros: el guapo $1.39 for 1.5 oz"},{item:"feta; atlanta 7 oz 100% sheep from bulgaria",store:"smart & final",num:"7",price:"5.89",notes:"for greek ~ $6.79 sprouts ~ $3.99 grocery outlet ~ for atlanta bulgarian: $6.39 regular price at smart & final/$5.89 sale price"},{item:"gorgonzola 4.78 oz",store:"smart & final",num:"7",price:"4.79",notes:"$4.59 sale price 91.9¢/oz"},{item:"greek yogurt, non-fat chobani - 170g/day for 16 days = 3 containers",store:"smart & final",num:"7",price:"5.99",notes:"walmart is $5.97 but don't trust their refrigerated section"},{item:"onion; red",store:"smart & final",num:"7",price:"1.03",notes:"price per lb * 0.7 = price for one\nH-Mart: TBD\nStater: $0.75/lb ($0.53 ea)\nSmart & Final: $0.99/lb ($0.69 ea)\nSprouts: $1.56/lb ($1.09 ea)"},{item:"pickles; grillo's dill chips - 8 svgs/container",store:"smart & final",num:"7",price:"5.49",notes:"sale price at smart & final is $4.99 & regular price $5.49 - both cheaper than sprouts at $6.99"},{item:"pizza & meat sauce mushrooms",store:"smart & final",num:"7",price:"9.99",notes:"baby bella 8 oz pkg = three 36-gram servings, 2.5 lbs (40 oz) $9.99 smart & final"},{item:"pepperoni; boar's head",store:"sprouts",num:"9",price:"5.99",notes:""},{item:"almond flour",store:"sprouts",num:"9",price:"",notes:""},{item:"asparagus - non-organic",store:"sprouts",num:"9",price:"4.99",notes:"$4.99/lb = .31/same price at Vons"},{item:"bread: Oroweat / Arnold Organic 22 Grains & Seed Bread",store:"sprouts",num:"9",price:"7.79",notes:"sale price $6.49"},{item:"chicken breast",store:"sprouts",num:"9",price:"17.98",notes:"2 lbs - $8.99/lb"},{item:"fish; crispy barramundi",store:"sprouts",num:"9",price:"9.89",notes:"barramundi $3.50 per 17 g protein"},{item:"fish; lemon herb barramundi",store:"sprouts",num:"9",price:"9.89",notes:"$3.30 per 17 g protein"},{item:"fish; simply skinless barramundi",store:"sprouts",num:"9",price:"10.99",notes:"$2.92 per 17 g protein"},{item:"freeze dried garlic",store:"sprouts",num:"9",price:"",notes:""},{item:"freeze dried onion",store:"sprouts",num:"9",price:"5.49",notes:""},{item:"freeze dried oregano",store:"sprouts",num:"9",price:"",notes:""},{item:"fresh dill",store:"sprouts",num:"9",price:"3.49",notes:""},{item:"ghee",store:"sprouts",num:"9",price:"5.99",notes:""},{item:"greek yogurt, non-fat fage",store:"sprouts",num:"9",price:"7.49",notes:"sale price sprouts $7.99, regular $8.49. regular vons $7.99"},{item:"greek yogurt, non-fat stonyfield organic",store:"sprouts",num:"9",price:"7.99",notes:""},{item:"green onions (scallions)",store:"sprouts",num:"9",price:"1.67",notes:"$1.99 at smart & final"},{item:"ground beef, 85% grass fed 16 oz, organic",store:"sprouts",num:"9",price:"9.49",notes:""},{item:"ground cardamom",store:"sprouts",num:"9",price:"4.99",notes:"walmart $5.46"},{item:"ground turkey 93%",store:"sprouts",num:"9",price:"9.29",notes:""},{item:"ground wagyu",store:"sprouts",num:"9",price:"",notes:"sprouts sale price $7.12, regular $9.49\nsprouts thomas farms $10.49\nvons snake river $12.99"},{item:"guittard sante chocolate chips",store:"sprouts",num:"9",price:"8.49",notes:""},{item:"gum",store:"sprouts",num:"9",price:"4.99",notes:""},{item:"hominy",store:"sprouts",num:"9",price:"1.89",notes:"25 oz $1.99 stater bros, $1.98 walmart"},{item:"iceberg lettuce",store:"sprouts",num:"9",price:"2.99",notes:""},{item:"lemon for greek chicken or salmon dill sauce",store:"sprouts",num:"9",price:"0.99",notes:""},{item:"lemon juice",store:"sprouts",num:"9",price:"10.09",notes:"sale price at 50% bogo = $7.57 each - bought 6 on 2/6/25 saving $15.12"},{item:"lime juice",store:"sprouts",num:"9",price:"10.09",notes:""},{item:"maille whole grain mustard",store:"sprouts",num:"9",price:"3.97",notes:"only if on sale for bogo 50% - reg sprouts price is $5.29"},{item:"micro arugula",store:"sprouts",num:"9",price:"3.99",notes:""},{item:"milk; nonfat, organic - 292g/day average - 1,892g=1/2-gallon",store:"sprouts",num:"9",price:"4.99",notes:"prices at sprouts: $4.50-$4.57 if on sale/reg $4.99 - vons has better expiration dates but sale price is $4.99 & regular price is $5.49"},{item:"mini cucumbers (persian) (2 for the balsamic tofu salad)",store:"sprouts",num:"9",price:"3.99",notes:"$4.42 h mart, not organic. $3.99 at smart & final too"},{item:"miso & easy original",store:"sprouts",num:"9",price:"6.99",notes:""},{item:"mustard greens",store:"sprouts",num:"9",price:"2.49",notes:"sprouts $2.49, h mart & vons $2.99. 1 bunch/wk. cheaper at sprouts $2.49, but unable to find most of the time."},{item:"nutritional yeast; kal unfortified 7.8 oz",store:"sprouts",num:"9",price:"24.99",notes:"$27.99 amazon"},{item:"olive oil; 100% california 25.4 oz",store:"sprouts",num:"9",price:"31.99",notes:"buy one get one 50% off. unopened bottle in fridge lasts 3 years, opened in fridge lasts 2 years."},{item:"orzo",store:"sprouts",num:"9",price:"2.99",notes:""},{item:"pineapple",store:"sprouts",num:"9",price:"3.50",notes:""},{item:"pink himalayan salt",store:"sprouts",num:"9",price:"bulk",notes:""},{item:"pinto beans, green valley food organic",store:"sprouts",num:"9",price:"2.29",notes:"15.5 oz"},{item:"pizza crust; brooklyn bred traditional 3-pack",store:"sprouts",num:"9",price:"4.99",notes:"red package round; 250 calories each"},{item:"pizza; sprouts mushroom",store:"sprouts",num:"9",price:"13.49",notes:"bogo 50% = $6.74 each or $13.49 for 2"},{item:"poppyseeds",store:"sprouts",num:"9",price:"3.33",notes:"$17.54/lb"},{item:"potatoes; yukon gold",store:"sprouts",num:"9",price:"4.99",notes:"1.5 lbs - split bag in 1/2 and make for 3 days each 1/2 of bag"},{item:"quinoa; tru roots sprouted",store:"sprouts",num:"9",price:"9.99",notes:""},{item:"salmon; wild caught sockeye salmon",store:"sprouts",num:"9",price:"34.98",notes:"850 grams/pkg for 230 grams protein = .15/gram, 10 svgs/pkg = $3.50/svg of 23 grams protein"},{item:"smoked paprika",store:"sprouts",num:"9",price:"bulk",notes:""},{item:"sunflower oil",store:"sprouts",num:"9",price:"6.99",notes:"60% Avocado / 40% Sunflower or 70% Avocado / 30% Sunflower blends are best options"},{item:"sweet tea",store:"sprouts",num:"9",price:"2.00",notes:""},{item:"tortillas; la fe burrito size 12 ct (250 kcal) - dry tasting",store:"sprouts",num:"9",price:"6.79",notes:".57 ea"},{item:"tortillas; rise & puff burrito size 8 ct",store:"sprouts",num:"9",price:"6.79",notes:""},{item:"tortillas; vista hermosa burrito size 8 ct",store:"sprouts",num:"9",price:"9.99",notes:""},{item:"walnuts",store:"whole foods",num:"4",price:"8.79",notes:"sprouts $8.99 for 10 oz = .899/oz; grocery outlet $5.99 for 6 oz = .998/oz; whole foods $8.79 for 10 oz = .879/oz"},{item:"whole seed pop smoked mustard",store:"sprouts",num:"9",price:"6.29",notes:""},{item:"koops stoneground mustard",store:"sprouts",num:"9",price:"",notes:""},{item:"zucchini",store:"sprouts",num:"9",price:"2.49",notes:"$2.49/lb"},{item:"zuvia 12-pack",store:"sprouts",num:"9",price:"12.49",notes:"6-pack $7.32"},{item:"zuvia creamy rootbeer",store:"sprouts",num:"9",price:"2.04",notes:"$1.99 each plus .05 crv = $2.04 each"},{item:"siggi's plain greek whole milk yogurt 24 oz",store:"sprouts ~ sale $5.99 bogo 50% off = $8.99 for 2",num:"9",price:"8.99",notes:"Chobani (32 oz): $0.23/oz\nSiggi's (24 oz): $0.25/oz"},{item:"sumac",store:"sprouts or vons",num:"9",price:"4.67",notes:"for greek chicken"},{item:"paper",store:"staples",num:"1",price:"",notes:"only cheapest if staples has the sale of $17.23 (with tax) for 3 reams (1500 sheets)"},{item:"bar keepers friend",store:"stater bros",num:"3",price:"",notes:"same price at smart & final"},{item:"cinnamon stick",store:"stater bros",num:"3",price:"3.99",notes:"$1.45/oz for 2.75 oz bag"},{item:"cottage cheese, daisy",store:"stater bros",num:"3",price:"3.49",notes:"(for bone broth) 16 oz $2.99 sale"},{item:"distilled water, gallon",store:"stater bros",num:"3",price:"",notes:""},{item:"full circle bone broth - buy 3 cartons @ $3.99 each",store:"stater bros",num:"3",price:"11.97",notes:"pacific organic $5.74 at walmart, reg price at sprouts $7.99 or \"sale\" $6.99; $7.99 at vons"},{item:"green chile, whole",store:"stater bros",num:"3",price:"6.49",notes:"27 oz $6.99 smart & final"},{item:"laughing cow cheese",store:"stater bros",num:"3",price:"3.99",notes:"$2.50 on sale at vons or their regular price is $5.49"},{item:"sardines, king oscar mediterranean",store:"stater bros",num:"3",price:"3.76",notes:"amazon $4.30 $3.76 at walmart too"},{item:"sweetened condensed milk, stater bros brand",store:"stater bros",num:"3",price:"2.49",notes:"14 oz walmart reg $2.72 or $1.78 sale"},{item:"tapatio",store:"stater bros",num:"3",price:"1.49",notes:"$1.49 for 5 oz at Stater Bros, $2.79 for 10 oz at Stater Bros, or $3.14 for 10 oz at Walmart (sale: $2.28)"},{item:"tortilla land uncooked burrito size 12 ct",store:"stater bros",num:"3",price:"3.99",notes:".33 each 1741 kellogg dr anaheim"},{item:"la roche-posay double repair face moisturizer",store:"target",num:"2",price:"",notes:"prices before tax: $24.99 amazon, $24.97 walmart, $24.69 (after 5% discount)"},{item:"banana",store:"target",num:"2",price:"0.29",notes:".79/lb at sprouts = .88 for one extra large - .69/lb at vons = .66 for one large - target was .29 for a large"},{item:"brown sugar; dark",store:"target",num:"2",price:"2.29",notes:"32 oz - $2.29 at vons for 16 oz"},{item:"carnitas",store:"target",num:"2",price:"$7.99 (sale, usually $9.99)",notes:"2 pkgs $15.13 with 5% discount + bag discount. past sales: 6/1/25, 9/2/25"},{item:"coffee filters",store:"target",num:"2",price:"",notes:"have to purchase online at target ($5.99 smart & final)"},{item:"cotton rounds; premium",store:"target",num:"2",price:"",notes:"don't get walmart ones, they split apart"},{item:"ground coffee",store:"target",num:"2",price:"9.02",notes:"$12.99 at sprouts - the $9.02 at target was a sales price of $9.49 minus the 5% discount"},{item:"head and shoulders",store:"target",num:"2",price:"",notes:""},{item:"gold bond retinol",store:"target",num:"2",price:"",notes:"$12.90 on amazon"},{item:"paper",store:"target",num:"2",price:"",notes:"only cheapest if staples doesn't have the sale of $17.23 (with tax) for 3 reams"},{item:"paper towels 12 rolls make-a-size up & up",store:"target",num:"2",price:"",notes:""},{item:"pizza sauce; rao's",store:"target",num:"2",price:"5.64",notes:"$5.99 at stater bros & walmart."},{item:"pizza; rao's",store:"target",num:"2",price:"10.69",notes:"$7 each sprouts on sale, must buy 2, otherwise $13.99"},{item:"sesame oil (for mayo - not toasted)",store:"target",num:"2",price:"4.99",notes:"sprouts $6.49 8.45 oz organic unrefined, vons $7.49 for 16.9 oz, target 8.45 oz $4.99"},{item:"ultra soft 3-ply facial tissue - 4 rectangle boxes",store:"target",num:"2",price:"",notes:""},{item:"change ring battery",store:"to do",num:".",price:"",notes:""},{item:"make bone broth",store:"to do",num:".",price:"",notes:""},{item:"make meat sauce",store:"to do",num:".",price:"",notes:""},{item:"make miso salmon",store:"to do",num:".",price:"",notes:""},{item:"make mushroom packs for pizza, quesadillas & meat sauce",store:"to do",num:".",price:"",notes:""},{item:"make panko chicken",store:"to do",num:".",price:"",notes:""},{item:"make pizza sauce",store:"to do",num:".",price:"",notes:"$5.99 at stater bros & walmart."},{item:"make powder jars and veggie packs",store:"to do",num:".",price:"",notes:""},{item:"make quinoa",store:"to do",num:".",price:"",notes:""},{item:"make rice",store:"to do",num:".",price:"",notes:""},{item:"make shredded chicken",store:"to do",num:".",price:"",notes:""},{item:"st. giorgio chianti riserva, 2021 375 ml for rum cake recipe",store:"total wine & more brea",num:"1",price:"7.53",notes:"makes 3 meat sauce recipes"},{item:"balsamic vinegar",store:"trader joe's",num:"10",price:"5.99",notes:"Gold Aceto Balsamico di Modena 8.5 oz if you want a glaze. Organic $5.99 for 8.5 oz for daily salad vinegar."},{item:"english cucumber",store:"trader joe's",num:"10",price:"2.49",notes:"$2.99 at vons"},{item:"joe's diner mac & cheese",store:"trader joe's",num:"10",price:"2.99",notes:""},{item:"pine nuts",store:"trader joe's",num:"10",price:"10.99",notes:"whole foods 8 oz for $15.99 = $1.99/oz; trader joe's 8 oz for $10.99"},{item:"pure organic bourbon vanilla",store:"trader joe's",num:"10",price:"9.99",notes:"$6 for 2 oz at walmart"},{item:"sundried tomatoes",store:"trader joe's",num:"10",price:"2.49",notes:"$4.99 for 3 oz at sprouts"},{item:"artichokes on the go",store:"trader joe's",num:"10",price:"1.49",notes:"$1.49 each"},{item:"macadamia nuts - 1 bag = 28 days",store:"trader joe's",num:"10",price:"7.99",notes:""},{item:"potatoes; yukon gold",store:"trader joe's",num:"10",price:"3.99",notes:"3 lbs - to last 12 days - cook 1/4 bag every 3 days"},{item:"sweet relish",store:"trader joe's",num:"10",price:"",notes:""},{item:"walnuts",store:"trader joe's",num:"10",price:"5.00",notes:"$9.89/lb at sprouts"},{item:"setting sprays",store:"ulta",num:"1",price:"",notes:"mac fix+ stay over alcohol-free 24hr setting spray, pixi makeup fixing mist with rose water and green tea, mac prep and prime fix+, milk makeup hydro grip setting spray, e.l.f. makeup mist and set"},{item:"chicken breast strips 24 oz; just bare lightly breaded",store:"vons",num:"11",price:"12.99",notes:".54/oz (the larger 36 oz bag is .56/oz)"},{item:"apples",store:"vons",num:"11",price:"3.04",notes:"$1.52 each; walmart $2.28/lb, sprouts $3.29/lb"},{item:"asparagus - non-organic",store:"vons",num:"11",price:"4.99",notes:"$4.99/lb = .31/same price at Sprouts"},{item:"barbacoa; del real",store:"vons",num:"11",price:"9.99",notes:"walmart $10.98"},{item:"black olives; large lindsay",store:"vons",num:"11",price:"3.50",notes:"$1.49 per can sale price - regular price $3.50. $2.47 at walmart"},{item:"botan rice",store:"vons",num:"11",price:"7.99",notes:"walmart sale $9.49, stater bros $8.99 reg/$6.99 sale"},{item:"capers, mezzetta",store:"vons",num:"11",price:"4.29",notes:"4 oz"},{item:"fish; gorton's beer battered fish fillets 10 count 18.2 oz",store:"vons",num:"11",price:"11.99",notes:".66/oz"},{item:"fish; gorton's crispy battered fish portions 24.5 oz value pack",store:"vons",num:"11",price:"11.99",notes:".49/oz"},{item:"fish; gorton's crunchy breaded fish filets 10 count 19 oz",store:"vons",num:"11",price:"11.99",notes:".63/oz"},{item:"fish; gorton's garlic & herb fish fillets 6 count 11 oz",store:"vons",num:"11",price:"7.99",notes:".73/oz"},{item:"fish; gorton's parmesan crusted fish fillets 10 count 18.2 oz",store:"vons",num:"11",price:"11.99",notes:".66/oz"},{item:"fish; gorton's potato crunch fish fillets 10 count 18.2 oz",store:"vons",num:"11",price:"11.99",notes:".66/oz"},{item:"fish; van de kamp's beer battered fish filets 10 count 19.1 oz",store:"vons",num:"11",price:"7.99",notes:".41/oz"},{item:"fish; van de kamp's crispy battered fish filets 10 count 19.45 oz",store:"vons",num:"11",price:"7.99",notes:".41/oz"},{item:"gorton's golden crusted fish fillets 8 count 15.2 oz",store:"vons",num:"11",price:"11.99",notes:".79/oz"},{item:"greek yogurt, fage 5% ~ 5.3 oz container",store:"vons",num:"11",price:"2.00",notes:""},{item:"greek yogurt, non-fat organics",store:"vons",num:"11",price:"6.99",notes:""},{item:"green apple",store:"sprouts",num:"9",price:"1.10",notes:"$2.29/lb"},{item:"green grapes",store:"vons",num:"11",price:"3.99",notes:"$3.99/lb - 1 bag is $11.48!!"},{item:"hashbrown potatoes; ore-ida diced",store:"vons",num:"11",price:"5.49",notes:"next cheapest is walmart at $7.99 but not even in stock"},{item:"lasagna; cheese michael angelo (split into 4 servings)",store:"vons",num:"11",price:"",notes:"sale price $10.99; good but a little dry needs more red sauce and mozzarella"},{item:"mint",store:"vons",num:"11",price:"1.49",notes:""},{item:"mustard greens",store:"vons",num:"11",price:"2.99",notes:"sprouts $2.49, h mart & vons $2.99. 1 bunch/wk."},{item:"pasta; de cecco",store:"vons",num:"11",price:"4.76",notes:"don't believe the $2.18 sale or $2.78 reg price at the orange walmart - they didn't even carry it"},{item:"pinto beans; del real",store:"vons",num:"11",price:"4.99",notes:""},{item:"pork tamales - 6 per pkg @ 2/serving",store:"vons",num:"11",price:"11.99",notes:"sale price $5.00"},{item:"refried beans - del real",store:"vons",num:"11",price:"5.99",notes:"$3.99 sale price"},{item:"roma tomato",store:"vons",num:"11",price:"1.99",notes:"$1.99/lb = .39 each (NEED 2)"},{item:"roquefort",store:"vons",num:"11",price:"7.99",notes:""},{item:"91% isopropyl alcohol - sprayer",store:"walmart",num:"8",price:"",notes:""},{item:"bay leafs",store:"walmart",num:"8",price:"2.98",notes:""},{item:"apple cider vinegar 32 oz",store:"walmart",num:"8",price:"6.48",notes:""},{item:"arm & hammer with oxi clean 166.5 oz",store:"walmart",num:"8",price:"",notes:"$13.98 for 166.5 oz for 8.4¢/oz, but if 100.5 oz is 7.97 then that is a better deal at 7.9¢/oz"},{item:"avocado oil",store:"walmart",num:"8",price:"10.97",notes:"16.9 oz - $11.99 at sprouts"},{item:"avocado oil spray",store:"walmart",num:"8",price:"11.47",notes:"13.5 oz"},{item:"bar keepers friend powder",store:"walmart",num:"8",price:"",notes:"sale price only: $2.99 at smart & final or stater bros"},{item:"black olives; jumbo great value",store:"walmart",num:"8",price:"1.97",notes:"vons $1.49 per can sale price - regular price $3.50. $2.47 at walmart"},{item:"bonne maman cherry preserves 13 oz",store:"walmart",num:"8",price:"6.28",notes:"$4.97 on sale"},{item:"bueno mild red chili",store:"walmart",num:"8",price:"3.97",notes:"$3.99 vons 14 oz"},{item:"buttermilk",store:"walmart",num:"8",price:"2.84",notes:"$3.49 smart & final"},{item:"cake mix; duncan hines white",store:"walmart",num:"8",price:"1.73",notes:"$2.99 smart & final"},{item:"carbone marinara",store:"walmart",num:"8",price:"7.97",notes:"sales at $6.36 & $7.17, regular $7.97 - sprouts sale price is still higher at $7.12"},{item:"cleaning vinegar",store:"walmart",num:"8",price:"",notes:"128 oz sale price $3.86"},{item:"coffee; decaf",store:"walmart",num:"8",price:"",notes:""},{item:"cotton balls",store:"walmart",num:"8",price:"",notes:""},{item:"cream cheese, philadelphia",store:"walmart",num:"8",price:"3.13",notes:"$2.99 sale price"},{item:"dried chiles de arbol",store:"walmart",num:"8",price:"1.97",notes:"el guapo 2 oz bag"},{item:"freezer ziplocs hefty",store:"walmart",num:"8",price:"",notes:""},{item:"garlic powder",store:"walmart",num:"8",price:"1.28",notes:""},{item:"Germ-X Advanced Hand Sanitizer, Aloe, 1 L",store:"walmart",num:"8",price:"",notes:""},{item:"italian seasoning",store:"walmart",num:"8",price:"1.28",notes:"sale price $1.18"},{item:"king arthur bread flour 5 lb",store:"walmart",num:"8",price:"5.58",notes:"stater bros $6.99, amazon $7.87, vons $10.99"},{item:"knorr tomato with chicken flavor bouillon cubes",store:"walmart",num:"8",price:"1.08",notes:""},{item:"lemon pepper",store:"walmart",num:"8",price:"1.28",notes:""},{item:"maseca yellow instant corn masa flour (masa harina)",store:"walmart",num:"8",price:"2.13",notes:"2 lb bag"},{item:"mayonnaise, avocado oil",store:"walmart",num:"8",price:"7.98",notes:"12 oz"},{item:"mezzetta jalapenos",store:"walmart",num:"8",price:"3.27",notes:"sale price $2.87"},{item:"mozzarella; low-moisture part skim",store:"walmart",num:"8",price:"7.32",notes:"32 oz walmart sale price $6.58 - grocery outlet reg $7.49"},{item:"pasta; rao's",store:"walmart",num:"8",price:"2.98",notes:"sprouts reg price $4.99 or bogo 50% = $3.74 each, vons $3.99"},{item:"pie crust; pillsbury",store:"walmart",num:"8",price:"3.82",notes:"$5.19 smart & final"},{item:"powdered sugar",store:"walmart",num:"8",price:"",notes:""},{item:"refried beans 16 oz; siete",store:"walmart",num:"8",price:"2.62",notes:""},{item:"rice vinegar",store:"walmart",num:"8",price:"",notes:""},{item:"salmon packet chicken of the sea 2.5 oz",store:"walmart",num:"8",price:"1.74",notes:"sale $1.54"},{item:"sandwich bags, 200 ct",store:"walmart",num:"8",price:"",notes:""},{item:"sardines, king oscar mediterranean",store:"walmart",num:"8",price:"3.76",notes:"amazon $4.30 $3.76 at stater bros too"},{item:"scrubbing bubbles foaming bleach bathroom cleaner 32 oz",store:"walmart",num:"8",price:"",notes:""},{item:"snack bags, 100 ct",store:"walmart",num:"8",price:"",notes:"walmart $4.64"},{item:"soda",store:"target",num:"6",price:"2.60",notes:"$1.12 at grocery outlet, $2.83 at home depot, $3.49 at cvs, $3.04 at vons, $2.85 at smart & final, $2.60 target (but they have zero sugar dr. pepper)"},{item:"sour cream daisy 8 oz",store:"walmart",num:"8",price:"1.74",notes:""},{item:"star anise",store:"walmart",num:"8",price:"1.18",notes:"la fiesta .62 oz"},{item:"sweetened condensed milk, great value brand",store:"walmart",num:"8",price:"2.72",notes:"14 oz $1.78 sale; $2.49 at stater bros"},{item:"swiss cheese ultra thin, sargento",store:"walmart",num:"8",price:"3.48",notes:"sale $2.48"},{item:"taco bell seasoning packet",store:"walmart",num:"8",price:"0.88",notes:""},{item:"toilet paper",store:"walmart",num:"8",price:"",notes:"charmin ultra strong mega xl 12 at walmart for $26.48 is the cheapest per sq foot"},{item:"tortillas; romero's burrito size",store:"walmart",num:"8",price:"3.24",notes:""},{item:"tortillas; romero's casera soft taco size 8 ct",store:"walmart",num:"8",price:"1.34",notes:"$1.49 sale target, $1.49 reg stater bros, $1.34 walmart. 66 cal each"},{item:"trash bags 13 gal 120 ct; great value",store:"walmart",num:"8",price:"",notes:""},{item:"triscuits; hint of salt",store:"walmart",num:"8",price:"3.97",notes:"reg price one box $3.97 or 3 for $8.91 on sale"},{item:"tuna; starkist 25% less sodium wild caught light tuna",store:"walmart",num:"8",price:"1.28",notes:""},{item:"tuna safe catch 3 oz",store:"walmart",num:"8",price:"2.86",notes:""},{item:"vanilla pudding 3.4 oz",store:"walmart",num:"8",price:"1.54",notes:"smart & final $1.69"},{item:"worcestershire",store:"walmart",num:"8",price:"4.97",notes:"sale price $4.97/regular $5.47"},{item:"eucerin intensive repair",store:"walmart - same exact price at amazon",num:"8",price:"",notes:""},{item:"balsamic vinegar",store:"walmart online",num:"1",price:"",notes:"https://www.walmart.com/ip/seort/179935477"},{item:"evaporated milk; 365 by whole foods market organic",store:"whole foods tustin",num:"4",price:"3.19",notes:"12 oz cheaper out there but only one w/out carrageenan"},{item:"balsamic vinegar",store:"williams sonoma - scp",num:"1",price:"35.50",notes:"VSOP 25-Year Barrel-Aged Balsamic Vinegar, 459-ml ($44.14 if bought online)"},{item:"ulta return wax",store:"",num:"1",price:"",notes:""}];
-
-const PRESET_DATES={"tomato paste - 4 cans = 16 days":addDays(11),"blueberries (16 oz) 3 bags":addDays(18),"mushrooms, enoki - three 200-gram pkgs = 16 days":addDays(12),"mushrooms, king oyster - three 270-gram pkgs = 810g for 16 days - or - two 1 lb packages = 908g for 16 days":addDays(12),"ginger root":addDays(8),"cabbage, red":addDays(11),"daikon radish root - get 1/3 lb":addDays(8),"italian parsley":addDays(11),"broccoli, 2 lb bag = 16 days":addDays(11),"brussels sprouts ~ 2 lbs= 16 days":addDays(11),"spinach - 2 lb box":addDays(11),"cilantro - buy at vons if it's not 4 for $5 at sprouts - get 2 bunches":addDays(11),"carrots":addDays(11),"swiss chard":addDays(11),"celery - 20 oz - get 2":addDays(11),"heavy cream, organic":addDays(7),"eggs; pasture-raised organic":addDays(17),"good earth sweet spice - buy at sprouts if on sale at 2 for $5 ~ each box lasts 9 days":"2026-05-20","garlic cloves":"2026-10-30","flaxseed, whole":addDays(8)};
-const PRESET_DAYS_INPUT={"tomato paste - 4 cans = 16 days":"3","blueberries (16 oz) 3 bags":"3.96","mushrooms, enoki - three 200-gram pkgs = 16 days":"12","mushrooms, king oyster - three 270-gram pkgs = 810g for 16 days - or - two 1 lb packages = 908g for 16 days":"12","ginger root":"8","cabbage, red":"11","daikon radish root - get 1/3 lb":"8","italian parsley":"11","broccoli, 2 lb bag = 16 days":"11","brussels sprouts ~ 2 lbs= 16 days":"11","spinach - 2 lb box":"11","cilantro - buy at vons if it's not 4 for $5 at sprouts - get 2 bunches":"11","carrots":"11","swiss chard":"11","celery - 20 oz - get 2":"11","heavy cream, organic":"7","eggs; pasture-raised organic":"25","good earth sweet spice - buy at sprouts if on sale at 2 for $5 ~ each box lasts 9 days":"51","garlic cloves":"214","flaxseed, whole":"8"};
-const PRESET_NEED=new Set(["tomato paste - 4 cans = 16 days","blueberries (16 oz) 3 bags","avocados; mini (6/bag)","mushrooms, enoki - three 200-gram pkgs = 16 days","mushrooms, king oyster - three 270-gram pkgs = 810g for 16 days - or - two 1 lb packages = 908g for 16 days","ginger root","milk; whole, organic - 292g/day average - 1,892g=1/2-gallon","cabbage, red","oatley original oatmilk","daikon radish root - get 1/3 lb","italian parsley","broccoli, 2 lb bag = 16 days","brussels sprouts ~ 2 lbs= 16 days","spinach - 2 lb box","cilantro - buy at vons if it's not 4 for $5 at sprouts - get 2 bunches","carrots","swiss chard","heavy cream, organic","celery - 20 oz - get 2","eggs; pasture-raised organic","good earth sweet spice - buy at sprouts if on sale at 2 for $5 ~ each box lasts 9 days","flaxseed, whole","tofu; nature's raw tofu","tofu; pulmuone organic soft for stews ($1.29)","ground beef, 93% grass fed, organic","italian panko breadcrumbs","whole chicken","barbacoa; del real","black beans (from freezer)","black olives; large lindsay","bread: Oroweat / Arnold Organic 22 Grains & Seed Bread","carnitas"]);
-
-var items=[], currentFilter='all', editingId=null, popupItemId=null;
-var _dupKeys = new Set();
-var _dupNames = new Set();
-var _nextId = 0;
-
-function genId() { return Date.now() * 1000 + (_nextId++); }
-
-function itemKey(it) {
-  return (it.item||'').trim().toLowerCase() + '|||' + (it.store||'').trim().toLowerCase();
-}
-
-function initFromRaw(){
-  _nextId = 0;
-  items = RAW_DATA.map(function(d, i) {
-    return {
-      id: i,
-      item: d.item, store: d.store, num: d.num, price: d.price,
-      notes: d.notes, calc: d.calc||'days',
-      need: PRESET_NEED.has(d.item),
-      due: PRESET_DATES[d.item]||'',
-      daysInput: PRESET_DAYS_INPUT[d.item]||''
-    };
-  });
-  _nextId = RAW_DATA.length;
-}
-
-function backfillDaysInput(){
-  var todayMs=today().getTime();
-  items.forEach(function(it){
-    if(it.due&&(it.daysInput===''||it.daysInput===null||it.daysInput===undefined)){
-      var d=parseDue(it.due);if(!d)return;
-      var daysRemaining=Math.ceil((d.getTime()-todayMs)/86400000);
-      var val;
-      if(it.calc==='eggs')val=Math.round(daysRemaining*1.5*10)/10;
-      else if(it.calc==='cans')val=Math.round(daysRemaining/4*10)/10;
-      else if(it.calc==='bags')val=Math.round(daysRemaining*100/(16*28.35)*100)/100;
-      else val=daysRemaining;
-      if(val>0)it.daysInput=String(val);
-    }
-  });
-}
-
-function loadState(){
+// ---- LOAD / SAVE ----
+function loadItems(){
   try{
-    var raw=localStorage.getItem('shopping-items-v2');
+    var raw=localStorage.getItem(STORE_KEY);
     if(raw){
-      var savedMap=JSON.parse(raw);
-      initFromRaw();
-      if(savedMap.__deleted&&savedMap.__deleted.length){
-        var delSet=new Set(savedMap.__deleted);
-        items=items.filter(function(it){return !delSet.has(it.item);});
+      var parsed=JSON.parse(raw);
+      if(parsed&&parsed.items&&Array.isArray(parsed.items)){
+        items=parsed.items;
+        return;
       }
-      items.forEach(function(it){
-        var s=savedMap[it.item];
-        if(s){
-          if(s.need!==undefined)it.need=s.need;
-          if(s.due!==undefined)it.due=s.due;
-          if(s.daysInput!==undefined)it.daysInput=s.daysInput;
-          if(s.notes!==undefined)it.notes=s.notes;
-          if(s.store!==undefined)it.store=s.store;
-          if(s.num!==undefined)it.num=s.num;
-          if(s.price!==undefined)it.price=s.price;
-          if(s.calc!==undefined)it.calc=s.calc;
-          if(s.section!==undefined)it.section=s.section;
-          if(s.gramsOnHand!==undefined)it.gramsOnHand=s.gramsOnHand;
-          if(s.gramsPerDay!==undefined)it.gramsPerDay=s.gramsPerDay;
-          if(s.gramsTotal!==undefined)it.gramsTotal=s.gramsTotal;
-        }
-      });
-      if(savedMap.__order){
-        var order=savedMap.__order;
-        items.sort(function(a,b){
-          var ai=order.indexOf(a.item),bi=order.indexOf(b.item);
-          if(ai===-1)return 1;if(bi===-1)return -1;return ai-bi;
-        });
-      }
-      if(savedMap.__added){
-        // Self-healing: reject anything whose name exists in RAW_DATA (name-only check, no store)
-        var rawNames=new Set(RAW_DATA.map(function(d){return d.item.trim().toLowerCase();}));
-        var existingNames=new Set(items.map(function(it){return it.item.trim().toLowerCase();}));
-        savedMap.__added.forEach(function(it){
-          var n=it.item.trim().toLowerCase();
-          if(!rawNames.has(n)&&!existingNames.has(n)){
-            it.id=genId();
-            items.push(it);
-            existingNames.add(n);
-          }
-        });
-        // Re-save immediately so the cleaned __added is written back to localStorage
-        // (schedules after current call stack so items is fully built first)
-        setTimeout(saveState, 0);
-      }
-    }else{
-      initFromRaw();
     }
-  }catch(e){initFromRaw();}
-  backfillDaysInput();
-}
-
-function saveState(){
-  try{
-    var currentNames=new Set(items.map(function(it){return it.item;}));
-    var deleted=RAW_DATA.filter(function(d){return !currentNames.has(d.item);}).map(function(d){return d.item;});
-    var map={__order:items.map(function(it){return it.item;}),__added:[],__deleted:deleted};
-    var rawNames=new Set(RAW_DATA.map(function(d){return d.item;}));
-    // Deduplicate __added by item name (last one wins) to prevent accumulation
-    var addedMap={};
-    items.forEach(function(it){
-      map[it.item]={need:it.need,due:it.due,daysInput:it.daysInput,notes:it.notes,store:it.store,num:it.num,price:it.price,calc:it.calc,section:it.section||'',gramsOnHand:it.gramsOnHand||'',gramsPerDay:it.gramsPerDay||'',gramsTotal:it.gramsTotal||''};
-      if(!rawNames.has(it.item)) addedMap[it.item.trim().toLowerCase()]=it;
-    });
-    map.__added=Object.values(addedMap);
-    localStorage.setItem('shopping-items-v2',JSON.stringify(map));
   }catch(e){}
+  // First load: use backup data, assign fresh ids
+  items=INITIAL_DATA.map(function(it){
+    return {id:genId(),item:it.item,store:it.store,num:it.num,price:it.price,notes:it.notes,calc:it.calc||'days',need:!!it.need,due:it.due||''};
+  });
+  saveItems();
 }
 
+function saveItems(){
+  try{localStorage.setItem(STORE_KEY,JSON.stringify({items:items}));}catch(e){}
+}
+
+// ---- FINANCE ----
 function loadFinance(){
   try{
-    var raw=localStorage.getItem('shopping-finance');
-    if(raw){
-      var f=JSON.parse(raw);
-      if(f.available!==undefined)document.getElementById('fin-available').value=f.available;
-      if(f.notes)f.notes.forEach(function(n){addFinNote(n);});
-    }
+    var raw=localStorage.getItem('st_finance_v3');
+    if(raw){var f=JSON.parse(raw);if(f.available!==undefined)document.getElementById('fin-available').value=f.available;if(f.notes)f.notes.forEach(function(n){addFinNote(n);});}
   }catch(e){}
   updateFinance();
 }
-
 function saveFinance(){
-  try{
-    var notes=[];
-    document.querySelectorAll('.fin-note-input').forEach(function(el){notes.push(el.value);});
-    localStorage.setItem('shopping-finance',JSON.stringify({
-      available:document.getElementById('fin-available').value,
-      notes:notes
-    }));
-  }catch(e){}
+  try{var notes=[];document.querySelectorAll('.fin-note-input').forEach(function(el){notes.push(el.value);});localStorage.setItem('st_finance_v3',JSON.stringify({available:document.getElementById('fin-available').value,notes:notes}));}catch(e){}
 }
-
 function updateFinance(){
-  var total=0;
-  items.forEach(function(it){if(it.need){var p=parseFloat(it.price);if(!isNaN(p))total+=p;}});
+  var total=0;items.forEach(function(it){if(it.need){var p=parseFloat(it.price);if(!isNaN(p))total+=p;}});
   document.getElementById('fin-total-needed').textContent='$'+total.toFixed(2);
   var available=parseFloat(document.getElementById('fin-available').value)||0;
   var left=available-total;
@@ -505,91 +643,100 @@ function updateFinance(){
   el.textContent=(left>=0?'+$':'-$')+Math.abs(left).toFixed(2);
   el.className='fin-value '+(left>=0?'fin-positive':'fin-negative');
 }
-
 function addFinNote(val){
   var area=document.getElementById('fin-notes-area');
   var wrap=document.createElement('div');wrap.className='fin-note-wrap';
   var inp=document.createElement('input');inp.className='fin-input fin-note-input';inp.style.width='150px';inp.placeholder='note…';inp.value=val||'';inp.oninput=function(){saveFinance();};
-  var del=document.createElement('button');del.textContent='✕';del.className='btn btn-secondary btn-sm';del.style.cssText='padding:2px 5px;font-size:10px;';
+  var del=document.createElement('button');del.textContent='✕';del.style.cssText='padding:2px 5px;font-size:10px;background:var(--surface);border:1px solid var(--border);border-radius:3px;cursor:pointer;';
   del.onclick=function(){wrap.remove();saveFinance();};
   wrap.append(inp,del);area.appendChild(wrap);
 }
 
-function computeDue(item,val){
-  if(!val&&val!==0)return item.due;
-  var v=parseFloat(val);if(isNaN(v))return item.due;
-  var days;
-  if(item.calc==='eggs')days=v/1.5;
-  else if(item.calc==='cans')days=v*4;
-  else if(item.calc==='bags')days=v*16*28.35/100;
-  else if(item.calc==='grams'){
-    var gpd=parseFloat(item.gramsPerDay);
-    if(!isNaN(gpd)&&gpd>0)days=v/gpd; else return item.due;
-  }
-  else days=v;
-  return addDays(days);
-}
-
+// ---- FILTER / SORT ----
 function setFilter(f){
   currentFilter=f;
-  ['all','need','dated','urgent'].forEach(function(x){
-    document.getElementById('filter-'+x).classList.toggle('active',x===f);
-  });
+  ['all','need','dated'].forEach(function(x){document.getElementById('filter-'+x).classList.toggle('active',x===f);});
   renderTable();
 }
-
 function getFilteredItems(){
   var q=document.getElementById('search-input').value.toLowerCase().trim();
   var dueByVal=document.getElementById('filter-due-by').value;
   var dueByDate=dueByVal?new Date(dueByVal+'T00:00:00'):null;
   return items.filter(function(it){
-    if(q){var h=(it.item+' '+it.store+' '+it.notes).toLowerCase();if(!h.includes(q))return false;}
-    if(dueByDate&&it.due){var d=parseDue(it.due);if(d&&d>dueByDate)return false;}
-    else if(dueByDate&&!it.due)return false;
+    if(q){var h=(it.item+' '+it.store+' '+(it.notes||'')).toLowerCase();if(!h.includes(q))return false;}
+    if(dueByDate){if(!it.due)return false;var d=parseDue(it.due);if(!d||d>dueByDate)return false;}
     if(currentFilter==='need')return it.need;
     if(currentFilter==='dated')return !!it.due;
-    if(currentFilter==='urgent'){if(!it.due)return false;var d2=parseDue(it.due);if(!d2)return false;return Math.floor((d2-today())/86400000)<=7;}
     return true;
   });
 }
+function sortByDate(){items.sort(function(a,b){if(!a.due&&!b.due)return 0;if(!a.due)return 1;if(!b.due)return -1;return a.due.localeCompare(b.due);});saveItems();renderTable();}
+function sortByStoreAZ(){items.sort(function(a,b){return (a.store||'').localeCompare(b.store||'');});saveItems();renderTable();}
+function sortByItemAZ(){items.sort(function(a,b){return (a.item||'').localeCompare(b.item||'');});saveItems();renderTable();}
+function sortByStoreNum(){items.sort(function(a,b){var na=parseInt(a.num)||999,nb=parseInt(b.num)||999;if(na!==nb)return na-nb;return (a.item||'').localeCompare(b.item||'');});saveItems();renderTable();}
 
-function numClass(n){
-  var m={'1':'sn-1','2':'sn-2','3':'sn-3','4':'sn-4','5':'sn-5','6':'sn-6','7':'sn-7','8':'sn-8','9':'sn-9','10':'sn-10','11':'sn-11'};
-  return m[String(n)]||'';
+// ---- DUPLICATES ----
+function computeDuplicates(){
+  var counts={};items.forEach(function(it){var k=itemKey(it);counts[k]=(counts[k]||0)+1;});
+  _dupKeys=new Set();Object.keys(counts).forEach(function(k){if(counts[k]>1)_dupKeys.add(k);});
 }
-function fmtPrice(p){if(!p)return '';var s=p.toString();return s.startsWith('$')?s:(isNaN(parseFloat(s))?s:'$'+parseFloat(s).toFixed(2));}
-function escHtml(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function findDuplicates(){
+  computeDuplicates();
+  if(_dupKeys.size===0){alert('No duplicate item+store combinations found!');return;}
+  alert('Found '+_dupKeys.size+' duplicate item+store combination(s). They are highlighted in yellow.');
+  renderTable();
+}
 
-function dueCellHtml(it) {
-  var dc = dueClass(it.due);
-  var vpBadge = it.vpSynced ? '<span title="Auto-synced from Veggie Prep" style="font-size:8px;color:var(--accent);margin-left:2px;vertical-align:middle;">↺</span>' : '';
+// ---- NEEDS / DATES BULK ----
+function toggleNeed(id,checked){var it=items.find(function(x){return x.id===id;});if(it){it.need=checked;saveItems();updateFinance();}}
+function uncheckAllNeeds(){items.forEach(function(it){it.need=false;});saveItems();renderTable();}
+function uncheckVisibleNeeds(){getFilteredItems().forEach(function(it){it.need=false;});saveItems();renderTable();}
+function clearAllDates(){items.forEach(function(it){it.due='';});saveItems();renderTable();}
+function clearVisibleDates(){getFilteredItems().forEach(function(it){it.due='';});saveItems();renderTable();}
+function clearDue(id){var it=items.find(function(x){return x.id===id;});if(it){it.due='';saveItems();renderTable();}}
+
+// ---- DATE POPUP ----
+function openPopup(id,btn){
+  popupItemId=id;
+  var it=items.find(function(x){return x.id===id;});
+  var pop=document.getElementById('date-popup');
+  document.getElementById('popup-current').textContent=it&&it.due?formatDue(it.due):'No date set';
+  document.getElementById('popup-offset').value='';
+  document.getElementById('popup-direct').value=(it&&it.due)||'';
+  var rect=btn.getBoundingClientRect();
+  pop.style.display='block';
+  pop.style.top=Math.min(rect.bottom+4,window.innerHeight-280)+'px';
+  pop.style.left=Math.min(rect.left,window.innerWidth-250)+'px';
+}
+function closePopup(){document.getElementById('date-popup').style.display='none';popupItemId=null;}
+function clearPopupDate(){var it=items.find(function(x){return x.id===popupItemId;});if(it){it.due='';saveItems();renderTable();}closePopup();}
+function applyPopup(){
+  var it=items.find(function(x){return x.id===popupItemId;});if(!it){closePopup();return;}
+  var offset=document.getElementById('popup-offset').value;
+  var direct=document.getElementById('popup-direct').value;
+  if(offset!==''){
+    var n=parseInt(offset);if(!isNaN(n)){
+      var base=it.due?parseDue(it.due):today();
+      var d=new Date(base);d.setDate(d.getDate()+n);
+      var mm=d.getMonth()+1,dd=d.getDate();
+      it.due=d.getFullYear()+'-'+(mm<10?'0':'')+mm+'-'+(dd<10?'0':'')+dd;
+    }
+  } else if(direct){it.due=direct;}
+  saveItems();renderTable();closePopup();
+}
+document.addEventListener('click',function(e){
+  var pop=document.getElementById('date-popup');
+  if(pop.style.display!=='none'&&!pop.contains(e.target))closePopup();
+});
+
+// ---- RENDER TABLE ----
+function dueCellHtml(it){
+  var dc=dueClass(it.due);
   if(it.due){
     return '<button class="due-btn '+dc+'" onclick="openPopup('+it.id+',this);event.stopPropagation()">'+formatDue(it.due)+'</button>'
-      +vpBadge
       +'<button class="due-clear" onclick="clearDue('+it.id+');event.stopPropagation()" title="Clear date">✕</button>';
-  } else {
-    return '<button class="due-btn due-none" onclick="openPopup('+it.id+',this);event.stopPropagation()">+ date</button>';
   }
-}
-
-function computeDuplicates() {
-  var counts = {};
-  items.forEach(function(it) {
-    var key = itemKey(it);
-    counts[key] = (counts[key]||0) + 1;
-  });
-  _dupKeys = new Set();
-  Object.keys(counts).forEach(function(k){ if(counts[k]>1) _dupKeys.add(k); });
-}
-
-function findDuplicates() {
-  computeDuplicates();
-  if(_dupKeys.size === 0) { alert('No duplicate item+store combinations found!'); return; }
-  var examples = Array.from(_dupKeys).slice(0,3).map(function(k){return k.split('|||')[0];}).join(', ');
-  document.getElementById('search-input').value = '';
-  setFilter('all');
-  alert('Found ' + _dupKeys.size + ' duplicate item+store combination(s).\n\nExamples: ' + examples + '\n\nThey are highlighted in yellow. Items at different stores with the same name are NOT flagged.');
-  renderTable();
+  return '<button class="due-btn due-none" onclick="openPopup('+it.id+',this);event.stopPropagation()">+ date</button>';
 }
 
 function renderTable(){
@@ -601,627 +748,207 @@ function renderTable(){
   tbody.innerHTML='';
   filtered.forEach(function(it){
     var urgency=rowUrgency(it);
-    var isDup = _dupKeys.has(itemKey(it));
+    var isDup=_dupKeys.has(itemKey(it));
     var tr=document.createElement('tr');
-    var classes=[it.need?'need-row':'',urgency,isDup?'dup-warning':''].filter(Boolean).join(' ');
-    tr.className=classes;
+    var cls=[it.need?'need-row':'',urgency,isDup?'dup-warning':''].filter(Boolean).join(' ');
+    tr.className=cls;
     tr.dataset.id=it.id;
 
+    // Need checkbox
     var tdNeed=document.createElement('td');tdNeed.className='td-need';
     var chk=document.createElement('input');chk.type='checkbox';chk.className='need-check';chk.checked=!!it.need;
-    (function(itemId){chk.onchange=function(){toggleNeed(itemId,this.checked);};})(it.id);
+    (function(id){chk.onchange=function(){toggleNeed(id,this.checked);};})(it.id);
     tdNeed.appendChild(chk);
 
-    var tdDue=document.createElement('td');tdDue.className='td-due';
-    tdDue.innerHTML=dueCellHtml(it);
+    // Due date
+    var tdDue=document.createElement('td');tdDue.className='td-due';tdDue.innerHTML=dueCellHtml(it);
 
-    var tdNum=document.createElement('td');tdNum.className='td-num';tdNum.dataset.num=it.num||'';
-    tdNum.innerHTML=it.num?'<span class="store-num '+numClass(it.num)+'">'+it.num+'</span>':'';
+    // Store #
+    var tdNum=document.createElement('td');tdNum.className='td-num';
+    tdNum.innerHTML=it.num?'<span class="store-num '+numClass(it.num)+'">'+escHtml(it.num)+'</span>':'';
 
+    // Item name
     var tdItem=document.createElement('td');tdItem.className='td-item';
-    var dupBadge = isDup ? '<span class="dup-badge">DUP</span>' : '';
-    var sectionLabels={'veggie-a':'VEG-A','veggie-b':'VEG-B','skip-day':'SKIP','blend-4day':'4-DAY','supply':'SUPPLY'};
-    var sectionColors={'veggie-a':'#2e7d32','veggie-b':'#1565c0','skip-day':'#b07d20','blend-4day':'#6a1b9a','supply':'#c04a2a'};
-    var secLabel=it.section&&sectionLabels[it.section]?it.section:null;
-    var sectionBadge=secLabel?'<span style="display:inline-block;background:'+sectionColors[it.section]+';color:white;font-size:8px;font-weight:700;border-radius:2px;padding:1px 3px;margin-left:4px;vertical-align:middle;">'+sectionLabels[it.section]+'</span>':'';
-    tdItem.innerHTML='<div class="item-name">'+escHtml(it.item)+dupBadge+sectionBadge+'</div>';
-    tdItem.style.cursor='pointer';
-    (function(itemId){tdItem.onclick=function(e){e.stopPropagation();openEditModal(itemId);};})(it.id);
+    var dupBadge=isDup?'<span class="dup-badge">DUP</span>':'';
+    tdItem.innerHTML='<div class="item-name">'+escHtml(it.item)+dupBadge+'</div>';
+    (function(id){tdItem.querySelector('.item-name').onclick=function(e){e.stopPropagation();openEditModal(id);};})(it.id);
 
+    // Store
     var tdStore=document.createElement('td');tdStore.className='td-store';
     tdStore.innerHTML='<span class="store-name">'+escHtml(it.store)+'</span>';
-    tdStore.style.cursor='pointer';
-    (function(itemId){tdStore.onclick=function(e){e.stopPropagation();openEditModal(itemId);};})(it.id);
+    (function(id){tdStore.querySelector('.store-name').onclick=function(e){e.stopPropagation();openEditModal(id);};})(it.id);
 
-    var tdDays=document.createElement('td');tdDays.className='td-days';
-    if(it.calc==='eggs'){
-      var r=it.daysInput?(parseFloat(it.daysInput)/1.5).toFixed(1):'';
-      tdDays.innerHTML='<div class="egg-wrap"><div class="egg-row"><span class="egg-label">eggs:</span><input class="days-input" type="number" min="0" value="'+escHtml(it.daysInput)+'" placeholder="qty"></div><div class="egg-row"><span class="egg-label">= days:</span><span class="egg-result">'+r+'</span></div></div>';
-    } else if(it.calc==='cans'){
-      tdDays.innerHTML='<div class="days-wrap"><input class="days-input" type="number" min="0" step="1" value="'+escHtml(it.daysInput)+'" placeholder="cans"><span class="days-label">cans</span></div>';
-    } else if(it.calc==='bags'){
-      var r2=it.daysInput?(parseFloat(it.daysInput)*16*28.35/100).toFixed(1):'';
-      tdDays.innerHTML='<div class="egg-wrap"><div class="egg-row"><span class="egg-label">bags:</span><input class="days-input" type="number" min="0" step="0.25" value="'+escHtml(it.daysInput)+'" placeholder="bags"></div><div class="egg-row"><span class="egg-label">= days:</span><span class="egg-result">'+r2+'</span></div></div>';
-    } else if(it.calc==='grams'){
-      var gpd=parseFloat(it.gramsPerDay);
-      var goh=parseFloat(it.gramsOnHand);
-      var grDays=(!isNaN(gpd)&&gpd>0&&!isNaN(goh))?Math.round(goh/gpd):'?';
-      tdDays.innerHTML='<div class="egg-wrap"><div class="egg-row"><span class="egg-label">g left:</span><span class="egg-result">'+(it.gramsOnHand||'—')+'g</span></div><div class="egg-row"><span class="egg-label">= days:</span><span class="egg-result">'+grDays+'</span></div></div>';
-    } else {
-      tdDays.innerHTML='<div class="days-wrap"><input class="days-input" type="number" min="0" value="'+escHtml(it.daysInput)+'" placeholder="days"><span class="days-label">d</span></div>';
-    }
-    (function(itemId){
-      var inp=tdDays.querySelector('.days-input');
-      if(inp){inp.onchange=function(){updateDays(itemId,this.value);};inp.oninput=function(){updateDays(itemId,this.value);};}
-    })(it.id);
-
-    var tdEditInline=document.createElement('td');tdEditInline.className='td-edit-inline';
-    var editBtn=document.createElement('button');
-    editBtn.className='edit-inline-btn';editBtn.title='Edit item';editBtn.innerHTML='✎';
-    (function(itemId){editBtn.onclick=function(e){e.stopPropagation();openEditModal(itemId);};})(it.id);
-    tdEditInline.appendChild(editBtn);
-
+    // Price
     var tdPrice=document.createElement('td');tdPrice.className='td-price';tdPrice.textContent=fmtPrice(it.price);
 
+    // Edit button
+    var tdEdit=document.createElement('td');tdEdit.className='td-edit';
+    var editBtn=document.createElement('button');editBtn.className='edit-btn';editBtn.title='Edit';editBtn.innerHTML='✎';
+    (function(id){editBtn.onclick=function(e){e.stopPropagation();openEditModal(id);};})(it.id);
+    tdEdit.appendChild(editBtn);
+
+    // Notes
     var tdNotes=document.createElement('td');tdNotes.className='td-notes';
     if(it.notes){
-      var notesDiv=document.createElement('div');
-      notesDiv.className='notes-text';
-      notesDiv.textContent=it.notes;
-      notesDiv.onclick=function(){this.classList.toggle('expanded');};
-      tdNotes.appendChild(notesDiv);
+      var nd=document.createElement('div');nd.className='notes-text';nd.textContent=it.notes;
+      nd.onclick=function(){this.classList.toggle('expanded');};
+      tdNotes.appendChild(nd);
     }
 
-    tr.append(tdNeed,tdDue,tdNum,tdItem,tdStore,tdDays,tdEditInline,tdPrice,tdNotes);
+    tr.append(tdNeed,tdDue,tdNum,tdItem,tdStore,tdPrice,tdEdit,tdNotes);
     tbody.appendChild(tr);
   });
 }
 
-function toggleNeed(id,val){
-  var it=items.find(function(x){return x.id===id;});if(!it)return;
-  it.need=val;saveState();updateFinance();
-  var tr=document.querySelector('tr[data-id="'+id+'"]');
-  if(tr){
-    tr.classList.toggle('need-row',val);
-    var u=rowUrgency(it);
-    tr.classList.toggle('urgent-row',u==='urgent-row');
-    tr.classList.toggle('warn-row',u==='warn-row');
-  }
-}
-
-function updateDays(id,val){
-  var it=items.find(function(x){return x.id===id;});if(!it)return;
-  it.daysInput=val;it.due=computeDue(it,val);saveState();
-  var tr=document.querySelector('tr[data-id="'+id+'"]');
-  if(tr){
-    var tdDue=tr.querySelector('.td-due');if(tdDue)tdDue.innerHTML=dueCellHtml(it);
-    var u=rowUrgency(it);
-    tr.classList.toggle('urgent-row',u==='urgent-row');
-    tr.classList.toggle('warn-row',u==='warn-row');
-    if(it.calc==='eggs'){var r=tr.querySelector('.egg-result');if(r)r.textContent=val?(parseFloat(val)/1.5).toFixed(1):'';}
-    else if(it.calc==='bags'){var r2=tr.querySelector('.egg-result');if(r2)r2.textContent=val?(parseFloat(val)*16*28.35/100).toFixed(1):'';}
-  }
-}
-
-function clearDue(id){
-  var it=items.find(function(x){return x.id===id;});if(!it)return;
-  it.due='';it.daysInput='';saveState();
-  var tr=document.querySelector('tr[data-id="'+id+'"]');
-  if(tr){
-    var tdDue=tr.querySelector('.td-due');if(tdDue)tdDue.innerHTML=dueCellHtml(it);
-    tr.classList.remove('urgent-row','warn-row');
-    var inp=tr.querySelector('.days-input');if(inp)inp.value='';
-  }
-}
-
-function uncheckAllNeeds(){
-  if(!confirm('Uncheck ALL need checkboxes in the entire list?'))return;
-  items.forEach(function(it){it.need=false;});saveState();renderTable();
-}
-function clearAllDates(){
-  if(!confirm('Clear ALL due dates from the entire list?'))return;
-  items.forEach(function(it){it.due='';it.daysInput='';});saveState();renderTable();
-}
-function uncheckVisibleNeeds(){
-  var filtered=getFilteredItems();
-  if(!confirm('Uncheck needs for the '+filtered.length+' currently visible items only?'))return;
-  filtered.forEach(function(it){it.need=false;});saveState();renderTable();
-}
-function clearVisibleDates(){
-  var filtered=getFilteredItems();
-  if(!confirm('Clear dates for the '+filtered.length+' currently visible items only?'))return;
-  filtered.forEach(function(it){it.due='';it.daysInput='';});saveState();renderTable();
-}
-
-function sortByDate(){
-  items.sort(function(a,b){
-    var da=a.due?parseDue(a.due):null,db=b.due?parseDue(b.due):null;
-    if(da&&db){if(da<db)return -1;if(da>db)return 1;return 0;}
-    if(da)return -1;if(db)return 1;return 0;
-  });
-  saveState();renderTable();
-}
-function sortByStore(){
-  items.sort(function(a,b){
-    var nd=(b.need?1:0)-(a.need?1:0);if(nd!==0)return nd;
-    if(a.need&&b.need){
-      var na=String(a.num||''),nb=String(b.num||''),numA=parseInt(na),numB=parseInt(nb);
-      if(!isNaN(numA)&&!isNaN(numB))return numA-numB;
-      if(!isNaN(numA))return -1;if(!isNaN(numB))return 1;
-      return na.localeCompare(nb);
-    }
-    return 0;
-  });
-  saveState();renderTable();
-}
-function sortByItemAZ(){
-  items.sort(function(a,b){return a.item.toLowerCase().localeCompare(b.item.toLowerCase());});
-  saveState();renderTable();
-}
-function sortByStoreAZ(){
-  items.sort(function(a,b){
-    var sa=(a.store||'').toLowerCase(),sb=(b.store||'').toLowerCase();
-    if(sa<sb)return -1;if(sa>sb)return 1;
-    return a.item.toLowerCase().localeCompare(b.item.toLowerCase());
-  });
-  saveState();renderTable();
-}
-
-var _popupOpen=false;
-function openPopup(id,triggerEl){
-  event.stopPropagation();
-  _popupOpen=false;
-  document.getElementById('date-popup').style.display='none';
-  popupItemId=id;
-  var it=items.find(function(x){return x.id===id;});if(!it)return;
-  var popup=document.getElementById('date-popup');
-  document.getElementById('popup-current').textContent=it.due?formatDue(it.due):'No date set';
-  document.getElementById('popup-offset').value='';
-  document.getElementById('popup-direct').value=it.due||'';
-  popup.style.display='block';
-  _popupOpen=true;
-  var row=triggerEl.closest('tr');
-  var rowRect=row?row.getBoundingClientRect():triggerEl.getBoundingClientRect();
-  var daysCell=row?row.querySelector('.td-days'):null;
-  var daysCellRect=daysCell?daysCell.getBoundingClientRect():rowRect;
-  var popupW=240, popupH=popup.offsetHeight||190;
-  var left=daysCellRect.right+6, top=rowRect.top+(rowRect.height/2)-(popupH/2);
-  if(left+popupW>window.innerWidth-8)left=daysCellRect.left-popupW-6;
-  if(top<52)top=52;
-  if(top+popupH>window.innerHeight-8)top=window.innerHeight-popupH-8;
-  popup.style.top=top+'px';popup.style.left=left+'px';
-}
-
-document.addEventListener('click',function(e){
-  if(!_popupOpen)return;
-  var popup=document.getElementById('date-popup');
-  if(!popup.contains(e.target))closePopup();
-});
-
-function closePopup(){document.getElementById('date-popup').style.display='none';popupItemId=null;_popupOpen=false;}
-
-function applyPopup(){
-  if(popupItemId===null)return;
-  var it=items.find(function(x){return x.id===popupItemId;});if(!it)return;
-  var offset=document.getElementById('popup-offset').value.trim();
-  var direct=document.getElementById('popup-direct').value;
-  if(offset!==''){
-    var n=parseInt(offset);
-    if(!isNaN(n)){var base=it.due?parseDue(it.due):today();var nd=new Date(base.getTime()+n*86400000);var mm=nd.getMonth()+1;var dd=nd.getDate();it.due=nd.getFullYear()+'-'+(mm<10?'0':'')+mm+'-'+(dd<10?'0':'')+dd;}
-  } else if(direct){it.due=direct;}
-  it.daysInput='';backfillDaysInput();saveState();renderTable();closePopup();
-}
-
-function clearPopupDate(){if(popupItemId===null)return;clearDue(popupItemId);closePopup();}
-
-function openShoppingMode(){
-  var needed=items.filter(function(it){return it.need;});
-  var groups={};
-  needed.forEach(function(it){
-    var key=(it.num||'zzz')+'|'+(it.store||'No Store');
-    if(!groups[key])groups[key]={num:it.num,store:it.store,items:[]};
-    groups[key].items.push(it);
-  });
-  var sorted=Object.values(groups).sort(function(a,b){
-    var na=parseInt(a.num),nb=parseInt(b.num);
-    if(!isNaN(na)&&!isNaN(nb))return na-nb;
-    if(!isNaN(na))return -1;if(!isNaN(nb))return 1;
-    return(a.store||'').localeCompare(b.store||'');
-  });
-  var body=document.getElementById('shopping-mode-body');body.innerHTML='';
-  sorted.forEach(function(group){
-    var h=document.createElement('div');h.className='shop-store-header';
-    h.textContent=(group.num?'#'+group.num+' — ':'')+(group.store||'No Store').toUpperCase();
-    body.appendChild(h);
-    group.items.forEach(function(it){
-      var div=document.createElement('div');div.className='shop-item';div.dataset.id=it.id;
-      var price=fmtPrice(it.price);
-      var due=it.due?'📅 Due: '+formatDue(it.due):'';
-      div.innerHTML='<div class="shop-item-name">'+escHtml(it.item)+'</div>'
-        +'<div class="shop-item-price">'+escHtml(price)+'</div>'
-        +(due?'<div class="shop-item-due">'+due+'</div>':'')
-        +(it.notes?'<div class="shop-item-notes">'+escHtml(it.notes)+'</div>':'')
-        +'<div class="shop-item-got"><label class="shop-got-check"><input type="checkbox" onchange="toggleGotIt(this.closest(\'.shop-item\'),this.checked)"> Got it ✓</label></div>';
-      body.appendChild(div);
-    });
-  });
-  document.getElementById('shopping-mode').classList.add('open');
-  document.body.style.overflow='hidden';
-}
-function closeShoppingMode(){document.getElementById('shopping-mode').classList.remove('open');document.body.style.overflow='';}
-function toggleGotIt(el,checked){el.classList.toggle('got-it',checked);}
-
-var _modalOpening = false;
+// ---- EDIT MODAL ----
 function openEditModal(id){
-  _modalOpening = true;
+  _modalOpening=true;
   editingId=id;
   var it=items.find(function(x){return x.id===id;});
-  if(!it){ _modalOpening=false; return; }
+  if(!it){_modalOpening=false;return;}
   document.getElementById('modal-title').textContent='Edit Item';
-  document.getElementById('m-item').value=it.item;
+  document.getElementById('m-item').value=it.item||'';
   document.getElementById('m-store').value=it.store||'';
   document.getElementById('m-num').value=it.num||'';
   document.getElementById('m-price').value=it.price||'';
   document.getElementById('m-notes').value=it.notes||'';
   document.getElementById('m-calc').value=it.calc||'days';
-  document.getElementById('m-section').value=it.section||'';
-  document.getElementById('m-grams-onhand').value=it.gramsOnHand||'';
-  document.getElementById('m-grams-perday').value=it.gramsPerDay||'';
-  document.getElementById('m-grams-total').value=it.gramsTotal||'';
-  toggleGramsFields();updateGramsPreview();
   document.getElementById('modal-delete-btn').style.display='';
   document.getElementById('edit-modal').classList.add('open');
-  setTimeout(function(){ _modalOpening = false; }, 50);
+  setTimeout(function(){_modalOpening=false;},50);
 }
 function openAddModal(){
-  _modalOpening = true;
+  _modalOpening=true;
   editingId=null;
   document.getElementById('modal-title').textContent='Add Item';
   ['m-item','m-store','m-num','m-price','m-notes'].forEach(function(id){document.getElementById(id).value='';});
   document.getElementById('m-calc').value='days';
-  document.getElementById('m-section').value='';
-  document.getElementById('m-grams-onhand').value='';
-  document.getElementById('m-grams-perday').value='';
-  document.getElementById('m-grams-total').value='';
-  toggleGramsFields();
   document.getElementById('modal-delete-btn').style.display='none';
   document.getElementById('edit-modal').classList.add('open');
-  setTimeout(function(){ _modalOpening = false; }, 50);
-}
-function toggleGramsFields(){
-  var calc=document.getElementById('m-calc').value;
-  document.getElementById('grams-fields').style.display=(calc==='grams')?'block':'none';
-  if(calc==='grams')updateGramsPreview();
-}
-function updateGramsPreview(){
-  var onhand=parseFloat(document.getElementById('m-grams-onhand').value);
-  var perday=parseFloat(document.getElementById('m-grams-perday').value);
-  var total=parseFloat(document.getElementById('m-grams-total').value);
-  var prev=document.getElementById('grams-preview');
-  if(!isNaN(onhand)&&!isNaN(perday)&&perday>0){
-    var days=onhand/perday;
-    var runout=new Date(today());runout.setDate(runout.getDate()+Math.round(days));
-    var label=(runout.getMonth()+1)+'/'+runout.getDate()+'/'+String(runout.getFullYear()).slice(2);
-    var refill=!isNaN(total)&&total>0?'\n  '+Math.round(total/perday)+' days per full package':'';
-    prev.textContent='Runs out in '+Math.round(days)+' days ('+label+')'+refill;
-  } else {prev.textContent='';}
+  setTimeout(function(){_modalOpening=false;},50);
 }
 function closeModal(){document.getElementById('edit-modal').classList.remove('open');editingId=null;}
 function saveModal(){
   var itemVal=document.getElementById('m-item').value.trim();
   if(!itemVal){alert('Item name required');return;}
-  var calcVal=document.getElementById('m-calc').value;
-  var sectionVal=document.getElementById('m-section').value;
-  var gramsOnHand=document.getElementById('m-grams-onhand').value;
-  var gramsPerDay=document.getElementById('m-grams-perday').value;
-  var gramsTotal=document.getElementById('m-grams-total').value;
   if(editingId!==null){
     var it=items.find(function(x){return x.id===editingId;});
     if(it){
-      it.item=itemVal;it.store=document.getElementById('m-store').value;
-      it.num=document.getElementById('m-num').value;it.price=document.getElementById('m-price').value;
-      it.notes=document.getElementById('m-notes').value;it.calc=calcVal;
-      it.section=sectionVal;
-      it.gramsOnHand=gramsOnHand;it.gramsPerDay=gramsPerDay;it.gramsTotal=gramsTotal;
-      if(calcVal==='grams'&&gramsOnHand&&gramsPerDay){
-        var gpd=parseFloat(gramsPerDay);
-        if(gpd>0){var days=parseFloat(gramsOnHand)/gpd;it.due=addDays(days);it.daysInput=gramsOnHand;}
-      }
+      it.item=itemVal;
+      it.store=document.getElementById('m-store').value;
+      it.num=document.getElementById('m-num').value;
+      it.price=document.getElementById('m-price').value;
+      it.notes=document.getElementById('m-notes').value;
+      it.calc=document.getElementById('m-calc').value;
     }
   } else {
-    var newIt={id:genId(),item:itemVal,store:document.getElementById('m-store').value,
-      num:document.getElementById('m-num').value,price:document.getElementById('m-price').value,
-      notes:document.getElementById('m-notes').value,calc:calcVal,
-      section:sectionVal,
-      gramsOnHand:gramsOnHand,gramsPerDay:gramsPerDay,gramsTotal:gramsTotal,
-      need:false,due:'',daysInput:''};
-    if(calcVal==='grams'&&gramsOnHand&&gramsPerDay){
-      var gpd2=parseFloat(gramsPerDay);
-      if(gpd2>0){var days2=parseFloat(gramsOnHand)/gpd2;newIt.due=addDays(days2);newIt.daysInput=gramsOnHand;}
-    }
-    items.push(newIt);
+    items.push({id:genId(),item:itemVal,store:document.getElementById('m-store').value,num:document.getElementById('m-num').value,price:document.getElementById('m-price').value,notes:document.getElementById('m-notes').value,calc:document.getElementById('m-calc').value,need:false,due:''});
   }
-  saveState();closeModal();renderTable();
+  saveItems();closeModal();renderTable();
 }
 function deleteItem(){
   if(!confirm('Delete this item?'))return;
   items=items.filter(function(x){return x.id!==editingId;});
-  saveState();closeModal();renderTable();
+  saveItems();closeModal();renderTable();
 }
+document.getElementById('edit-modal').addEventListener('click',function(e){if(_modalOpening)return;if(e.target===this)closeModal();});
 
-document.getElementById('edit-modal').addEventListener('click',function(e){
-  if(_modalOpening)return;
-  if(e.target===this)closeModal();
-});
-
-function openBackupModal(){
-  var data = {items: items, finance: {
-    available: document.getElementById('fin-available').value
-  }};
-  document.getElementById('backup-export-text').value = JSON.stringify(data, null, 2);
-  document.getElementById('backup-import-text').value = '';
-  document.getElementById('backup-modal').classList.add('open');
-}
-function closeBackupModal(){document.getElementById('backup-modal').classList.remove('open');}
-document.getElementById('backup-modal').addEventListener('click',function(e){if(e.target===this)closeBackupModal();});
-
-function copyBackup(){
-  var txt = document.getElementById('backup-export-text');
-  txt.select();
-  try { document.execCommand('copy'); } catch(e) {}
-  navigator.clipboard && navigator.clipboard.writeText(txt.value).catch(function(){});
-  alert('Backup copied to clipboard!');
-}
-function downloadBackup(){
-  var data = document.getElementById('backup-export-text').value;
-  var blob = new Blob([data], {type:'application/json'});
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = 'shopping-backup-' + new Date().toISOString().slice(0,10) + '.json';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-function restoreBackup(){
-  var raw = document.getElementById('backup-import-text').value.trim();
-  if(!raw){alert('Paste backup data first.');return;}
-  try{
-    var data = JSON.parse(raw);
-    if(data.items && Array.isArray(data.items)){
-      if(!confirm('This will replace all current data. Continue?'))return;
-      // Deduplicate restored items
-      var seen = new Set();
-      items = data.items.filter(function(it, i){
-        var k = itemKey(it);
-        if(seen.has(k)) return false;
-        seen.add(k);
-        return true;
-      });
-      items.forEach(function(it, i){ if(!it.id) it.id = i; });
-      _nextId = items.length + 1000;
-      saveState();
-      if(data.finance){
-        if(data.finance.available)document.getElementById('fin-available').value=data.finance.available;
-        saveFinance();
-      }
-      renderTable();closeBackupModal();
-      alert('Backup restored successfully!');
-    } else { alert('Invalid backup format.'); }
-  }catch(e){alert('Could not parse backup: '+e.message);}
-}
-
-// JSONBin sync
-var JBIN_ID='69cc8912856a682189ea4991';
-var JBIN_KEY='$2a$10$tpjsSaIqmjzoWXjpvpu7n.AdJJdQf8JUbDhBDfNoCC5rzN0vxDh/m';
-var JBIN_URL='https://api.jsonbin.io/v3/b/'+JBIN_ID;
-
-function setSyncStatus(msg,cls){var el=document.getElementById('sync-status');if(el){el.textContent=msg;el.style.color=cls==='sync-ok'?'#2e7d32':cls==='sync-err'?'#c04a2a':'#b07d20';}}
-
-function buildDiff(){
-  var diff={__added:[],__changes:{},__deleted:[],__order:items.map(function(it){return it.item;})};
-  var rawNames=new Set(RAW_DATA.map(function(d){return d.item;}));
-  var currentNames=new Set(items.map(function(it){return it.item;}));
-  RAW_DATA.forEach(function(d){
-    if(!currentNames.has(d.item))diff.__deleted.push(d.item);
+// ---- SHOPPING MODE ----
+function openShoppingMode(){
+  var body=document.getElementById('shopping-mode-body');
+  var needed=items.filter(function(it){return it.need;});
+  var byStore={};
+  needed.forEach(function(it){var s=it.store||'(no store)';if(!byStore[s])byStore[s]=[];byStore[s].push(it);});
+  var storesSorted=Object.keys(byStore).sort();
+  var html='';
+  storesSorted.forEach(function(store){
+    html+='<div class="shop-store-header">'+escHtml(store)+'</div>';
+    byStore[store].forEach(function(it){
+      html+='<div class="shop-item" id="si-'+it.id+'">';
+      html+='<div class="shop-item-name">'+escHtml(it.item)+'</div>';
+      html+='<div class="shop-item-price">'+fmtPrice(it.price)+'</div>';
+      if(it.due)html+='<div class="shop-item-due">Due: '+formatDue(it.due)+'</div>';
+      if(it.notes)html+='<div class="shop-item-notes">'+escHtml(it.notes)+'</div>';
+      html+='<div class="shop-item-got"><label class="shop-got-check"><input type="checkbox" onchange="toggleGotIt('si-'+it.id+'',this.checked)" style="width:16px;height:16px;accent-color:var(--accent);"> Got it</label></div>';
+      html+='</div>';
+    });
   });
-  var addedSeen={};
-  items.forEach(function(it){
-    if(!rawNames.has(it.item)){
-      // deduplicate by name only
-      addedSeen[it.item.trim().toLowerCase()]={item:it.item,store:it.store,num:it.num,price:it.price,notes:it.notes,calc:it.calc,need:it.need,due:it.due,daysInput:it.daysInput,section:it.section||'',gramsOnHand:it.gramsOnHand||'',gramsPerDay:it.gramsPerDay||'',gramsTotal:it.gramsTotal||''};
-    } else {
-      var defaultNeed=PRESET_NEED.has(it.item);
-      if(it.need!==defaultNeed||it.due){
-        diff.__changes[it.item]={need:it.need,due:it.due||'',daysInput:it.daysInput||''};
-      }
-    }
-  });
-  diff.__added=Object.values(addedSeen);
-  return diff;
+  if(!html)html='<p style="padding:20px;color:var(--text-muted);">No items checked as needed.</p>';
+  body.innerHTML=html;
+  document.getElementById('shopping-mode').classList.add('open');
+  document.body.style.overflow='hidden';
 }
+function closeShoppingMode(){document.getElementById('shopping-mode').classList.remove('open');document.body.style.overflow='';}
+function toggleGotIt(elId,checked){var el=document.getElementById(elId);if(el)el.classList.toggle('got-it',checked);}
 
-function applyDiff(data){
-  initFromRaw();
-  if(data.__deleted&&data.__deleted.length){
-    var delSet=new Set(data.__deleted);
-    items=items.filter(function(it){return !delSet.has(it.item);});
-  }
-  if(data.__changes){
-    items.forEach(function(it){
-      var c=data.__changes[it.item];
-      if(c){if(c.need!==undefined)it.need=c.need;if(c.due!==undefined)it.due=c.due;if(c.daysInput!==undefined)it.daysInput=c.daysInput;if(c.section!==undefined)it.section=c.section;if(c.gramsOnHand!==undefined)it.gramsOnHand=c.gramsOnHand;if(c.gramsPerDay!==undefined)it.gramsPerDay=c.gramsPerDay;if(c.gramsTotal!==undefined)it.gramsTotal=c.gramsTotal;}
-    });
-  }
-  if(data.__added){
-    var rawNames=new Set(RAW_DATA.map(function(d){return d.item.trim().toLowerCase()}));
-    var existingNames=new Set(items.map(function(it){return it.item.trim().toLowerCase();}));
-    data.__added.forEach(function(it){
-      var n=it.item.trim().toLowerCase();
-      // only add if name is not already in RAW_DATA and not already in list
-      if(!rawNames.has(n)&&!existingNames.has(n)){
-        it.id=genId();
-        items.push(it);
-        existingNames.add(n);
-      }
-    });
-  }
-  if(data.__order){
-    var order=data.__order;
-    items.sort(function(a,b){
-      var ai=order.indexOf(a.item),bi=order.indexOf(b.item);
-      if(ai===-1)return 1;if(bi===-1)return -1;return ai-bi;
-    });
-  }
+// ---- SYNC ----
+function setSyncStatus(msg,cls){var el=document.getElementById('sync-status');if(el){el.textContent=msg;el.style.color=cls==='ok'?'#2e7d32':cls==='err'?'#c04a2a':'#b07d20';}}
+function pushToCloud(){
+  setSyncStatus('Saving…','pending');
+  var payload={items:items,finance:{available:document.getElementById('fin-available').value}};
+  fetch(JBIN_URL,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':JBIN_KEY,'X-Bin-Versioning':'false'},body:JSON.stringify(payload)})
+    .then(function(r){return r.json();}).then(function(){setSyncStatus('Saved '+new Date().toLocaleTimeString(),'ok');})
+    .catch(function(e){setSyncStatus('Save failed','err');});
 }
-
-function pushToGoogle(){
-  var diff=buildDiff();setSyncStatus('Saving...','sync-pending');
-  fetch(JBIN_URL,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':JBIN_KEY,'X-Bin-Versioning':'false'},body:JSON.stringify(diff)})
-    .then(function(r){return r.json();}).then(function(){setSyncStatus('Saved '+new Date().toLocaleTimeString(),'sync-ok');})
-    .catch(function(e){setSyncStatus('Save failed: '+e,'sync-err');});
-}
-
-function pullFromGoogle(){
-  setSyncStatus('Loading...','sync-pending');
+function pullFromCloud(){
+  setSyncStatus('Loading…','pending');
   fetch(JBIN_URL+'/latest',{method:'GET',headers:{'X-Master-Key':JBIN_KEY}})
     .then(function(r){return r.json();})
     .then(function(resp){
       var data=resp.record;
-      if(data&&(data.__changes||data.__added)){
-        applyDiff(data);backfillDaysInput();saveState();renderTable();
-        setSyncStatus('Loaded '+new Date().toLocaleTimeString(),'sync-ok');
-      } else {setSyncStatus('Nothing saved yet','sync-err');}
-    }).catch(function(e){setSyncStatus('Could not connect: '+e,'sync-err');});
+      if(data&&data.items&&Array.isArray(data.items)){
+        items=data.items;
+        if(data.finance&&data.finance.available!==undefined)document.getElementById('fin-available').value=data.finance.available;
+        saveItems();renderTable();
+        setSyncStatus('Loaded '+new Date().toLocaleTimeString(),'ok');
+      } else {setSyncStatus('Nothing saved yet','err');}
+    }).catch(function(e){setSyncStatus('Could not connect','err');});
 }
-
-
 function resetAndClean(){
-  if(!confirm('Step 3 of 7:\n\nThis will:\n1. Wipe localStorage on THIS device\n2. Push the current clean list to JSONBin\n3. Reload the page\n\nMake sure you have already deleted all duplicates before clicking OK.')) return;
-  var cleanDiff=buildDiff();
-  localStorage.removeItem('shopping-items-v2');
-  localStorage.removeItem('shopping-finance');
-  setSyncStatus('Cleaning...','sync-pending');
-  fetch(JBIN_URL,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':JBIN_KEY,'X-Bin-Versioning':'false'},body:JSON.stringify(cleanDiff)})
+  if(!confirm('This will clear all local data and push current items to cloud. Continue?'))return;
+  localStorage.removeItem(STORE_KEY);
+  localStorage.removeItem('st_finance_v3');
+  setSyncStatus('Resetting…','pending');
+  var payload={items:items,finance:{available:document.getElementById('fin-available').value}};
+  fetch(JBIN_URL,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':JBIN_KEY,'X-Bin-Versioning':'false'},body:JSON.stringify(payload)})
     .then(function(r){return r.json();})
-    .then(function(){
-      setSyncStatus('Clean done — reloading…','sync-ok');
-      setTimeout(function(){location.reload(true);},900);
-    })
-    .catch(function(e){
-      setSyncStatus('Push failed: '+e,'sync-err');
-      alert('JSONBin push failed. Error: '+e);
-    });
+    .then(function(){setSyncStatus('Done — reloading…','ok');setTimeout(function(){location.reload(true);},900);})
+    .catch(function(e){setSyncStatus('Push failed','err');});
 }
 
-// Veggie Prep JSONBin sync
-var VP_JBIN_ID='69d627d5856a6821890eb408';
-var VP_JBIN_KEY='$2a$10$tpjsSaIqmjzoWXjpvpu7n.AdJJdQf8JUbDhBDfNoCC5rzN0vxDh/m';
-var VP_JBIN_URL='https://api.jsonbin.io/v3/b/'+VP_JBIN_ID+'/latest';
-
-// Map from Veggie Prep itemData keys to Shopping Tracker item name fragments
-// Each entry: { vpKey, nameMatch } where nameMatch is a lowercase substring of the ST item name
-var VP_ITEM_MAP=[
-  {vpKey:'enoki',            match:'enoki'},
-  {vpKey:'celery',           match:'celery - 20 oz'},
-  {vpKey:'cabbage',          match:'cabbage, red'},
-  {vpKey:'kingoyster',       match:'king oyster'},
-  {vpKey:'broccoli',         match:'broccoli, 2 lb'},
-  {vpKey:'parsley',          match:'italian parsley'},
-  {vpKey:'cilantro',         match:'cilantro'},
-  {vpKey:'spinach',          match:'spinach - 2 lb'},
-  {vpKey:'carrots',          match:'carrots'},
-  {vpKey:'chard',            match:'swiss chard'},
-  {vpKey:'brussels',         match:'brussels sprouts'},
-  {vpKey:'supply-ginger',    match:'ginger root'},
-  {vpKey:'supply-garlic',    match:'garlic cloves'},
-  {vpKey:'supply-blueberries',match:'blueberries'},
-  {vpKey:'supply-flaxseed',  match:'flaxseed, whole'},
-  {vpKey:'supply-daikon',    match:'daikon radish'},
-];
-
-// Tomato paste uses blend data: tomatoDaysOpen + tomatoFullCans*4
-// Fish oil, collagen, chia use blend days (entered as days remaining)
-var VP_BLEND_MAP=[
-  {blendKey:'tomatoDaysOpen', blendCans:'tomatoFullCans', match:'tomato paste'},
-  {catalogId:'blend-fishoil',  blendDays:'fishOilDays',   match:'fish oil'},
-  {catalogId:'blend-collagen', blendDays:'collagenDays',  match:'collagen'},
-  {catalogId:'blend-chia',     blendDays:'chiaDays',      match:'chia seeds'},
-];
-
-function calcVPDueDate(grams, gpd){
-  if(!grams||!gpd||gpd<=0)return '';
-  var days=Math.floor(grams/gpd);
-  return addDays(days);
+// ---- BACKUP ----
+function openBackupModal(){
+  var data={items:items,finance:{available:document.getElementById('fin-available').value}};
+  document.getElementById('backup-export-text').value=JSON.stringify(data,null,2);
+  document.getElementById('backup-import-text').value='';
+  document.getElementById('backup-modal').classList.add('open');
+}
+function closeBackupModal(){document.getElementById('backup-modal').classList.remove('open');}
+document.getElementById('backup-modal').addEventListener('click',function(e){if(e.target===this)closeBackupModal();});
+function copyBackup(){var t=document.getElementById('backup-export-text');t.select();document.execCommand('copy');alert('Copied!');}
+function downloadBackup(){
+  var data={items:items,finance:{available:document.getElementById('fin-available').value}};
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  var d=new Date();a.download='shopping-backup-'+d.getFullYear()+'-'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1)+'-'+(d.getDate()<10?'0':'')+d.getDate()+'.json';
+  a.click();
+}
+function restoreBackup(){
+  try{
+    var raw=document.getElementById('backup-import-text').value.trim();
+    var data=JSON.parse(raw);
+    if(data.items&&Array.isArray(data.items)){
+      items=data.items;
+      if(data.finance&&data.finance.available!==undefined)document.getElementById('fin-available').value=data.finance.available;
+      saveItems();saveFinance();renderTable();closeBackupModal();alert('Restored successfully!');
+    } else {alert('Invalid backup format.');}
+  }catch(e){alert('Could not parse backup: '+e.message);}
 }
 
-function findSTItem(matchStr){
-  var m=matchStr.toLowerCase();
-  return items.find(function(it){return it.item.toLowerCase().indexOf(m)>=0;});
-}
-
-function applyVPDates(vpData){
-  var itemData=vpData.itemData||{};
-  var blend=vpData.blend||{};
-
-  // Regular items: grams / gpd
-  VP_ITEM_MAP.forEach(function(entry){
-    var d=itemData[entry.vpKey];
-    if(!d)return;
-    var grams=parseFloat(d.grams);
-    var gpd=parseFloat(d.gpd);
-    if(isNaN(grams)||isNaN(gpd)||gpd<=0)return;
-    var due=calcVPDueDate(grams,gpd);
-    if(!due)return;
-    var it=findSTItem(entry.match);
-    if(it){it.due=due;it.vpSynced=true;}
-  });
-
-  // Tomato paste: tomatoDaysOpen + tomatoFullCans*4
-  var tomatoDaysOpen=parseFloat(blend.tomatoDaysOpen)||0;
-  var tomatoFullCans=parseFloat(blend.tomatoFullCans)||0;
-  var tomatoDays=tomatoDaysOpen+(tomatoFullCans*4);
-  if(tomatoDays>0){
-    var tomatoItem=findSTItem('tomato paste');
-    if(tomatoItem){tomatoItem.due=addDays(tomatoDays);tomatoItem.vpSynced=true;}
-  }
-
-  // Fish oil, collagen, chia — stored as days remaining in blend object
-  var blendDaysMap={
-    'fish oil': parseFloat(blend.fishOilDays)||0,
-    'collagen': parseFloat(blend.collagenDays)||0,
-    'chia seeds': parseFloat(blend.chiaDays)||0,
-  };
-  Object.keys(blendDaysMap).forEach(function(matchStr){
-    var days=blendDaysMap[matchStr];
-    if(days>0){
-      var it=findSTItem(matchStr);
-      if(it){it.due=addDays(days);it.vpSynced=true;}
-    }
-  });
-}
-
-function syncFromVeggiePrepAndInit(){
-  loadState();loadFinance();
-  setSyncStatus('Syncing veggie dates…','sync-pending');
-  fetch(VP_JBIN_URL,{method:'GET',headers:{'X-Master-Key':VP_JBIN_KEY}})
-    .then(function(r){return r.json();})
-    .then(function(resp){
-      if(resp&&resp.record){
-        applyVPDates(resp.record);
-        setSyncStatus('Veggie dates synced '+new Date().toLocaleTimeString(),'sync-ok');
-      } else {
-        setSyncStatus('Veggie sync: no data','sync-err');
-      }
-      renderTable();
-    })
-    .catch(function(e){
-      setSyncStatus('Veggie sync failed — showing saved dates','sync-err');
-      renderTable();
-    });
-}
-
-function init(){syncFromVeggiePrepAndInit();}
-init();
+// ---- INIT ----
+loadItems();
+loadFinance();
+renderTable();
 </script>
 </body>
 </html>
